@@ -16,7 +16,7 @@ Shared behavioral protocols for all agents in the workflow-team pipeline.
 When your scope card is too broad for a single context:
 
 1. Further decompose using `parallel-dispatch` skill (§1 Decomposition, §5 Hierarchical Decomposition)
-2. Spawn sub-agents with narrower scope cards
+2. Spawn sub-agents with narrower scope cards using `TypeName="self"` (see `workflow-team.md` §0)
 3. Your scope becomes the ceiling — children cannot operate outside it
 4. Track sub-agent progress; merge results when all complete
 5. Write `.agentwork/handoff.md` for your parent coordinator
@@ -30,11 +30,11 @@ Triggers for nesting:
 ## 2. Pre-Implementation Restatement
 
 Before writing code, restate in your own words:
-1. What the `.agentwork/briefing.md` / scope card asks you to build
+1. What the `.agentwork/brief.md` / scope card asks you to build
 2. What files you will create or modify
 3. What assumptions you are making
 
-If any assumption is uncertain, document it in `.agentwork/progress.md` and proceed with the conservative interpretation.
+If any assumption is uncertain, document it in your handoff and proceed with the conservative interpretation.
 
 ## 3. Agent Definition Protocol (Coordinators Only)
 
@@ -43,7 +43,7 @@ When spawning ANY agent type with a role file in `.agents/agents/`:
 1. **Reference the role file** in the system prompt — never paraphrase:
    ```
    "Your role, domain, skills, boundaries, and protocols are defined in
-   file:///{workspace}/.agents/agents/{agent-type}.md.
+    file://{workspace}/.agents/agents/{agent-type}.md.
    Read this file FIRST before beginning any work."
    ```
 2. The child agent MUST read the role file as its first action

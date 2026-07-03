@@ -123,7 +123,7 @@ Group scope cards into levels by dependency depth:
 
 All nodes at the same level are independent — dispatch in parallel. Between levels: merge completed branches, run quality gate, then proceed to next level.
 
-If a node fails, it follows the Escalation Ladder in the `fault-recovery` skill. If failure changes scope, re-decompose the affected sub-tree only — already-completed nodes outside the failure are preserved.
+If a node fails: Retry once with failure context → re-assign to different specialist → escalate to parent coordinator. If failure changes scope, re-decompose the affected sub-tree only — already-completed nodes outside the failure are preserved.
 
 ### Merge Order
 
@@ -145,7 +145,7 @@ Within a level, merge in this priority:
 
 ## 4. Read-Only Agents
 
-Read-only agents (scout, qa-analyst, security-engineer, ux-craftsman, incident-responder) use MECE scoping for **coverage guarantees**, not conflict prevention:
+Read-only agents (scout, reviewer, security-engineer, ux-craftsman, incident-responder) use MECE scoping for **coverage guarantees**, not conflict prevention:
 
 - Each instance covers a disjoint area
 - Union covers 100% of relevant scope
@@ -165,54 +165,50 @@ Read-only agents (scout, qa-analyst, security-engineer, ux-craftsman, incident-r
 
 ## 5. Hierarchical Decomposition
 
-When work spans multiple missions or epics, decompose into coordinator subtrees — not a flat fan-out of executors.
+When work spans multiple scope cards, decompose into coordinator subtrees — not a flat fan-out of executors.
 
 ### Decision: Flat vs. Hierarchical
 
 | Signal | Dispatch Model |
 |---|---|
-| ≤5 scope cards, single mission | Flat (direct executor dispatch) |
-| >5 scope cards OR multi-mission | Hierarchical (@mission-lead per mission) |
-| Cross-cutting dependencies between missions | Hierarchical with @tech-lead[integration] |
+| ≤5 scope cards, single domain | Flat (direct builder dispatch) |
+| >5 scope cards OR multi-domain | Hierarchical (@tech-lead per domain) |
+| Cross-cutting dependencies between domains | Hierarchical with @tech-lead[integration] |
 
 ### Coordinator Pattern
 
-A coordinator agent (@rally-lead, @mission-lead):
+A coordinator agent (@conductor, @tech-lead):
 1. Owns a subtree of executors
-2. Loads the `convergence-loop` skill
-3. Has its own `.agentwork/briefing.md`, `.agentwork/progress.md`, `.agentwork/handoff.md` lifecycle
-4. Reports upward to its parent coordinator, not to the root
-5. Never writes code or runs tests — only dispatches, evaluates, and re-plans
+2. Has its own `.agentwork/brief.md`, `.agentwork/handoff.md` lifecycle
+3. Reports upward to its parent coordinator, not to the root
+4. Never writes production code (Tech-Lead may write integration/wiring code)
 
-### Nesting Budget
+### Nesting Budget — 3 Layers Max
 
 | Layer | Role | Max Agents |
 |---|---|---|
-| 1-2 | @overseer + @rally-lead | ≤2 |
-| 3 | @mission-lead instances + @tech-lead[integration] | ≤5 recommended |
-| 4 | Execution teams (scouts, workers, reviewers, adversaries, arbiter) | As needed per mission |
-| 4 | Validation teams — Gate 2 (@red-team-lead → validators) | As needed per project |
-| 5-6 | Sub-decomposition within workers or validators | As needed |
-| 7+ | Reserved for extreme decomposition | Rare |
+| 1 | @conductor | 1 |
+| 2 | @tech-lead / builders / @reviewer / @red-team-lead | As needed |
+| 3 | Specialists within tech-lead or red-team-lead | As needed |
 
-Total budget: **10 layers max**. Recommended: **5-7** for typical features.
+Total budget: **3 layers max**. Recommended: **2** for typical features (Conductor → Builders).
 
 ### Workspace Strategy by Layer
 
 | Layer | Workspace Mode | Rationale |
 |---|---|---|
-| 1-2 | `inherit` | Overseer and rally-lead read the main workspace |
-| 3 | `branch` | Mission isolation — independent failure domains |
-| 4+ (writers) | `share` within mission branch | Parallel executors within a mission share its branch |
-| 4+ (readers) | `inherit` from mission branch | Reviewers read the mission's work |
+| 1 | `inherit` | Conductor reads the main workspace |
+| 2 (writers) | `inherit` or `share` | Tech-Lead and builders share workspace |
+| 2 (readers) | `inherit` | Reviewer and scouts read the workspace |
+| 3 | `inherit` | Specialists within tech-lead/red-team share workspace |
 
-### Integration Between Missions
+### Integration Between Scope Cards
 
-After all missions pass their individual arbiter gates:
-1. @rally-lead dispatches @tech-lead[integration] with all mission handoffs
+After all scope cards pass their individual checks:
+1. @conductor dispatches @tech-lead[integration] with all card handoffs
 2. @tech-lead[integration] owns aggregation files (routers, registries, configs)
-3. Integration runs on the main branch, merging mission branches
-4. A final @arbiter runs cross-mission verification before completion
+3. Integration runs on the main workspace
+4. A final @reviewer runs cross-card verification before completion
 
 ## 6. Scope Sizing & Integration Points
 
@@ -220,16 +216,16 @@ After all missions pass their individual arbiter gates:
 
 | Signal | Action |
 |---|---|
-| Mission requires **>4 workers** | Too large — split into sub-missions |
-| Mission is **1 worker editing ≤3 files** | Too small — merge with adjacent mission |
-| Mission spans **>8 files** | Too broad — find a natural seam to split |
-| Mission touches **<1 file** | Phantom mission — remove or merge |
+| Scope card requires **>4 workers** | Too large — split into sub-cards |
+| Scope card is **1 worker editing ≤3 files** | Too small — merge with adjacent card |
+| Scope card spans **>8 files** | Too broad — find a natural seam to split |
+| Scope card touches **<1 file** | Phantom card — remove or merge |
 
-**Sweet spot:** 3–8 files per mission, 1–3 workers, completable by 1 mission-lead with ≤4 workers.
+**Sweet spot:** 3–8 files per scope card, 1–3 workers, completable by 1 tech-lead with ≤4 specialists.
 
 ### Integration Point Identification
 
-Integration points are where missions touch each other:
+Integration points are where scope cards touch each other:
 - Shared API contracts (request/response types, proto files)
 - Database schemas and migrations
 - Event bus topics and message formats
@@ -237,8 +233,8 @@ Integration points are where missions touch each other:
 
 Rules:
 1. Identify ALL integration points **before** dispatch — never discover them mid-build
-2. Assign integration work to `@tech-lead[integration]`, which runs **after** all missions pass
-3. Shared contracts are **read-only during BUILD** — no mission may modify a shared contract unilaterally
+2. Assign integration work to `@tech-lead[integration]`, which runs **after** all scope cards pass
+3. Shared contracts are **read-only during BUILD** — no scope card may modify a shared contract unilaterally
 4. If a contract needs changes, **STOP and escalate** to the coordinator for re-planning
 
 
