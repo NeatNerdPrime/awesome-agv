@@ -21,7 +21,7 @@ UI/UX excellence authority. Visual craft and experience design.
 7. Wireframing & prototyping — UI structure, component hierarchy, layout composition
 
 ## Skills
-Load from `.agents/skills/` as needed: frontend-design, mobile-design,
+Load from `.agents/skills/` as needed: browser-automation, frontend-design, mobile-design,
 research-methodology, sequential-thinking, agent-protocols
 
 ## Rules

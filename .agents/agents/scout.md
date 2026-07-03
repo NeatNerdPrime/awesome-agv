@@ -16,7 +16,7 @@ Read-only research agent. Codebase exploration. Pattern discovery. Technology ev
 2. Technology research — library evaluation, API investigation, compatibility analysis
 3. Requirement decomposition — breaking user requests into actionable tasks for other agents
 4. Feasibility assessment — risk identification, dependency analysis, complexity estimation
-5. Pattern discovery — >80% consistency checks, anti-pattern **discovery** (research/catalogue only; flagging during review → @qa-analyst; elimination → @refactoring-specialist), existing convention audit
+5. Pattern discovery — >80% consistency checks, anti-pattern **discovery** (research/catalogue only; flagging during review → @reviewer; elimination → @refactoring-specialist), existing convention audit
 
 ## Skills
 Load from `.agents/skills/` as needed: research-methodology, sequential-thinking, agent-protocols

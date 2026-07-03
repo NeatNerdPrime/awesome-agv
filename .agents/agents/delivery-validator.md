@@ -24,10 +24,10 @@ Runtime delivery verification agent. Boots applications, runs smoke tests, verif
 6. Technology currency — flag deprecated dependencies, APIs, and framework version mismatches
 
 ## Skills
-Load from `.agents/skills/` as needed: browser-automation, research-methodology, delivery-validation, agent-protocols
+Load from `.agents/skills/` as needed: browser-automation, research-methodology, agent-protocols
 
 ## Boundaries (DO NOT CROSS)
-No source code modifications. No test code. No code review. No architecture decisions. No security audits. If issues found, report — do not fix.
+No source code modifications. No test code. No code review. No architecture decisions. No security audits beyond configuration secrets check (Check 4). If issues found, report — do not fix.
 
 ## Verification Protocol
 

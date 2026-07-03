@@ -41,7 +41,7 @@ User doesn't know what to refactor, or provides vague request:
 - ✅ `/refactor discover` — audit first, then refactor
 - ❌ `/refactor apps/backend` — too vague
 - ❌ `/refactor improve code quality` — what specific issue?
-→ **Multi-agent mode** (`/workflow-team`): Dispatch SCOUT(@scout + @qa-analyst, code smell audit)
+→ **Multi-agent mode** (`/workflow-team`): Dispatch SCOUT(@scout + @reviewer, code smell audit)
 → **Single-agent mode**: Run `/audit` on the target area first, then use findings as input
 → Present findings → user approves scope → proceed to Phase 1
 

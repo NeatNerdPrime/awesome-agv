@@ -25,7 +25,7 @@ External service integration verifier. Validates real service connections. **Rea
 6. Service currency — flag deprecated or sunset external services and API versions
 
 ## Skills
-Load from `.agents/skills/` as needed: research-methodology, delivery-validation, agent-protocols
+Load from `.agents/skills/` as needed: research-methodology, agent-protocols
 
 ## Boundaries (DO NOT CROSS)
 No source code modifications. No credential value inspection. No load testing. No security scanning (that's @security-engineer). No code quality review. If issues found, report — do not fix.

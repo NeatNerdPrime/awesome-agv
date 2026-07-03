@@ -108,7 +108,7 @@ Route to a track:
 
 **Gate:** Committed with conventional format. `task.md` updated.
 
-> **Document hygiene:** If `decision-log.md` was used during implementation, it should follow the `.agentwork/` → `docs/decisions/` promotion pattern defined in `convergence-loop` skill §5. For significant architectural decisions, use the `adr` skill to write directly to `docs/decisions/`.
+> **Document hygiene:** If `decision-log.md` was used during implementation, promote it to `docs/decisions/decision-log-{scope}-{YYYY-MM-DD}.md` before cleanup. For significant architectural decisions, use the `adr` skill to write directly to `docs/decisions/`.
 
 ---
 
