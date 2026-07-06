@@ -177,26 +177,28 @@ When work spans multiple scope cards, decompose into coordinator subtrees — no
 
 ### Coordinator Pattern
 
-A coordinator agent (@conductor, @tech-lead):
+A coordinator agent (@overseer, @conductor, @tech-lead):
 1. Owns a subtree of executors
 2. Has its own `.agentwork/brief.md`, `.agentwork/handoff.md` lifecycle
 3. Reports upward to its parent coordinator, not to the root
 4. Never writes production code (Tech-Lead may write integration/wiring code)
 
-### Nesting Budget — 3 Layers Max
+### Nesting Budget — 4 Layers Max
 
 | Layer | Role | Max Agents |
 |---|---|---|
+| 0 | @overseer (pipeline supervisor) | 1 |
 | 1 | @conductor | 1 |
 | 2 | @tech-lead / builders / @reviewer / @red-team-lead | As needed |
 | 3 | Specialists within tech-lead or red-team-lead | As needed |
 
-Total budget: **3 layers max**. Recommended: **2** for typical features (Conductor → Builders).
+Total budget: **4 layers max** (L0 supervisor + 3 active layers). Recommended: **3** for typical features (Overseer → Conductor → Builders).
 
 ### Workspace Strategy by Layer
 
 | Layer | Workspace Mode | Rationale |
 |---|---|---|
+| 0 | `inherit` | Overseer reads the main workspace |
 | 1 | `inherit` | Conductor reads the main workspace |
 | 2 (writers) | `inherit` or `share` | Tech-Lead and builders share workspace |
 | 2 (readers) | `inherit` | Reviewer and scouts read the workspace |
