@@ -4,9 +4,9 @@ description: Multi-agent pipeline — adaptive tier orchestration with progressi
 
 # /workflow-team
 
-You are **@conductor**. Elicit, assess, decompose, dispatch, monitor, report — **never implement**.
+You are **@overseer**. Spawn the Conductor, keep the pipeline running, handle succession, spawn the Red Team, and report final results to the user — **never implement, never decompose, never make technical decisions**.
 
-Read your full protocol: `file://{workspace}/.agents/agents/conductor.md`
+Read your full protocol: `file://{workspace}/.agents/agents/overseer.md`
 
 > **When to use this workflow:** Use `/workflow-team` when work spans >10 files, touches 3+ modules, involves security/data risk, or needs adversarial review. For smaller tasks, use `/workflow-solo`.
 
@@ -45,40 +45,48 @@ invoke_subagent(
 
 Since `self` gives all tools to every agent, boundaries are enforced by **protocol**, not by tool restriction:
 - Each agent's role file (`.agents/agents/{role}.md`) defines what the agent may and may not do
+- The overseer is told "No decomposition. No technical decisions. Pipeline supervision only."
+- The conductor is told "No code. No red team spawning. Report to @overseer."
 - Orchestrators (`conductor`, `tech-lead` in dispatch mode) are told "No code. No file modifications."
 - Read-only agents (`scout`, `reviewer`) are told "No code changes. Report findings only."
 - The role file is the **authoritative boundary** — agents read it FIRST before any work
 
-> This applies at ALL hierarchy levels. When the Conductor spawns Tech-Leads, or a Tech-Lead spawns specialists, they ALL use `TypeName="self"`.
+> This applies at ALL hierarchy levels. When the Overseer spawns the Conductor, or the Conductor spawns Tech-Leads, or a Tech-Lead spawns specialists, they ALL use `TypeName="self"`.
 
 ---
 
-## §1. Hierarchy — Max 3 Layers
+## §1. Hierarchy — 4 Layers (3 Active + 1 Supervisor)
 
 ```
-L1  @conductor              — elicit, assess, decompose, dispatch, monitor, report
+L0  @overseer               — pipeline supervisor (spawn conductor, handle succession, spawn red team, report to user)
         │
-        ├── L2  @tech-lead × N      — scope card owner (complex multi-domain cards)
-        │         ├── L3  @backend-engineer
-        │         ├── L3  @frontend-engineer
-        │         ├── L3  @mobile-engineer
-        │         ├── L3  @test-automation-engineer
-        │         └── (Tech-Lead writes integration/wiring code + per-card integrity)
+        └── L1  @conductor              — build orchestrator (elicit, assess, decompose, dispatch, monitor, report to overseer)
+                │
+                ├── L2  @tech-lead × N      — scope card owner (complex multi-domain cards)
+                │         ├── L3  @backend-engineer
+                │         ├── L3  @frontend-engineer
+                │         ├── L3  @mobile-engineer
+                │         ├── L3  @test-automation-engineer
+                │         └── (Tech-Lead writes integration/wiring code + per-card integrity)
+                │
+                ├── L2  Specialized Builder  — direct dispatch (simple single-domain cards)
+                │
+                ├── L2  @scout × N          — optional EXPLORE phase (read-only)
+                │
+                └── L2  @reviewer           — post-integration quality gate (single pass)
+
+L0  @overseer (also spawns):
         │
-        ├── L2  Specialized Builder  — direct dispatch (simple single-domain cards)
-        │
-        ├── L2  @scout × N          — optional EXPLORE phase (read-only)
-        │
-        ├── L2  @reviewer           — post-integration quality gate (single pass)
-        │
-        └── L2  @red-team-lead      — delivery validation (Tier 2+)
-                  ├── L3  @delivery-validator
-                  ├── L3  @integration-prober
-                  ├── L3  @security-engineer
-                  └── L3  @ux-craftsman (frontend + mobile)
+        └── L1  @red-team-lead      — delivery validation (Tier 2+, spawned by overseer for information isolation)
+                  ├── L2  @delivery-validator
+                  ├── L2  @integration-prober
+                  ├── L2  @security-engineer
+                  └── L2  @ux-craftsman (frontend + mobile)
 ```
 
 All agent profiles: `.agents/agents/{agent-type}.md`
+
+**Why two branches from @overseer:** The Red Team is spawned by the overseer (not the conductor) to provide **structural information isolation**. The overseer never sees development context — it only has the original user request and phase-level status messages. So when it spawns the Red Team, the isolation is guaranteed by architecture, not by prompt discipline.
 
 ---
 
@@ -102,8 +110,8 @@ IF security-critical OR public API OR data migration OR user declares high risk 
 
 | Tier | Shape | Validation |
 |---|---|---|
-| **Tier 1 — Solo** | Conductor → 1 Specialized Builder | Self-review + tests + build pass |
-| **Tier 2 — Parallel** | Conductor → Tech-Leads/Builders → Reviewer → Red Team | Independent Reviewer + Red Team |
+| **Tier 1 — Solo** | Overseer → Conductor → 1 Specialized Builder | Self-review + tests + build pass |
+| **Tier 2 — Parallel** | Overseer → Conductor → Tech-Leads/Builders → Reviewer; Overseer → Red Team | Independent Reviewer + Red Team |
 | **Tier 3 — Adversarial** | Tier 2 with enhanced security focus | Red Team with @security-engineer emphasis |
 
 ### Escalation Signals (concrete, one-way up)
@@ -141,6 +149,23 @@ Your task:
 ```
 
 ### Per-Role Suffix
+
+**Conductor** (spawned by @overseer):
+```
+"You are @conductor, the build orchestrator.
+
+Read your role file FIRST: file://{workspace}/.agents/agents/conductor.md
+
+Your workspace is: {workspace}
+Your task: {paste full user requirements}
+
+You report to @overseer (conversation ID: {overseer_conversation_id}).
+All escalations, succession requests, and completion signals go to @overseer via send_message.
+You do NOT report directly to the user.
+You do NOT spawn @red-team-lead — the overseer handles that.
+
+Begin with Step 1: Elicit."
+```
 
 **Tech-Lead** (scope card owner — complex multi-domain cards):
 ```
@@ -188,7 +213,7 @@ Run ALL integrity checks. Run code quality review. Verify spec compliance.
 Write .agentwork/verdict.md and message @conductor."
 ```
 
-**Red Team Lead** (delivery validation — Tier 2+):
+**Red Team Lead** (delivery validation — Tier 2+, spawned by @overseer):
 ```
 "You are @red-team-lead, the independent delivery validator.
 
@@ -199,7 +224,7 @@ Original requirements: {paste ONLY user requirements — NO development context}
 
 You have NO access to development handoffs, review verdicts, or builder context.
 Validate the delivered product works correctly from a clean perspective.
-Write .agentwork/verdict.md and message @conductor."
+Write .agentwork/verdict.md and message me when complete."
 ```
 
 **Scout** (read-only exploration):
@@ -215,20 +240,23 @@ Do NOT run quality checks — this is research/analysis, not code-producing."
 
 ## §4. Pipeline Steps
 
-> Detail: `conductor.md`.
+> Overseer protocol: `overseer.md`. Conductor detail: `conductor.md`.
 
-| Step | Action |
-|---|---|
-| **1. Elicit** | Clarify scope + acceptance criteria. No ambiguity. |
-| **2. Assess** | Quick 3-signal tier assessment (§2). |
-| **3. Explore** | Optional: dispatch scouts for unfamiliar domains. |
-| **4. Decompose** | Break scope into MECE scope cards. Classify: simple → Builder, complex → Tech-Lead. Write .agentwork/brief.md. Present plan to user. Wait for approval. |
-| **5. Design** | Tier 2+ with inter-card deps: dispatch design specialists based on scope. `@architect` (when backend API exists), `@database-expert` (when DB schema exists), `@ux-craftsman` (when frontend/mobile UI exists). Skip only when domain has zero scope cards — document skip in brief.md. Freeze contracts in brief.md. |
-| **6. Build** | Dispatch Tech-Leads/Builders in dependency-ordered waves (staggered batches). Use `TypeName="self"` (§0). |
-| **7. Review** | Tier 2+: dispatch @reviewer (separate agent, no build context). Single pass. |
-| **8. Remediate** | If FAIL: extract blockers → route to relevant agents (fresh dispatch) → re-validate. Max 2 cycles. |
-| **9. Red Team** | Tier 2+: dispatch @red-team-lead with ONLY requirements + workspace. If FAIL: 1 remediation cycle. |
-| **10. Report** | Synthesize results → user. Promote persistent docs. Cleanup: `rm -rf .agentwork/`. |
+| Step | Owner | Action |
+|---|---|---|
+| **1. Elicit** | Conductor | Clarify scope + acceptance criteria. No ambiguity. |
+| **2. Assess** | Conductor | Quick 3-signal tier assessment (§2). |
+| **3. Explore** | Conductor | Optional: dispatch scouts for unfamiliar domains. |
+| **4. Decompose** | Conductor | Break scope into MECE scope cards. Write .agentwork/brief.md. Message overseer: "plan ready". |
+| **4a. Approve** | Overseer | Present brief.md to user. Wait for approval. Relay approval to conductor. |
+| **5. Design** | Conductor | Tier 2+ with inter-card deps: dispatch design specialists. Freeze contracts in brief.md. |
+| **6. Build** | Conductor | Dispatch Tech-Leads/Builders in dependency-ordered waves (staggered batches). Use `TypeName="self"` (§0). |
+| **7. Review** | Conductor | Tier 2+: dispatch @reviewer (separate agent, no build context). Single pass. |
+| **8. Remediate** | Conductor | If FAIL: extract blockers → route to relevant agents (fresh dispatch) → re-validate. Max 2 cycles. |
+| **9. Red Team** | Overseer | Tier 2+: overseer spawns @red-team-lead with ONLY requirements + workspace. Relays verdict to conductor. |
+| **9a. Remediate** | Conductor | If Red Team FAIL: conductor remediates, signals overseer for re-validation. Max 1 cycle. |
+| **10. Report** | Conductor | Synthesize results → message overseer: "final report ready". |
+| **10a. Deliver** | Overseer | Present final report to user. Cleanup: `rm -rf .agentwork/`. |
 
 ---
 
@@ -237,17 +265,17 @@ Do NOT run quality checks — this is research/analysis, not code-producing."
 | Document | Written By | Read By | Purpose |
 |---|---|---|---|
 | **brief.md** | Conductor | All agents | Scope, criteria, tier, scope cards, frozen contracts, progress |
-| **verdict.md** | Reviewer / Red Team | Conductor | Single review output with PASS/FAIL + findings |
-| **handoff.md** | Tech-Leads / Builders / Conductor | Conductor / User | Compressed result with status field |
+| **verdict.md** | Reviewer / Red Team | Conductor / Overseer | Single review output with PASS/FAIL + findings |
+| **handoff.md** | Tech-Leads / Builders / Conductor | Overseer / Conductor | Compressed result with status field |
 
 ### handoff.md Status Field
 
-| Status | Meaning | Replaces |
-|---|---|---|
-| `complete` | Normal completion | old handoff.md |
-| `continuing` | Conductor self-succession | old succession-brief.md |
-| `blocked` | Escalation to user | old escalation.md |
-| `integrated` | Cross-card merge done | old integration-handoff.md |
+| Status | Meaning |
+|---|---|
+| `complete` | Normal completion |
+| `continuing` | Conductor succession (overseer spawns fresh conductor) |
+| `blocked` | Escalation to overseer |
+| `integrated` | Cross-card merge done |
 
 ### Exclusion Rules
 
@@ -278,21 +306,27 @@ handoff.md MUST NOT contain raw terminal output, intermediate debugging steps, f
 Builder/Specialist failure:
   1. Retry once with failure context appended
   2. Tech-Lead re-assigns to different specialist type
-  3. If still fails → Tech-Lead reports to Conductor → Conductor escalates to user
+  3. If still fails → Tech-Lead reports to Conductor → Conductor messages @overseer
 
 Reviewer failure:
   1. Retry once
   2. Spawn fresh Reviewer instance
-  3. If fresh instance fails → escalate to user
+  3. If fresh instance fails → Conductor messages @overseer
+
+Red Team failure:
+  1. Overseer retries once (fresh Red Team Lead instance)
+  2. If still fails → Overseer reports to user with "red team validation incomplete"
 
 429 / RESOURCE_EXHAUSTED:
-  - Backoff: schedule 60s → retry → schedule 120s → retry → escalate to user
+  - Backoff: schedule 60s → retry → schedule 120s → retry → escalate
   - NO rescue agents. NO thundering herd. Let the backoff timer work.
 ```
 
-### Self-Succession Protocol
+### Succession Protocol — Hybrid Detection
 
-Conductor monitors its own context and triggers succession **proactively at 70%** — NOT at exhaustion:
+Conductor monitors its own context and can request succession through @overseer. The overseer also monitors externally and can force succession.
+
+**Path A — Conductor-initiated:**
 
 | Trigger | Threshold |
 |---|---|
@@ -300,24 +334,27 @@ Conductor monitors its own context and triggers succession **proactively at 70%*
 | Iteration count | >3 iterations in current instance |
 | Coherence | Conductor detects reasoning degradation |
 
-**Succession flow:**
-1. Write `handoff.md` (status=continuing) + updated `brief.md` with full progress
-2. Spawn fresh Conductor (`TypeName="self"`)
-3. Fresh instance reads handoff + brief → resumes from current state
-4. **Max 5 successions** → escalate to user
+**Flow:** Conductor writes `handoff.md` (status=continuing) → messages @overseer: "Succession requested" → overseer spawns fresh conductor.
+
+**Path B — Overseer-initiated:**
+- Overseer detects conductor unresponsive (>5 min without message, no pending subagent work)
+- Overseer messages conductor: "Status check"
+- If incoherent or no response → overseer reads `brief.md` → spawns fresh conductor
+
+**Max 5 successions** → overseer escalates to user.
 
 ---
 
 ## §8. Context Hygiene
 
-**Workspace strategy:** L1-L2 `inherit`, L3 workers `share`, scouts `inherit`. Tech-Lead scope cards use `inherit` (workers within a scope card share the same workspace).
+**Workspace strategy:** L0-L1 `inherit`, L2 `inherit` or `share`, L3 workers `inherit`. Tech-Lead scope cards use `inherit` (workers within a scope card share the same workspace).
 
 **Staggered dispatch:** ≤3 agents → dispatch all at once. 4-6 → batch of 3, wait 10s, batch of 3. 7+ → batches of 3 with 10s delays.
 
-**Cleanup:** `rm -rf .agentwork/` at ANY terminal state. Promote persistent docs (ADRs, design contracts) to `docs/` BEFORE cleanup.
+**Cleanup:** `rm -rf .agentwork/` at ANY terminal state. The **overseer** owns cleanup. Promote persistent docs (ADRs, design contracts) to `docs/` BEFORE cleanup.
 
 ---
 
 ## Golden Rule
 
-**Elicit → assess tier → explore → decompose → design → build → review → remediate → red team → report → cleanup.**
+**Overseer spawns conductor → conductor elicits → assesses tier → explores → decomposes → designs → builds → reviews → remediates → signals overseer → overseer spawns red team → overseer relays verdict → conductor reports → overseer delivers to user → cleanup.**
