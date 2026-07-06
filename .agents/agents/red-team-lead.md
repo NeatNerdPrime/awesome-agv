@@ -87,7 +87,7 @@ Read the original user requirements (received from Conductor) and examine the fi
 
 ### Step 2 — Parallel Dispatch
 
-Dispatch all selected validators in a single `invoke_subagent` call using `TypeName='self'` (see workflow-team.md §0):
+Dispatch all selected validators in a single `invoke_subagent` call. **ALL validators MUST use `TypeName="self"`. NEVER use `define_subagent` or custom TypeNames — they produce tool-deprived agents that cannot read files or run commands** (see §Agent Spawn Protocol below):
 - Each validator gets the workspace path + original user requirements
 - NO development context (.agentwork/ from development agents, scope card handoffs)
 - Each validator writes `.agentwork/findings-{agent-name}.md` independently
@@ -198,7 +198,30 @@ When a dispatched validator fails:
 3. **Skip** — if a non-critical validator fails twice, skip and note gap in verdict
 4. **Degrade** — if critical validators fail, produce CONDITIONAL PASS noting unverifiable areas
 
-## Agent Definition Protocol
+## Agent Spawn Protocol
+
+> **CRITICAL PLATFORM CONSTRAINT.** All named subagent types (`delivery-validator`, `ux-craftsman`, `security-engineer`, etc.) receive ONLY `schedule` + `send_message` tools — they lack `view_file`, `run_command`, and all critical tools. `define_subagent` reports success but defined types FAIL on invocation with tool registration errors. This is a verified platform limitation.
+
+**Rule: ALL validators MUST be spawned as `TypeName="self"`.**
+**Rule: NEVER use `define_subagent`.** It always fails with tool registration errors.
+
+**Correct pattern:**
+```
+invoke_subagent(
+  TypeName: "self",
+  Role:     "Delivery Validator",
+  Prompt:   "Your role... file://{workspace}/.agents/agents/delivery-validator.md
+             Read this file FIRST..."
+)
+```
+
+**INCORRECT patterns (WILL FAIL):**
+```
+define_subagent(name="delivery-validator")    ← FAILS (tool registration error)
+invoke_subagent(TypeName="delivery-validator") ← TOOL-DEPRIVED (only schedule + send_message)
+invoke_subagent(TypeName="security-engineer")  ← TOOL-DEPRIVED (only schedule + send_message)
+```
+
 When spawning agents with role files in `.agents/agents/`: reference the role file in the system prompt — never paraphrase. Child MUST read its role file first, then load its listed skills. Include the RED TEAM CONTEXT addendum (§Validation Protocol Step 2) for agents reused from the development pipeline.
 
 ## Parallel Dispatch

@@ -82,7 +82,7 @@ Dispatch parallel `@security-engineer` subagents — one per activated dimension
 Use `invoke_subagent` to spawn all activated dimension agents in a **single call** (AAD — All-Agents Drafting: parallel, no cross-talk).
 
 **invoke_subagent fields per dimension:**
-- **TypeName:** `security-engineer`
+- **TypeName:** `self` (CRITICAL: must be `"self"` — named types like `"security-engineer"` receive only `schedule` + `send_message` tools and cannot read files or run commands)
 - **Role:** `Security Auditor — Dimension {KEY}` (e.g., `Security Auditor — Dimension A`)
 - **Workspace:** `inherit` (read-only agents share the main workspace; no branch needed)
 - **Prompt:** Use the system prompt template below, filled with dimension-specific scope card

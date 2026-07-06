@@ -154,7 +154,7 @@ Shared Reads: {shared file globs}
 Dependencies: {list of inter-card deps, if any}
 Frozen Contracts: {reference to brief.md contract section, if any}
 
-Dispatch specialized builders as needed within your scope.
+Dispatch specialized builders for domain work + @test-automation-engineer (mandatory for every multi-domain card).
 Write integration/wiring code yourself.
 Run per-card integrity checks before reporting.
 When complete: write .agentwork/handoff.md and message @conductor."
@@ -223,7 +223,7 @@ Do NOT run quality checks — this is research/analysis, not code-producing."
 | **2. Assess** | Quick 3-signal tier assessment (§2). |
 | **3. Explore** | Optional: dispatch scouts for unfamiliar domains. |
 | **4. Decompose** | Break scope into MECE scope cards. Classify: simple → Builder, complex → Tech-Lead. Write .agentwork/brief.md. Present plan to user. Wait for approval. |
-| **5. Design** | Tier 2+ with inter-card deps: dispatch design specialists. Freeze contracts in brief.md. For specialists without role files (@architect, @database-expert), define task and constraints inline in the system prompt — no role file reference needed. |
+| **5. Design** | Tier 2+ with inter-card deps: dispatch design specialists based on scope. `@architect` (when backend API exists), `@database-expert` (when DB schema exists), `@ux-craftsman` (when frontend/mobile UI exists). Skip only when domain has zero scope cards — document skip in brief.md. Freeze contracts in brief.md. |
 | **6. Build** | Dispatch Tech-Leads/Builders in dependency-ordered waves (staggered batches). Use `TypeName="self"` (§0). |
 | **7. Review** | Tier 2+: dispatch @reviewer (separate agent, no build context). Single pass. |
 | **8. Remediate** | If FAIL: extract blockers → route to relevant agents (fresh dispatch) → re-validate. Max 2 cycles. |
@@ -265,6 +265,8 @@ handoff.md MUST NOT contain raw terminal output, intermediate debugging steps, f
 | Multi-domain, trivial integration (<50 lines) | Direct Specialized Builder + integration note | Avoid coordinator overhead |
 
 > **Guard rail:** If a Tech-Lead's integration code is <20% of the card's total output, the card should have been a direct builder dispatch. The Conductor decides during decomposition.
+
+> **Guard rail:** Every Tech-Lead dispatch for a multi-domain card MUST include `@test-automation-engineer`. If a Tech-Lead completes without spawning a test automation engineer, it is a protocol violation.
 
 ---
 

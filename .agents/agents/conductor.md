@@ -40,6 +40,7 @@ No code. No tests. No design decisions. No file modifications. No direct codebas
 ## Agent Spawn Protocol
 
 **CRITICAL: Always use `TypeName="self"` for ALL spawns.** Named types only receive `schedule` + `send_message` — they lack `invoke_subagent`, `view_file`, and all critical tools.
+**NEVER use `define_subagent`.** It reports success but defined types FAIL on invocation with internal tool registration errors. This is a verified platform limitation.
 
 **Correct pattern:**
 ```
@@ -47,10 +48,11 @@ invoke_subagent → TypeName: "self", Role: "Tech Lead (Auth)", Prompt: "Read yo
 invoke_subagent → TypeName: "self", Role: "Builder (Payments)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/backend-engineer.md ..."
 ```
 
-**Incorrect pattern:**
+**Incorrect patterns (WILL FAIL):**
 ```
-invoke_subagent → TypeName: "tech-lead"       ← TOOL-DEPRIVED (only schedule + send_message)
-invoke_subagent → TypeName: "backend-engineer" ← TOOL-DEPRIVED (only schedule + send_message)
+define_subagent(name="tech-lead")               ← FAILS (tool converter registration error)
+invoke_subagent → TypeName: "tech-lead"         ← TOOL-DEPRIVED (only schedule + send_message)
+invoke_subagent → TypeName: "backend-engineer"  ← TOOL-DEPRIVED (only schedule + send_message)
 ```
 
 When spawning agents with role files in `.agents/agents/`: reference the role file in the system prompt — never paraphrase. Child MUST read its role file first, then load its listed skills.
@@ -108,7 +110,11 @@ Quick 3-signal routing. Assess ONCE at intake, then escalate if signals change d
 - **Present full plan to user** — list scope cards with complexity, acceptance criteria, agent assignments. **Wait for explicit approval before execution.**
 
 ### 5. Design (Tier 2+ with inter-card dependencies)
-- Dispatch specialists as needed: @architect, @database-expert, @ux-craftsman
+- Dispatch design specialists based on scope card domains (mandatory when applicable):
+  - `@architect` — **REQUIRED** when any backend API endpoints exist in scope cards
+  - `@database-expert` — **REQUIRED** when any database schema, migrations, or data models exist in scope cards
+  - `@ux-craftsman` — **REQUIRED** when any frontend UI, mobile screens, or user-facing interfaces exist in scope cards
+  - Skip a specialist ONLY when its domain has zero scope cards. Document skip reason in brief.md.
 - Collect contract outputs (API shapes, DB schemas, component interfaces)
 - **Freeze contracts in `brief.md`** — builders work against frozen contracts
 - If a builder needs to change a frozen contract → STOP → escalate to Conductor → re-freeze + notify all dependent scope cards

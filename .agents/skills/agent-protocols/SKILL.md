@@ -38,16 +38,20 @@ If any assumption is uncertain, document it in your handoff and proceed with the
 
 ## 3. Agent Definition Protocol (Coordinators Only)
 
+> **CRITICAL PLATFORM CONSTRAINT.** All named subagent types receive ONLY `schedule` + `send_message` tools. `define_subagent` reports success but defined types FAIL on invocation. **ALL agents MUST be spawned as `TypeName="self"`. NEVER use `define_subagent`.**
+
 When spawning ANY agent type with a role file in `.agents/agents/`:
 
-1. **Reference the role file** in the system prompt — never paraphrase:
+1. **Always use `TypeName="self"`** — named TypeNames produce tool-deprived agents that cannot read files, run commands, or spawn their own subagents
+2. **Never use `define_subagent`** — it always fails with internal tool converter registration errors
+3. **Reference the role file** in the system prompt — never paraphrase:
    ```
    "Your role, domain, skills, boundaries, and protocols are defined in
     file://{workspace}/.agents/agents/{agent-type}.md.
    Read this file FIRST before beginning any work."
    ```
-2. The child agent MUST read the role file as its first action
-3. Propagate this protocol recursively — if the child is a coordinator, it must follow the same rule when spawning its own children
+4. The child agent MUST read the role file as its first action
+5. Propagate this protocol recursively — if the child is a coordinator, it must follow the same rule when spawning its own children
 
 ## 4. Parallel Dispatch Format
 

@@ -37,6 +37,41 @@ code-idioms-and-conventions.md, testing-strategy.md
 ## Boundaries (DO NOT CROSS)
 No primary feature business logic (delegated to builders). No E2E tests. No CI/CD runners. No visual UX layouts.
 
+---
+
+## Agent Spawn Protocol
+
+> **CRITICAL PLATFORM CONSTRAINT.** All named subagent types (`backend-engineer`, `frontend-engineer`, etc.) receive ONLY `schedule` + `send_message` tools — they lack `view_file`, `run_command`, and all critical tools. `define_subagent` reports success but defined types FAIL on invocation with tool registration errors. This is a verified platform limitation.
+
+**Rule: ALL specialist builders MUST be spawned as `TypeName="self"`.**
+**Rule: NEVER use `define_subagent`.** It always fails with internal tool converter registration errors.
+
+Role differentiation is achieved through the `Role` field and the `Prompt` (which points to the builder's role file).
+
+**Correct pattern:**
+```
+invoke_subagent(
+  TypeName: "self",                              ← ALWAYS "self"
+  Role:     "Backend Engineer (Auth)",            ← Human-readable role name
+  Prompt:   "Your role, domain, skills...         ← Points to .agents/agents/{role}.md
+             file://{workspace}/.agents/agents/backend-engineer.md
+             Read this file FIRST before beginning any work.
+             Your workspace is: {workspace}
+             Your task: ..."
+)
+```
+
+**INCORRECT patterns (WILL FAIL):**
+```
+define_subagent(name="backend-engineer")           ← FAILS (tool converter registration error)
+invoke_subagent(TypeName="backend-engineer")        ← TOOL-DEPRIVED (only schedule + send_message)
+invoke_subagent(TypeName="frontend-engineer")       ← TOOL-DEPRIVED (only schedule + send_message)
+```
+
+> This applies to ALL builders: `@backend-engineer`, `@frontend-engineer`, `@mobile-engineer`, `@test-automation-engineer`. Every single one MUST use `TypeName="self"`.
+
+---
+
 ## Scope Card Execution
 
 ### Step 1 — Card Intake
@@ -47,14 +82,16 @@ Receive scope card from Conductor. The card specifies:
 - **Acceptance criteria**: what "done" looks like
 
 ### Step 2 — Specialist Dispatch
-Decompose the scope card into specialist tasks and dispatch builders using `TypeName='self'`:
+Decompose the scope card into specialist tasks and dispatch builders using `TypeName='self'` (see §Agent Spawn Protocol above — NEVER use `define_subagent`):
 
 | Builder | When to Dispatch |
 |---|---|
 | `@backend-engineer` | Backend logic, API handlers, services, repositories |
 | `@frontend-engineer` | UI components, pages, client-side logic |
 | `@mobile-engineer` | Mobile screens, platform-specific code |
-| `@test-automation-engineer` | Integration/E2E test suites |
+| `@test-automation-engineer` | **MANDATORY for every multi-domain card.** Integration/E2E test suites covering the card's acceptance criteria. |
+
+> **Rule:** Every scope card dispatch MUST include a `@test-automation-engineer` alongside domain specialists. The test engineer receives the same frozen contracts and acceptance criteria, and writes tests that verify cross-boundary integration within the card's scope. Omitting this agent is a protocol violation.
 
 **Dispatch protocol:**
 1. Define MECE file ownership for each builder (no overlapping write scopes)
