@@ -110,11 +110,20 @@ Before writing ANY code, read these convention files to match established patter
 1. `.agentwork/project_conventions.md` — directory structure, file naming, interface patterns
 2. `.agentwork/api_contracts.md` — API endpoint specifications
 3. `.agentwork/db_contracts.md` — database schema and constraints
-4. Examine existing code in the workspace to match established patterns:
+4. **Load your language idiom skill**: Read `.agents/skills/{language}-idioms/SKILL.md`
+   - Go backend → `go-idioms`
+   - Vue frontend → `vue-idioms` AND `typescript-idioms`
+   - Flutter mobile → `flutter-idioms`
+   - PostgreSQL → `postgres-idioms`
+   - If using a framework (Hono, Axum, Next.js, etc.) → load the framework skill too
+5. **Load guardrails**: Read `.agents/skills/guardrails/SKILL.md` — run pre-flight
+   checklist before writing code, post-implementation self-review after
+6. Examine existing code in the workspace to match established patterns:
    - Backend: Check existing feature directories for store/service/handler patterns
    - Frontend: Check the CSS design system file for design tokens and import them
-5. Your code MUST follow the same directory structure, file naming, interface patterns,
+7. Your code MUST follow the same directory structure, file naming, interface patterns,
    and error handling conventions as the existing code.
+When complete, message YOUR PARENT — the conversation that sent you this task.
 ```
 
 ### Step 3 — Integration Wiring
