@@ -189,13 +189,21 @@ Before writing ANY code, read these convention files to match established patter
 1. `.agentwork/project_conventions.md` — directory structure, file naming, interface patterns
 2. `.agentwork/api_contracts.md` — API endpoint specifications
 3. `.agentwork/db_contracts.md` — database schema and constraints
-4. Examine existing code in the workspace to match established patterns:
+4. **Load your language idiom skill**: Read `.agents/skills/{language}-idioms/SKILL.md`
+   - Go backend → `go-idioms`
+   - Vue frontend → `vue-idioms` AND `typescript-idioms`
+   - Flutter mobile → `flutter-idioms`
+   - If using a framework (Hono, Axum, Next.js, etc.) → load the framework skill too
+5. **Load guardrails**: Read `.agents/skills/guardrails/SKILL.md` — run pre-flight
+   checklist before writing code, post-implementation self-review after
+6. Examine existing code in the workspace to match established patterns:
    - Backend: Check existing feature directories for store/service/handler patterns
    - Frontend: Check the CSS design system file for design tokens and import them
-5. Your code MUST follow the same directory structure, file naming, interface patterns,
+7. Your code MUST follow the same directory structure, file naming, interface patterns,
    and error handling conventions as the existing code.
 
-Include this Convention Reference in every builder dispatch prompt."
+Include this Convention Reference in every builder dispatch prompt.
+When complete, message your parent conversation (the one that sent this task)."
 ```
 
 **Specialized Builder** (direct dispatch — simple single-domain cards):
@@ -217,11 +225,20 @@ Before writing ANY code, read these convention files to match established patter
 1. `.agentwork/project_conventions.md` — directory structure, file naming, interface patterns
 2. `.agentwork/api_contracts.md` — API endpoint specifications
 3. `.agentwork/db_contracts.md` — database schema and constraints
-4. Examine existing code in the workspace to match established patterns:
+4. **Load your language idiom skill**: Read `.agents/skills/{language}-idioms/SKILL.md`
+   - Go backend → `go-idioms`
+   - Vue frontend → `vue-idioms` AND `typescript-idioms`
+   - Flutter mobile → `flutter-idioms`
+   - If using a framework (Hono, Axum, Next.js, etc.) → load the framework skill too
+5. **Load guardrails**: Read `.agents/skills/guardrails/SKILL.md` — run pre-flight
+   checklist before writing code, post-implementation self-review after
+6. Examine existing code in the workspace to match established patterns:
    - Backend: Check existing feature directories for store/service/handler patterns
    - Frontend: Check the CSS design system file for design tokens and import them
-5. Your code MUST follow the same directory structure, file naming, interface patterns,
-   and error handling conventions as the existing code."
+7. Your code MUST follow the same directory structure, file naming, interface patterns,
+   and error handling conventions as the existing code.
+
+When complete, message your parent conversation (the one that sent this task)."
 ```
 
 **Reviewer** (post-build quality gate):
@@ -376,7 +393,7 @@ Conductor monitors its own context and can request succession through @overseer.
 
 **Staggered dispatch:** ≤3 agents → dispatch all at once. 4-6 → batch of 3, wait 10s, batch of 3. 7+ → batches of 3 with 10s delays.
 
-**Cleanup:** `rm -rf .agentwork/` at ANY terminal state. The **overseer** owns cleanup. Promote persistent docs (ADRs, design contracts) to `docs/` BEFORE cleanup.
+**Cleanup:** The **overseer** owns cleanup at ANY terminal state. Sequence: (1) Promote persistent docs (`api_contracts.md`, `db_contracts.md`, `design-ux.md`, `project_conventions.md`) to `docs/`, (2) present final report to user, (3) `rm -rf .agentwork/`. If overseer fails, conductor executes cleanup fallback (see conductor.md §Cleanup Fallback Protocol).
 
 ---
 
