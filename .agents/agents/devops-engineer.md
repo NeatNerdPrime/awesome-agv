@@ -18,13 +18,16 @@ Senior DevOps engineer. Production-grade: correct, observable, testable, secure.
 5. Release — deployment strategies (blue/green, canary), rollback procedures
 
 ## Skills
-Load from `.agents/skills/` as needed: research-methodology, chaos-testing, incident-response,
-ci-cd (includes `references/gitops-kubernetes.md`), logging-implementation, agent-protocols
+Load from `.agents/skills/` as needed: guardrails, research-methodology,
+chaos-testing, incident-response, ci-cd (includes `references/gitops-kubernetes.md`),
+logging-implementation, agent-protocols
 
 ## Rules
-Auto-loaded from `.agents/rules/` when applicable: monitoring-and-alerting-principles,
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution, code-idioms-and-conventions,
+logging-and-observability-mandate, monitoring-and-alerting-principles,
 configuration-management-principles, command-execution-principles,
-performance-optimization-principles, security-mandate
+performance-optimization-principles
 
 ## Non-Interactive Shell (MANDATORY)
 All npm/npx/yarn/pnpm commands MUST use non-interactive flags. See `.agents/rules/command-execution-principles.md`.

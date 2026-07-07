@@ -20,10 +20,13 @@ Senior database engineer. Production-grade: correct, observable, testable, secur
 7. Security at DB layer — RLS policies, role-based privileges, least privilege enforcement
 
 ## Skills
-Load from `.agents/skills/` as needed: research-methodology, sql-idioms, logging-implementation, agent-protocols
+Load from `.agents/skills/` as needed: guardrails, research-methodology,
+postgres-idioms, logging-implementation, agent-protocols
 
 ## Rules
-Auto-loaded from `.agents/rules/` when applicable: database-design-principles,
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution, code-idioms-and-conventions,
+logging-and-observability-mandate, database-design-principles,
 performance-optimization-principles, security-principles
 
 ## Boundaries (DO NOT CROSS)
