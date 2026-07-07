@@ -66,3 +66,23 @@ Each agent file contains a `## Parallel Dispatch` section with role-specific val
 | **Integration** | How parallel results are reconciled (if applicable) |
 
 For read-only agents, `Write Scope` becomes `Read Scope` and scoping is for coverage guarantee, not conflict prevention.
+
+## 5. Completion Reporting Protocol
+
+**Every agent MUST report completion to its parent.** This is non-negotiable.
+
+### For code-writing agents (builders, specialists):
+1. Write `.agentwork/handoff.md` with status and file manifest
+2. Message your parent (the conversation that dispatched you):
+   `".agentwork/handoff.md ready — [scope-card-id] [COMPLETE|BLOCKED]"`
+
+### For read-only agents (scouts, reviewers, red team members):
+1. Write your deliverable file (findings, verdict, etc.)
+2. Message your parent:
+   `".agentwork/[deliverable-file] ready — [1-line summary]"`
+
+### Critical: Reply-To Address
+Your parent's conversation ID is the conversation that sent you your initial task.
+This is the conversation you received your first message from.
+**Always reply to THIS conversation ID** — never to any other ID mentioned in your
+task description or context.
