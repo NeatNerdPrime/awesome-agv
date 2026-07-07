@@ -38,7 +38,7 @@ For example, the principles of the [Rugged Software Constitution](.agents/rules/
 ### Key Features
 
 *   📏 **25 Rules** — covering security, reliability, architecture, and maintainability. Distilled to project-specific decisions only — rules encode *what overrides model defaults*, not what models already know.
-*   🛠️ **60 Skills** — specialized capabilities loaded on demand: language idioms, debugging, design, testing, performance, CI/CD, and more.
+*   🛠️ **56 Skills** — specialized capabilities loaded on demand: language idioms, debugging, design, testing, performance, CI/CD, and more.
 *   🔄 **10 Workflows** — end-to-end development processes from research to ship, plus specialized testing pipelines.
 *   🤖 **21 Agent Personas** — specialized sub-agents for multi-agent orchestration arranged in a 4-tier hierarchy.
 *   🏗️ **Three-Tier Loading System** — always-on mandates + contextual principles + on-demand skills for zero-noise enforcement.
@@ -330,12 +330,8 @@ Skills are deep expertise modules loaded on demand — agents only pay the token
 *   **[Mobile Design](.agents/skills/mobile-design/SKILL.md)**: Platform-native mobile interfaces for Flutter and React Native
 
 #### 🔀 Multi-Agent Orchestration Skills
-*   **[Convergence Loop](.agents/skills/convergence-loop/SKILL.md)**: Iterative problem solving protocol for coordinators.
-*   **[Fault Recovery](.agents/skills/fault-recovery/SKILL.md)**: Structured fault tolerance and escalation ladder.
-*   **[Integrity Enforcement](.agents/skills/integrity-enforcement/SKILL.md)**: Zero-tolerance compliance checking for the arbiter agent.
-*   **[Parallel Dispatch](.agents/skills/parallel-dispatch/SKILL.md)**: MECE task decomposition, scope sizing, file ownership enforcement, DAG-based execution, and safe merge protocol for intra-domain parallel dispatch. Includes scope decomposition techniques previously in a separate skill.
-*   **[Agent Protocols](.agents/skills/agent-protocols/SKILL.md)**: Shared behavioral protocols for all agents: recursive nesting, pre-implementation restatement, agent definition cascade, and parallel dispatch format.
-*   **[Acceptance Review](.agents/skills/acceptance-review/SKILL.md)**: Spec adherence and deliverable completeness verification — ensures what was delivered matches what was requested.
+*   **[Parallel Dispatch](.agents/skills/parallel-dispatch/SKILL.md)**: MECE task decomposition, scope sizing, file ownership enforcement, DAG-based execution, and safe merge protocol for intra-domain parallel dispatch.
+*   **[Agent Protocols](.agents/skills/agent-protocols/SKILL.md)**: Shared behavioral protocols for all agents: recursive nesting, pre-implementation restatement, agent definition cascade, parallel dispatch format, and completion reporting with reply-to address routing.
 
 #### 🌐 Language & Framework Idioms (26)
 
@@ -377,6 +373,12 @@ Language-specific patterns, tooling, project layout, and quality commands. Each 
 | [SQL](.agents/skills/sql-idioms/SKILL.md) | Query optimization, indexes, migrations |
 | [Swift](.agents/skills/swift-idioms/SKILL.md) | SwiftUI, Combine, async/await |
 
+**Database-specific skills:**
+
+| Skill | Coverage |
+|---|---|
+| [PostgreSQL Idioms](.agents/skills/postgres-idioms/SKILL.md) | Query performance & indexing, connection pooling, RLS & security, schema design, concurrency & locking, data access patterns, monitoring, JSONB & full-text search |
+
 #### 🏢 Domain Skills
 *   **[API Documentation](.agents/skills/api-documentation/SKILL.md)**: OpenAPI 3.1 specs, request/response examples, versioning
 *   **[Browser Automation](.agents/skills/browser-automation/SKILL.md)**: Playwright MCP-first automation for E2E testing, UI review, and Playwright MCP interactive development
@@ -391,22 +393,24 @@ Language-specific patterns, tooling, project layout, and quality commands. Each 
 
 ### Agent Personas (21)
 
-Agent personas are specialized sub-agents designed for multi-agent orchestration. The system uses a Recursive Multi-Agent System (RMAS) with a 4-tier orchestration hierarchy. Each agent has an exclusive domain, clear boundaries, and never crosses into another agent's territory — enforcing MECE at the architecture level.
+Agent personas are specialized sub-agents designed for multi-agent orchestration. The system uses a 4-layer pipeline architecture with an overseer/conductor command structure. Each agent has an exclusive domain, clear boundaries, and never crosses into another agent's territory — enforcing MECE at the architecture level.
 
 #### Layers
 
 | Layer | Agents | Purpose |
 |---|---|---|
-| **L1 Strategic** | `overseer` | Program director: aligns multiple domain streams and manages cross-domain dependencies |
-| **L2 Domain** | `rally-lead` | Domain coordinator: orchestrates multiple missions within a business vertical |
-| **L3 Execution** | `mission-lead` | Mission manager: drives a specific feature slice to completion |
-| **Compliance** | `arbiter`, `tech-lead` | Hard gate authorities: independent verification of rules, skills, and specs |
+| **L0 Supervisor** | `overseer` | Pipeline supervisor: spawns conductor, monitors progress, dispatches red team, owns cleanup |
+| **L1 Orchestration** | `conductor` | Build orchestrator: tier assessment, scope decomposition, dispatches builders and reviewers |
+| **Build** | `tech-lead`, `backend-engineer`, `frontend-engineer`, `mobile-engineer`, `database-expert`, `devops-engineer`, `test-automation-engineer`, `performance-engineer`, `refactoring-specialist` | Implementation — tech-lead coordinates multi-domain scope cards, specialists handle single-domain tasks |
+| **Review** | `reviewer` | Independent quality gate: integrity enforcement, code quality, spec compliance — sole PASS/FAIL authority |
+| **Red Team** | `red-team-lead`, `delivery-validator`, `integration-prober` | Adversarial validation: smoke testing, environment bootstrap, service connectivity probing |
 | **Research** | `scout` | Codebase exploration, pattern discovery, technology research |
 | **Design** | `architect` + optional `ux-craftsman`, `database-expert`, `security-engineer` | System design, ADRs, API contracts |
-| **Build** | `backend-engineer`, `frontend-engineer`, `mobile-engineer`, `database-expert`, `devops-engineer`, `technical-writer`, `test-automation-engineer`, `performance-engineer`, `refactoring-specialist` | Implementation with isolated worktrees |
-| **Review** | `qa-analyst`, `security-engineer`, `ux-craftsman`, `incident-responder`, `acceptance-reviewer` | Quality gates, security audits, UX review |
+| **Support** | `technical-writer`, `incident-responder` | Documentation and incident response |
 
-See the [workflow-team](.agents/workflows/workflow-team.md) workflow for the full dispatch protocol, including recursive parallel dispatch with MECE file ownership and DAG-based execution ordering.
+All code-writing agents are hardened with **always-on mandates** (`security-mandate`, `rugged-software-constitution`, `code-idioms-and-conventions`, `logging-and-observability-mandate`) plus the `guardrails` skill for pre-flight and post-implementation safety checks.
+
+See the [workflow-team](.agents/workflows/workflow-team.md) workflow for the full dispatch protocol, including adaptive tier routing, recursive parallel dispatch with MECE file ownership, and DAG-based execution ordering.
 
 ### Development Workflows (10)
 
@@ -426,13 +430,15 @@ Each phase references existing rules and skills rather than restating content �
 
 #### 🤖 Multi-Agent Orchestration (`/workflow-team`)
 
-The pipeline manager workflow for dispatching specialized sub-agents across layers. Supports parallel execution via git worktrees with MECE file ownership.
+The multi-agent pipeline boots an `@overseer` supervisor that spawns a `@conductor` for build orchestration. The conductor assesses task complexity using a 3-signal check (scope, risk, knowledge) and routes into adaptive tiers:
 
-```
-SCOUT → DESIGN → PRE-MORTEM → BUILD (parallel) → REVIEW (parallel) → REMEDIATE → VERIFY
-```
+| Tier | When | Pipeline |
+|------|------|----------|
+| **Tier 1** | Single-domain, low risk | Builder → Reviewer |
+| **Tier 2** | Multi-domain or medium risk | Scout → Design → Tech-Lead + Builders → Reviewer → Red Team |
+| **Tier 3** | Cross-cutting, high risk | Scout → Design → Multiple Tech-Leads (parallel) → Reviewer → Red Team |
 
-Includes 11 workflow templates (A-K) for common scenarios: full features, bug fixes, audits, mobile features, security hardening, infrastructure, documentation sprints, incident response, and technical debt.
+Includes system prompt templates for all agent roles, MECE file ownership for parallel execution, and resilience protocols (conductor succession, overseer role identity lock, cleanup fallback).
 
 #### 🧪 Testing Workflows
 
@@ -460,11 +466,11 @@ Specialized workflows for retroactive testing improvements on existing codebases
 ```
 .agents/
 ├── agents/            # 21 agent personas (multi-agent orchestration)
-│   ├── overseer.md              # L1 Strategic Director
-│   ├── rally-lead.md            # L2 Domain Coordinator
-│   ├── mission-lead.md          # L3 Execution Manager
-│   ├── arbiter.md               # Independent compliance authority
-│   ├── tech-lead.md             # Quality gate authority
+│   ├── overseer.md              # L0 Pipeline Supervisor
+│   ├── conductor.md             # L1 Build Orchestrator
+│   ├── tech-lead.md             # Scope card owner + builder dispatcher
+│   ├── reviewer.md              # Independent quality gate (PASS/FAIL)
+│   ├── red-team-lead.md         # Adversarial validation orchestrator
 │   ├── architect.md
 │   ├── backend-engineer.md
 │   └── ...            # 14 more specialized agents
@@ -476,7 +482,7 @@ Specialized workflows for retroactive testing improvements on existing codebases
 │   ├── architectural-pattern.md          # always_on: I/O isolation, testability
 │   ├── rule-priority.md                  # always_on: conflict resolution
 │   └── ...            # 5 more always-on + 15 contextual principles
-├── skills/            # 60 specialized skills — loaded on demand, not always
+├── skills/            # 56 specialized skills — loaded on demand, not always
 │   ├── go-idioms/               # paths: **/*.go — includes references/project-structure.md
 │   ├── typescript-idioms/       # paths: **/*.ts, **/*.tsx
 │   ├── vue-idioms/              # paths: **/*.vue, **/store/**/*.ts, **/*.store.ts
@@ -493,6 +499,7 @@ Specialized workflows for retroactive testing improvements on existing codebases
 │   ├── debugging-protocol/      # Core engineering (reference-loaded)
 │   ├── code-review/
 │   ├── guardrails/
+│   ├── postgres-idioms/         # PostgreSQL best practices — query, indexing, RLS, connection mgmt
 │   ├── parallel-dispatch/       # Multi-agent orchestration — consolidated safety invariants
 │   ├── angular-idioms/          # Community language skills (18 ecosystems)
 │   ├── react-idioms/
