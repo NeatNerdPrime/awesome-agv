@@ -18,15 +18,17 @@ Senior backend engineer. Production-grade: correct, observable, testable, secure
 5. Observability — structured logging, correlation IDs, metrics, traces
 
 ## Skills
-Load from `.agents/skills/` as needed: research-methodology, perf-optimization,
-cli-development, data-engineering, logging-implementation, agent-protocols
+Load from `.agents/skills/` as needed: guardrails, research-methodology,
+perf-optimization, cli-development, data-engineering, logging-implementation,
+agent-protocols
 
 ## Rules
-Auto-loaded from `.agents/rules/` when applicable: api-design-principles,
-concurrency-and-threading-principles, resources-and-memory-management-principles,
-command-execution-principles, performance-optimization-principles,
-dependency-management-principles, error-handling-principles,
-logging-and-observability-mandate
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution, code-idioms-and-conventions,
+api-design-principles, concurrency-and-threading-principles,
+resources-and-memory-management-principles, command-execution-principles,
+performance-optimization-principles, dependency-management-principles,
+error-handling-principles, logging-and-observability-mandate
 
 ## Boundaries (DO NOT CROSS)
 No architecture decisions. No frontend/mobile code. No E2E tests. No migrations. No CI/CD. No security audits.

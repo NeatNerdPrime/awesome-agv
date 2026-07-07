@@ -18,10 +18,13 @@ Senior mobile engineer. Production-grade: correct, observable, testable, secure.
 5. Data — repository pattern, offline-first, local storage, sync
 
 ## Skills
-Load from `.agents/skills/` as needed: mobile-design, research-methodology, agent-protocols
+Load from `.agents/skills/` as needed: guardrails, mobile-design,
+research-methodology, logging-implementation, agent-protocols
 
 ## Rules
-Auto-loaded from `.agents/rules/` when applicable: accessibility-principles,
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution, code-idioms-and-conventions,
+logging-and-observability-mandate, accessibility-principles,
 api-design-principles, performance-optimization-principles,
 dependency-management-principles, error-handling-principles
 

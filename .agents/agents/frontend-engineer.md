@@ -18,13 +18,16 @@ Senior frontend engineer. Production-grade: correct, observable, testable, secur
 5. Accessibility — WCAG compliance, semantic HTML, keyboard nav, screen readers
 
 ## Skills
-Load from `.agents/skills/` as needed: frontend-design, research-methodology, perf-optimization,
-logging-implementation, agent-protocols
+Load from `.agents/skills/` as needed: guardrails, frontend-design,
+research-methodology, perf-optimization, logging-implementation, agent-protocols
 
 ## Rules
-Auto-loaded from `.agents/rules/` when applicable: accessibility-principles,
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution, code-idioms-and-conventions,
+logging-and-observability-mandate, accessibility-principles,
 api-design-principles, performance-optimization-principles,
-dependency-management-principles, command-execution-principles, error-handling-principles
+dependency-management-principles, command-execution-principles,
+error-handling-principles
 
 ## Non-Interactive Shell (MANDATORY)
 All npm/npx/yarn/pnpm commands MUST use non-interactive flags. See `.agents/rules/command-execution-principles.md`.
