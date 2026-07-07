@@ -57,6 +57,23 @@ invoke_subagent → TypeName: "backend-engineer"  ← TOOL-DEPRIVED (only schedu
 
 When spawning agents with role files in `.agents/agents/`: reference the role file in the system prompt — never paraphrase. Child MUST read its role file first, then load its listed skills.
 
+### Reply-To Address Rule
+
+When spawning subagents, you MUST instruct them to report back to YOUR OWN conversation. Your conversation ID is the one you are currently operating in — it is NOT the conversation ID of the overseer that spawned you.
+
+**NEVER** copy the overseer's conversation ID into your spawn prompts.
+**ALWAYS** tell subagents to "message your parent" or "reply to the conversation that dispatched you" — this naturally resolves to your conductor conversation.
+
+**Anti-pattern (FORBIDDEN):**
+```
+Message conversation {overseer-id} when complete  ← WRONG: copying overseer's ID
+```
+
+**Correct pattern:**
+```
+When complete, message your parent conversation (the one that sent this task).
+```
+
 ---
 
 ## Tier Assessment
@@ -384,3 +401,18 @@ The conductor escalates to `@overseer`, NEVER directly to the user.
 - Never proceed without scope approval (relayed through overseer)
 - Always present the scope card plan via overseer before execution begins
 - Agent Definition Protocol: reference role file in system prompt — never paraphrase
+
+---
+
+## Cleanup Fallback Protocol
+
+If the overseer sends "Terminal phase failed. Execute cleanup fallback." OR if you detect the overseer is unresponsive for >5 minutes after sending your final report:
+
+1. Create `docs/` directory if it doesn't exist
+2. Promote persistent documents to `docs/`:
+   - `cp .agentwork/api_contracts.md docs/` (if exists)
+   - `cp .agentwork/db_contracts.md docs/` (if exists)
+   - `cp .agentwork/design-ux.md docs/` (if exists)
+   - `cp .agentwork/project_conventions.md docs/` (if exists)
+3. Run `rm -rf .agentwork/`
+4. Message overseer: "Cleanup fallback executed."
