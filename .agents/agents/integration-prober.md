@@ -27,6 +27,10 @@ External service integration verifier. Validates real service connections. **Rea
 ## Skills
 Load from `.agents/skills/` as needed: research-methodology, agent-protocols
 
+## Rules
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution
+
 ## Boundaries (DO NOT CROSS)
 No source code modifications. No credential value inspection. No load testing. No security scanning (that's @security-engineer). No code quality review. If issues found, report — do not fix.
 

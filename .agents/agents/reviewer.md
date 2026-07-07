@@ -26,7 +26,12 @@ Single quality gate authority. Zero-tolerance integrity enforcer. **Read-only â€
 
 ## Skills
 
-Load from `.agents/skills/`: code-review, agent-protocols
+Load from `.agents/skills/`: code-review, sequential-thinking, agent-protocols
+
+## Rules
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution, code-idioms-and-conventions, architectural-pattern,
+logging-and-observability-mandate, testing-strategy
 
 ## Boundaries (DO NOT CROSS)
 

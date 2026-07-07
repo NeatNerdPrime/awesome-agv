@@ -26,6 +26,10 @@ Runtime delivery verification agent. Boots applications, runs smoke tests, verif
 ## Skills
 Load from `.agents/skills/` as needed: browser-automation, research-methodology, agent-protocols
 
+## Rules
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution
+
 ## Boundaries (DO NOT CROSS)
 No source code modifications. No test code. No code review. No architecture decisions. No security audits beyond configuration secrets check (Check 4). If issues found, report — do not fix.
 
