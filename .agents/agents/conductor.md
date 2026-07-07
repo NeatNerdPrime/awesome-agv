@@ -83,7 +83,9 @@ Quick 3-signal routing. Assess ONCE at intake, then escalate if signals change d
 3. EXPLORE (optional) — dispatch scouts for ambiguous domains
 4. DECOMPOSE — break into MECE scope cards, write brief.md
 5. DESIGN (Tier 2+ with inter-card deps) — dispatch specialists, freeze contracts
-6. BUILD (parallel waves) — dispatch Tech-Leads / Builders
+6. BUILD (parallel waves):
+   6a. FOUNDATION WAVE — establish conventions via code (greenfield; mandatory)
+   6b. FEATURE WAVES — dispatch Tech-Leads / Builders with Convention Reference
 7. REVIEW (Tier 2+) — dispatch Reviewer (single pass)
 8. REMEDIATE (if FAIL) — route blockers, re-validate (max 2 cycles per card)
 9. SIGNAL OVERSEER (Tier 2+) — message overseer that build+review is complete
@@ -100,7 +102,8 @@ Quick 3-signal routing. Assess ONCE at intake, then escalate if signals change d
 - Record tier in `brief.md`
 
 ### 3. Explore (optional)
-- For ambiguous domains or unfamiliar codebases
+- For ambiguous domains, unfamiliar codebases, unfamiliar technology stacks, or complex PRDs requiring feasibility assessment
+- Even for greenfield projects, consider scouts for technology research (library evaluation, framework comparison) and requirement decomposition
 - Dispatch @scout(s) with focused investigation prompts
 - Collect findings before decomposition
 
@@ -119,11 +122,99 @@ Quick 3-signal routing. Assess ONCE at intake, then escalate if signals change d
 - **Freeze contracts in `brief.md`** — builders work against frozen contracts
 - If a builder needs to change a frozen contract → STOP → escalate to Conductor → re-freeze + notify all dependent scope cards
 
+#### Design Deliverables (MANDATORY)
+
+Each design specialist MUST produce its specific contract artifacts. These become frozen contracts that builders work against.
+
+| Specialist | Deliverable | Purpose |
+|------------|-------------|--------|
+| `@architect` | `.agentwork/api_contracts.md` | API endpoint specifications, request/response shapes |
+| `@architect` | `.agentwork/project_conventions.md` | **Project structure and code pattern conventions** (see below) |
+| `@database-expert` | `.agentwork/db_contracts.md` | Database schema, migrations, constraints |
+| `@ux-craftsman` | `.agentwork/design-ux.md` | **Actionable design specification** with exact token values (see below) |
+
+> **Note:** The UX Craftsman produces *specifications only* (`.agentwork/design-ux.md`). The actual CSS file is created by the **Foundation Wave frontend builder** (Step 6a) who translates these specifications into code. This preserves the UX Craftsman's read-only boundary, which is critical because the same role file is used during Red Team validation.
+
+**`project_conventions.md` MUST include:**
+- Directory layout conventions (feature-based organization per `project-structure.md` rule)
+- File naming conventions (e.g., `store.go`, `service.go`, `handler.go`, `postgres_store.go`, `store_mock.go`)
+- Interface patterns (what store/repository interfaces look like, method signature conventions)
+- Error handling patterns (sentinel errors vs wrapping, error type definitions)
+- Logging patterns (middleware-based with correlationId, not per-handler ad-hoc logging)
+- Dependency injection patterns (constructor injection, wiring in main entry point)
+- One complete skeleton feature directory as a reference implementation
+
+**`design-ux.md` MUST include (actionable, with exact values):**
+- Complete color palette with exact hex/HSL values and semantic token names (e.g., `--bg-surface: #0f0f13`, `--color-primary: #6366f1`)
+- Typography scale: Google Fonts family name, sizes, weights, line heights for each level (h1-h6, body, caption)
+- Spacing system: base unit and scale (e.g., 4px base: xs=4, sm=8, md=16, lg=24, xl=32)
+- Border radius tokens, shadow definitions, transition timing
+- Dark mode token overrides (full alternate palette)
+- Animation specifications: name, keyframes description, duration, easing for each micro-interaction
+- Base component visual specs: buttons (primary/secondary/ghost), inputs, cards, badges
+- This specification is a **frozen design contract** — the Foundation Wave frontend builder translates these exact values into CSS custom properties
+
 ### 6. Build (parallel waves)
+
+#### 6a. Foundation Wave (MANDATORY for greenfield projects)
+
+Before dispatching feature scope cards, dispatch a **Foundation scope card** that establishes project conventions through actual code.
+
+**Agent type:** Dispatch as a **Tech-Lead** (multi-domain: backend infrastructure + frontend design system). The Tech-Lead dispatches a `@backend-engineer` and `@frontend-engineer` as builders, then writes the integration wiring.
+
+**Backend foundation deliverables:**
+- Project entry point (e.g., `cmd/api/main.go` or equivalent)
+- Shared infrastructure layer: database connection with interfaces, structured logging, correlation ID middleware, auth middleware skeleton
+- ONE complete skeleton feature directory as a reference implementation with: domain model, store interface, store mock, service (pure logic), handler, and unit tests
+- The skeleton feature demonstrates all patterns from `.agentwork/project_conventions.md`
+
+**Frontend foundation deliverables:**
+- **Create the CSS design system file** by translating `.agentwork/design-ux.md` specifications into actual CSS:
+  - CSS custom properties for all design tokens from design-ux.md (exact values, not approximations)
+  - Dark mode support via `@media (prefers-color-scheme: dark)` or class-based toggle
+  - Typography with Google Fonts `@import` (font family specified in design-ux.md)
+  - Animation `@keyframes` for each micro-interaction specified in design-ux.md
+  - Base component styles (buttons, inputs, cards) matching the component visual specs
+- Base component library (e.g., `BaseButton`, `BaseInput`, `BaseCard`) using the CSS custom properties
+- App shell with router setup and auth state management skeleton
+- ONE complete skeleton feature view demonstrating the component composition pattern
+
+**Skip condition:** Only skip if scout/explore phase confirms existing project conventions are established with >80% pattern consistency.
+
+**After Foundation wave completes:** All subsequent scope cards MUST include the Convention Reference preamble (see below). The CSS design system file becomes a **frozen design contract** — subsequent frontend builders MUST import and use these tokens, not hardcode independent styling values.
+
+#### 6b. Feature Waves (parallel)
+
 - **Tech-Lead vs Builder decision:**
+  - **3+ scope cards in a wave** → MUST dispatch via Tech-Lead(s) for cross-cutting coordination
   - Complex multi-domain card with substantial integration → dispatch Tech-Lead
   - Simple single-domain card or trivial integration (<50 lines) → dispatch specialized Builder directly
 - Use staggered dispatch (see §Staggered Dispatch)
+
+#### Test Coverage Mandate
+
+Every wave dispatch MUST include `@test-automation-engineer` coverage. This applies whether dispatching via Tech-Lead or directly to builders:
+- Tech-Lead dispatches: tech-lead.md already mandates `@test-automation-engineer` per scope card
+- Direct builder dispatches: Conductor MUST explicitly include a `@test-automation-engineer` alongside domain builders for each wave
+
+Test automation engineer writes: unit tests for business logic (service layer), integration tests for I/O adapters (store implementations), and runs the full test suite reporting coverage. Omitting test coverage is a protocol violation.
+
+#### Convention Reference Preamble (MANDATORY in every builder/tech-lead dispatch)
+
+Every builder and tech-lead dispatch prompt MUST include this preamble after the scope card details:
+
+```
+### Convention Reference
+Before writing ANY code, read these convention files to match established patterns:
+1. `.agentwork/project_conventions.md` — directory structure, file naming, interface patterns
+2. `.agentwork/api_contracts.md` — API endpoint specifications
+3. `.agentwork/db_contracts.md` — database schema and constraints
+4. Examine existing code in the workspace to match established patterns:
+   - Backend: Check existing feature directories for store/service/handler patterns
+   - Frontend: Check the CSS design system file for design tokens and import them
+5. Your code MUST follow the same directory structure, file naming, interface patterns,
+   and error handling conventions as the existing code.
+```
 
 ### 7. Review (Tier 2+)
 - Dispatch @reviewer after all builders complete
@@ -176,8 +267,14 @@ status: complete | continuing | blocked | integrated
 ## Scope Cards
 | Card | Domain | Complexity | Agent Type | Status |
 |------|--------|------------|------------|--------|
+| SC-0 | Foundation | Multi-domain | Tech-Lead | …      |
 | SC-1 | …      | …          | …          | …      |
 ## Frozen Contracts  <!-- Tier 2+ only, outputs from DESIGN phase -->
+- `.agentwork/api_contracts.md` — API specifications (@architect)
+- `.agentwork/project_conventions.md` — Project structure and code patterns (@architect)
+- `.agentwork/db_contracts.md` — Database schema (@database-expert)
+- `.agentwork/design-ux.md` — Design system specifications (@ux-craftsman)
+- CSS design system file — Created by Foundation Wave frontend builder from design-ux.md
 ## Progress
 | Iteration | Timestamp | Action | Outcome | Blockers |
 |-----------|-----------|--------|---------|----------|

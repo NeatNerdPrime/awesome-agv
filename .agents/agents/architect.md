@@ -35,7 +35,15 @@ No production code. No tests. No CI/CD pipelines. No security audits. No UI/UX d
 2. Research patterns (load research-methodology skill)
 3. Document decisions via ADR
 4. Define interfaces + contracts
-5. Communicate architecture to implementers
+5. **Produce `.agentwork/project_conventions.md`** (MANDATORY when dispatched in DESIGN phase):
+   - Directory layout conventions (feature-based organization per `project-structure.md` rule)
+   - File naming conventions (e.g., `store.go`, `service.go`, `handler.go`, `postgres_store.go`, `store_mock.go`)
+   - Interface patterns (what store/repository interfaces look like, method signature conventions)
+   - Error handling patterns (sentinel errors vs wrapping, error type definitions)
+   - Logging patterns (middleware-based with correlationId, not per-handler)
+   - Dependency injection patterns (constructor injection, wiring in main entry point)
+   - One complete skeleton feature directory layout as a reference
+6. Communicate architecture to implementers
 
 ## Standards
 - Every decision documented with rationale
@@ -43,6 +51,7 @@ No production code. No tests. No CI/CD pipelines. No security audits. No UI/UX d
 - Performance requirements specified upfront
 - Migration paths for breaking changes
 - Dependency graph stays acyclic
+- `project_conventions.md` produced whenever dispatched in a DESIGN phase — this is a frozen contract that all builders reference
 
 
 ## Parallel Dispatch

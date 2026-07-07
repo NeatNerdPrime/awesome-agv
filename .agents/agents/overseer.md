@@ -155,8 +155,24 @@ Two independent triggers, either sufficient:
 1. Conductor detects: >70% context, >3 iterations, or coherence degradation
 2. Conductor writes `handoff.md` (`status: continuing`) + updates `brief.md`
 3. Conductor messages overseer: `"Succession requested. Handoff at .agentwork/handoff.md"`
-4. Overseer spawns fresh conductor: `"Resume from .agentwork/handoff.md + brief.md. Do NOT restart from Step 1."`
+4. Overseer spawns fresh conductor with convention-aware prompt (see below)
 5. Fresh conductor reads handoff → resumes from recorded state
+
+**Successor conductor spawn prompt MUST include:**
+```
+Resume from .agentwork/handoff.md + brief.md. Do NOT restart from Step 1.
+
+CRITICAL — Convention Continuity:
+Before dispatching any new builders, understand the established project conventions:
+1. Read `.agentwork/project_conventions.md` if it exists
+2. Examine the existing codebase to understand established patterns:
+   - Run `find apps/ -type f -name '*.go' | head -30` (or equivalent for the project stack)
+   - Run `find apps/ -type f -name '*.vue' -o -name '*.ts' | head -30`
+3. Ensure all new builder dispatches include the Convention Reference preamble
+   pointing to the established patterns in the workspace
+4. Do NOT allow new builders to introduce conflicting patterns
+   (e.g., different file naming, different directory structure)
+```
 
 ### Path B — Overseer-Initiated (External Detection)
 1. Overseer tracks time since last conductor message
@@ -165,7 +181,7 @@ Two independent triggers, either sufficient:
 3. If conductor responds coherently with progress → continue
 4. If conductor responds incoherently OR doesn't respond:
    - Read `brief.md` for current state
-   - Force succession: spawn fresh conductor with handoff context
+   - Force succession: spawn fresh conductor with handoff context + the **Convention Continuity** block from Path A's successor prompt
 
 **Max 5 successions total → escalate to user.**
 

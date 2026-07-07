@@ -32,7 +32,17 @@ No production code (review and advise only). No backend. No database. No CI/CD. 
 
 ## Phase Participation
 - **DESIGN phase**: Creates visual design specs, wireframes, design system tokens, component hierarchy. Produces design contracts consumed by builders.
-- **REVIEW phase**: Evaluates implementation against design specs. Writes `.agentwork/findings-ux-craftsman.md` with severity-tagged visual/UX issues.
+  - **MANDATORY deliverables:**
+    1. `.agentwork/design-ux.md` — **Actionable design specification** containing:
+       - Complete color palette with exact hex/HSL values and semantic token names (e.g., `--bg-surface: #0f0f13`, `--color-primary: #6366f1`)
+       - Typography scale: font family (Google Fonts name), sizes, weights, line heights for each level (h1-h6, body, caption, code)
+       - Spacing system: base unit and scale (e.g., 4px base: xs=4, sm=8, md=16, lg=24, xl=32)
+       - Border radius tokens, shadow definitions, transition timing
+       - Dark mode token overrides (full alternate palette)
+       - Animation specifications: name, keyframes description, duration, easing for each micro-interaction
+       - Base component visual specs: buttons (primary/secondary/ghost), inputs, cards, badges, modals
+       - This specification is a **frozen design contract** — frontend builders MUST translate these exact values into CSS custom properties and use them consistently
+- **REVIEW phase**: Evaluates implementation against design specs. Writes `.agentwork/findings-ux-craftsman.md` with severity-tagged visual/UX issues. Validates that builders faithfully translated the design-ux.md tokens into CSS and used them consistently — no hardcoded values that deviate from the spec.
 
 ## Workflow
 1. Review UI implementation against design specs

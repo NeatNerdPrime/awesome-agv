@@ -98,6 +98,24 @@ Decompose the scope card into specialist tasks and dispatch builders using `Type
 2. Include the scope card's write scope constraints in each builder's prompt
 3. Dispatch all independent builders in a single `invoke_subagent` call (`TypeName='self'`, `workspace='inherit'`)
 4. Each builder's prompt must include: task description, write scope, frozen contracts, and the instruction to read its role file from `.agents/agents/`
+5. **Each builder's prompt MUST include the Convention Reference preamble** (see below)
+
+#### Convention Reference Preamble (MANDATORY in every builder dispatch)
+
+Every builder dispatch prompt MUST include this preamble after the task-specific details:
+
+```
+### Convention Reference
+Before writing ANY code, read these convention files to match established patterns:
+1. `.agentwork/project_conventions.md` — directory structure, file naming, interface patterns
+2. `.agentwork/api_contracts.md` — API endpoint specifications
+3. `.agentwork/db_contracts.md` — database schema and constraints
+4. Examine existing code in the workspace to match established patterns:
+   - Backend: Check existing feature directories for store/service/handler patterns
+   - Frontend: Check the CSS design system file for design tokens and import them
+5. Your code MUST follow the same directory structure, file naming, interface patterns,
+   and error handling conventions as the existing code.
+```
 
 ### Step 3 — Integration Wiring
 While builders work on domain logic, or after they complete:

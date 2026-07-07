@@ -182,7 +182,20 @@ Frozen Contracts: {reference to brief.md contract section, if any}
 Dispatch specialized builders for domain work + @test-automation-engineer (mandatory for every multi-domain card).
 Write integration/wiring code yourself.
 Run per-card integrity checks before reporting.
-When complete: write .agentwork/handoff.md and message @conductor."
+When complete: write .agentwork/handoff.md and message @conductor.
+
+### Convention Reference
+Before writing ANY code, read these convention files to match established patterns:
+1. `.agentwork/project_conventions.md` — directory structure, file naming, interface patterns
+2. `.agentwork/api_contracts.md` — API endpoint specifications
+3. `.agentwork/db_contracts.md` — database schema and constraints
+4. Examine existing code in the workspace to match established patterns:
+   - Backend: Check existing feature directories for store/service/handler patterns
+   - Frontend: Check the CSS design system file for design tokens and import them
+5. Your code MUST follow the same directory structure, file naming, interface patterns,
+   and error handling conventions as the existing code.
+
+Include this Convention Reference in every builder dispatch prompt."
 ```
 
 **Specialized Builder** (direct dispatch — simple single-domain cards):
@@ -197,7 +210,18 @@ When complete: write .agentwork/handoff.md and message @conductor."
 4. Write .agentwork/handoff.md with: files changed, tests passing, build status, review findings, blockers
 5. Message @conductor: '.agentwork/handoff.md ready'
 
-If you need to sub-decompose, follow parallel-dispatch skill."
+If you need to sub-decompose, follow parallel-dispatch skill.
+
+### Convention Reference
+Before writing ANY code, read these convention files to match established patterns:
+1. `.agentwork/project_conventions.md` — directory structure, file naming, interface patterns
+2. `.agentwork/api_contracts.md` — API endpoint specifications
+3. `.agentwork/db_contracts.md` — database schema and constraints
+4. Examine existing code in the workspace to match established patterns:
+   - Backend: Check existing feature directories for store/service/handler patterns
+   - Frontend: Check the CSS design system file for design tokens and import them
+5. Your code MUST follow the same directory structure, file naming, interface patterns,
+   and error handling conventions as the existing code."
 ```
 
 **Reviewer** (post-build quality gate):
@@ -250,7 +274,7 @@ Do NOT run quality checks — this is research/analysis, not code-producing."
 | **4. Decompose** | Conductor | Break scope into MECE scope cards. Write .agentwork/brief.md. Message overseer: "plan ready". |
 | **4a. Approve** | Overseer | Present brief.md to user. Wait for approval. Relay approval to conductor. |
 | **5. Design** | Conductor | Tier 2+ with inter-card deps: dispatch design specialists. Freeze contracts in brief.md. |
-| **6. Build** | Conductor | Dispatch Tech-Leads/Builders in dependency-ordered waves (staggered batches). Use `TypeName="self"` (§0). |
+| **6. Build** | Conductor | **6a. Foundation Wave** (greenfield): dispatch Foundation Tech-Lead to establish conventions via code (backend infra + CSS from design-ux.md). **6b. Feature Waves**: dispatch Tech-Leads/Builders in dependency-ordered waves (staggered batches). Use `TypeName="self"` (§0). Convention Reference preamble MANDATORY in all dispatches. |
 | **7. Review** | Conductor | Tier 2+: dispatch @reviewer (separate agent, no build context). Single pass. |
 | **8. Remediate** | Conductor | If FAIL: extract blockers → route to relevant agents (fresh dispatch) → re-validate. Max 2 cycles. |
 | **9. Red Team** | Overseer | Tier 2+: overseer spawns @red-team-lead with ONLY requirements + workspace. Relays verdict to conductor. |
@@ -291,6 +315,7 @@ handoff.md MUST NOT contain raw terminal output, intermediate debugging steps, f
 | Single domain, complex scope | Direct Specialized Builder (may self-decompose) | Builder handles sub-decomposition |
 | Multi-domain, substantial integration (>50 lines) | Tech-Lead → Specialists | Real integration work justifies dispatch overhead |
 | Multi-domain, trivial integration (<50 lines) | Direct Specialized Builder + integration note | Avoid coordinator overhead |
+| **3+ scope cards in a single wave** | **MUST dispatch via Tech-Lead(s)** | Cross-cutting coordination needed at scale |
 
 > **Guard rail:** If a Tech-Lead's integration code is <20% of the card's total output, the card should have been a direct builder dispatch. The Conductor decides during decomposition.
 
@@ -334,12 +359,12 @@ Conductor monitors its own context and can request succession through @overseer.
 | Iteration count | >3 iterations in current instance |
 | Coherence | Conductor detects reasoning degradation |
 
-**Flow:** Conductor writes `handoff.md` (status=continuing) → messages @overseer: "Succession requested" → overseer spawns fresh conductor.
+**Flow:** Conductor writes `handoff.md` (status=continuing) → messages @overseer: "Succession requested" → overseer spawns fresh conductor with handoff context + **Convention Continuity** prompt (see overseer.md §Succession).
 
 **Path B — Overseer-initiated:**
 - Overseer detects conductor unresponsive (>5 min without message, no pending subagent work)
 - Overseer messages conductor: "Status check"
-- If incoherent or no response → overseer reads `brief.md` → spawns fresh conductor
+- If incoherent or no response → overseer reads `brief.md` → spawns fresh conductor with handoff context + **Convention Continuity** prompt (see overseer.md §Succession)
 
 **Max 5 successions** → overseer escalates to user.
 
