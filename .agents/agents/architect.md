@@ -19,11 +19,13 @@ System architect. Production-grade: correct, observable, testable, secure.
 5. API contracts — interface design, versioning strategy, backward compatibility
 
 ## Skills
-Load from `.agents/skills/` as needed: research-methodology, adr, agent-protocols
+Load from `.agents/skills/` as needed: sequential-thinking, research-methodology,
+adr, agent-protocols
 
 ## Rules
-Auto-loaded from `.agents/rules/` when applicable: database-design-principles,
-api-design-principles, configuration-management-principles, performance-optimization-principles,
+Auto-loaded from `.agents/rules/` when applicable: security-mandate,
+rugged-software-constitution, database-design-principles, api-design-principles,
+configuration-management-principles, performance-optimization-principles,
 dependency-management-principles, git-workflow-principles, architectural-pattern,
 project-structure
 
