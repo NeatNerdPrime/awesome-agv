@@ -13,8 +13,8 @@ description: >-
 Load this skill when writing E2E or integration tests for mobile applications (Flutter, React Native, or native iOS/Android). This skill complements the `browser-automation` skill which covers web — this skill covers native mobile.
 
 **Framework references:** This file covers patterns and strategies. For framework-specific setup, API, and code examples, see:
-- [Flutter (integration_test, Patrol, Golden Testing)](file:///Users/irahardianto/works/awesome-agv/.agents/skills/mobile-testing/references/flutter.md)
-- [Maestro (cross-platform YAML flows)](file:///Users/irahardianto/works/awesome-agv/.agents/skills/mobile-testing/references/maestro.md)
+- [Flutter (integration_test, Patrol, Golden Testing)](file:///home/irahardianto/works/projects/awesome-agv/.agents/skills/mobile-testing/references/flutter.md)
+- [Maestro (cross-platform YAML flows)](file:///home/irahardianto/works/projects/awesome-agv/.agents/skills/mobile-testing/references/maestro.md)
 
 ## Screen Object Model
 
@@ -45,8 +45,8 @@ Each screen object exposes:
 4. **Assertions** — methods to verify screen state (`assertErrorVisible()`, `assertWelcomeShown()`)
 
 For framework-specific implementations, see the references:
-- **Flutter/Patrol:** See [flutter.md § Screen Object Model](file:///Users/irahardianto/works/awesome-agv/.agents/skills/mobile-testing/references/flutter.md)
-- **Maestro:** Uses YAML sub-flows rather than code classes — see [maestro.md](file:///Users/irahardianto/works/awesome-agv/.agents/skills/mobile-testing/references/maestro.md)
+- **Flutter/Patrol:** See [flutter.md § Screen Object Model](file:///home/irahardianto/works/projects/awesome-agv/.agents/skills/mobile-testing/references/flutter.md)
+- **Maestro:** Uses YAML sub-flows rather than code classes — see [maestro.md](file:///home/irahardianto/works/projects/awesome-agv/.agents/skills/mobile-testing/references/maestro.md)
 
 ## Test Data Management
 
@@ -96,7 +96,7 @@ Call backend API to create test state before tests run:
 - Verify layout adapts correctly — no overflow, no clipped content
 - Some screens should lock orientation — verify rotation is ignored
 
-For framework-specific size simulation APIs, see the [Flutter reference](file:///Users/irahardianto/works/awesome-agv/.agents/skills/mobile-testing/references/flutter.md).
+For framework-specific size simulation APIs, see the [Flutter reference](file:///home/irahardianto/works/projects/awesome-agv/.agents/skills/mobile-testing/references/flutter.md).
 
 ## Offline & Network Testing
 
@@ -112,7 +112,7 @@ For framework-specific size simulation APIs, see the [Flutter reference](file://
 - **Patrol native interactions:** Use `$.native.disableWifi()` / `$.native.enableWifi()` for real airplane mode testing on physical devices or emulators
 - **Android emulator flags:** Use `-netdelay` and `-netspeed` flags for slow network simulation
 
-For code examples, see the [Flutter reference](file:///Users/irahardianto/works/awesome-agv/.agents/skills/mobile-testing/references/flutter.md).
+For code examples, see the [Flutter reference](file:///home/irahardianto/works/projects/awesome-agv/.agents/skills/mobile-testing/references/flutter.md).
 
 ## CI Configuration
 
@@ -123,7 +123,7 @@ For code examples, see the [Flutter reference](file:///Users/irahardianto/works/
 - **Artifact collection:** Always upload screenshots and device logs on failure (`actions/upload-artifact`).
 - **Golden tests:** Generate golden files locally, commit to repo, compare in CI. Set tolerance for cross-platform rendering differences.
 
-For CI workflow YAML examples, see the [Flutter reference § CI Configuration](file:///Users/irahardianto/works/awesome-agv/.agents/skills/mobile-testing/references/flutter.md).
+For CI workflow YAML examples, see the [Flutter reference § CI Configuration](file:///home/irahardianto/works/projects/awesome-agv/.agents/skills/mobile-testing/references/flutter.md).
 
 ## Framework Selection Guide
 

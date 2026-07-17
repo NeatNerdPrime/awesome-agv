@@ -7,7 +7,7 @@ nav_order: 5
 # Workflows Reference
 {: .no_toc }
 
-All 12 development workflows — from feature delivery to code audits.
+All 11 development workflows — from feature delivery to code audits.
 {: .fs-6 .fw-300 }
 
 <details open markdown="block">
@@ -80,7 +80,7 @@ If a phase fails:
 
 ## Phase 1: Research
 
-**File:** `.agents/workflows/phase-research.md`
+**Section:** Research (inside `.agents/workflows/workflow-solo.md`)
 
 Understand the request context and gather knowledge before writing any code.
 
@@ -103,7 +103,7 @@ Understand the request context and gather knowledge before writing any code.
 
 ## Phase 2: Implement
 
-**File:** `.agents/workflows/phase-implement.md`
+**Section:** Implement (inside `.agents/workflows/workflow-solo.md`)
 
 Write production code following Test-Driven Development (TDD).
 
@@ -126,7 +126,7 @@ Write production code following Test-Driven Development (TDD).
 
 ## Phase 3: Integrate
 
-**File:** `.agents/workflows/phase-integrate.md`
+**Section:** Integrate (inside `.agents/workflows/workflow-solo.md`)
 
 Test adapter implementations with real infrastructure using Testcontainers.
 
@@ -145,7 +145,7 @@ Test adapter implementations with real infrastructure using Testcontainers.
 
 ## Phase 3.5: E2E Test
 
-**File:** `.agents/workflows/phase-e2e.md`
+**Section:** E2E Test (inside `.agents/workflows/workflow-solo.md`)
 
 Validate complete user journeys through the full system using Playwright MCP.
 
@@ -169,7 +169,7 @@ Validate complete user journeys through the full system using Playwright MCP.
 
 ## Phase 4: Verify
 
-**File:** `.agents/workflows/phase-verify.md`
+**Section:** Verify (inside `.agents/workflows/workflow-solo.md`)
 
 Run all linters, static analysis, and tests to ensure code quality.
 
@@ -205,7 +205,7 @@ pnpm run build
 
 ## Phase 5: Ship
 
-**File:** `.agents/workflows/phase-commit.md`
+**Section:** Ship (inside `.agents/workflows/workflow-solo.md`)
 
 Commit completed work with proper conventional commit format.
 
@@ -354,6 +354,27 @@ Profile-driven performance optimization. Always measure before optimizing — on
 
 ---
 
+## 🔧 Security Audit Workflow (`/security-audit`)
+
+**File:** `.agents/workflows/security-audit.md`
+
+A specialized, multi-agent security verification pipeline that performs a multi-dimensional vulnerability assessment in parallel.
+
+### Phases
+
+1. **Assess (Coordinator)** — initializes the audit, defines the target scope, and plans the parallel dimension audits.
+2. **Analyze (Parallel Subagents)** — dispatches 6 parallel subagents (Dimensions A-F) to scan the codebase for specific vulnerabilities:
+   - **A: Data Validation & Sanitization** (SQLi, XSS, Path Traversal)
+   - **B: Authentication & Session Management** (JWT, session lifecycle, MFA)
+   - **C: Authorization & Least Privilege** (RBAC, IDOR, RLS bypass)
+   - **D: Cryptography & Secrets** (hardcoded keys, weak hashing, TLS)
+   - **E: Infrastructure & Dependency Security** (CORS, dependency vulnerabilities, supply chain)
+   - **F: Error Handling & Logging** (PII leaks, silent failures)
+3. **Consolidate (Coordinator)** — merges the 6 dimension findings into a unified draft report.
+4. **Reporting** — produces the final markdown report saved to `docs/audits/security-findings-{date}-{HHmm}.md`.
+
+---
+
 ## 🏭 Multi-Agent Pipeline (`/workflow-team`)
 
 **File:** `.agents/workflows/workflow-team.md`
@@ -366,29 +387,27 @@ Dispatches specialized sub-agents across layers (research, design, build, review
 - Scenarios needing specialized review (security audit + QA + UX review)
 - Large features that can be decomposed into independent work streams
 
-### Agent Roster (16 Personas)
+### Agent Roster (21 Personas)
 
 Agents are organized into five layers with strict boundaries:
 
-#### Orchestration Layer
+#### L0 Supervisor Layer
+
+| Agent | Domain |
+| --- | --- |
+| `@overseer` | L0 pipeline supervisor. Monitors progress, manages conductor succession, boots validation. |
+
+#### L1 Orchestration Layer
+
+| Agent | Domain |
+| --- | --- |
+| `@conductor` | L1 build orchestrator. Assesses complexity, routes to adaptive tiers, dispatches specialized leads. |
+
+#### Orchestration & Build Layer
 
 | Agent | Domain |
 | --- | --- |
 | `@tech-lead` | Codebase integrity, architectural alignment, contract validation, merge/conflict resolution |
-
-#### Research Layer (Read-only)
-
-| Agent | Domain |
-| --- | --- |
-| `@scout` | Codebase exploration, pattern discovery, technology research |
-
-#### Design Layer (Read-only — produces decisions and contracts)
-
-| Agent | Domain |
-| --- | --- |
-| `@architect` | System design, ADRs, API contracts, dependency strategy |
-
-Cross-layer participants can join DESIGN when needed: `@ux-craftsman`, `@database-expert`, `@security-engineer`, `@performance-engineer`.
 
 #### Builder Layer (Write — run in Git worktrees)
 
@@ -408,10 +427,25 @@ Cross-layer participants can join DESIGN when needed: `@ux-craftsman`, `@databas
 
 | Agent | Domain |
 | --- | --- |
-| `@qa-analyst` | Code review, testing coverage, quality gates |
+| `@reviewer` | Independent quality gate (sole PASS/FAIL authority, replaces qa-analyst and arbiter) |
 | `@security-engineer` | Threats, vulnerabilities, auth, input validation |
 | `@ux-craftsman` | Design heuristics, interaction, a11y, responsive |
 | `@incident-responder` | Triage, RCA, mitigation, postmortems |
+
+#### Red Team Layer
+
+| Agent | Domain |
+| --- | --- |
+| `@red-team-lead` | Adversarial validation orchestrator |
+| `@delivery-validator` | Runtime delivery verifier (boots app, runs smoke tests) |
+| `@integration-prober` | External service connection prober |
+
+#### Research & Design Layer (Read-only)
+
+| Agent | Domain |
+| --- | --- |
+| `@scout` | Codebase exploration, pattern discovery, technology research |
+| `@architect` | System design, ADRs, API contracts, dependency strategy |
 
 ### Composable Primitives
 
@@ -424,12 +458,12 @@ Workflows are built from composable primitives — each a stage in the pipeline:
 | **PRE-MORTEM** | incident-responder + optional experts | After DESIGN |
 | **BUILD** | Implementation agents | After DESIGN |
 | **TEST** | test-automation-engineer | After DESIGN |
-| **REVIEW** | qa-analyst + security-engineer + optional | After BUILD/TEST |
+| **REVIEW** | reviewer + security-engineer + optional | After BUILD/TEST |
 | **REMEDIATE** | Fix agents | After REVIEW |
 | **OPTIMIZE** | performance-engineer | After BUILD |
 | **REFACTOR** | refactoring-specialist | After REVIEW/SCOUT |
 | **INCIDENT** | incident-responder + engineers | Standalone |
-| **VERIFY** | qa-analyst | After final merge |
+| **VERIFY** | reviewer | After final merge |
 | **DOCUMENT** | technical-writer | After VERIFY |
 
 ### Workflow Templates
@@ -484,4 +518,4 @@ git branch -D wt/<agent-name>-<scope>-<ts>
 ### Fault Recovery & Self-Succession
 - Sub-agent fails → 5-level escalation ladder (Retry → Replace → Skip → Redistribute → Degrade)
 - Exhaustion → dead-man timers trigger escalation to parent
-- Coordinators self-succeed at 70% context capacity, >3 iterations, or coherence degradation. See `convergence-loop` skill.
+- Coordinators self-succeed at 70% context capacity, >3 iterations, or coherence degradation using the built-in self-succession protocol.

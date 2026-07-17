@@ -26,9 +26,9 @@ The setup is built on the [Rugged Software Manifesto](https://ruggedsoftware.org
 
 | Component     | Count | Purpose                                                                           |
 | ------------- | ----- | --------------------------------------------------------------------------------- |
-| **Rules**     | 27    | Security, reliability, architecture, and maintainability |
-| **Skills**    | 57    | Specialized capabilities for debugging, design, performance optimization, language idioms, and more |
-| **Workflows** | 12    | End-to-end development processes from research to ship                             |
+| **Rules**     | 25    | Security, reliability, architecture, and maintainability |
+| **Skills**    | 56    | Specialized capabilities for debugging, design, performance optimization, language idioms, and more |
+| **Workflows** | 11    | End-to-end development processes from research to ship                             |
 | **Agents**    | 21    | Specialized personas for multi-agent orchestration arranged in a 4-tier hierarchy |
 
 ## Core Philosophy
@@ -65,7 +65,7 @@ Procedural capabilities loaded by the agent or workflow when needed:
 - Debugging protocol, code review, guardrails
 - CI/CD patterns, feature flags, parallel dispatch
 
-This means the agent isn't overwhelmed with 27 rules on every task — it gets the critical mandates always, contextual principles when relevant, and specialized skills exactly when needed.
+This means the agent isn't overwhelmed with 25 rules on every task — it gets the critical mandates always, contextual principles when relevant, and specialized skills exactly when needed.
 
 ## Opinionated Defaults
 
@@ -99,19 +99,19 @@ While originally designed for **Antigravity**, the setup is built on standard ma
 
 ```
 .agents/
-├── rules/             # 27 rules (mandates + principles)
+├── rules/             # 25 rules (mandates + principles)
 ├── agents/            # 21 agent personas
-├── skills/            # 57 specialized skills
-└── workflows/         # 12 development workflows
+├── skills/            # 56 specialized skills
+└── workflows/         # 11 development workflows
 ```
 
 </div>
 
 Explore each component in detail:
 
-- [**Rules Reference**](/awesome-agv/rules) — All 27 rules organized by category
-- [**Skills Reference**](/awesome-agv/skills) — All 57 specialized skills
-- [**Workflows Reference**](/awesome-agv/workflows) — All 12 development workflows
+- [**Rules Reference**](/awesome-agv/rules) — All 25 rules organized by category
+- [**Skills Reference**](/awesome-agv/skills) — All 56 specialized skills
+- [**Workflows Reference**](/awesome-agv/workflows) — All 11 development workflows
 - [**Agent Personas**](/awesome-agv/agents) — 21 specialized agent personas for multi-agent orchestration
 - [**Architecture**](/awesome-agv/architecture) — How the rule system is designed
 - [**Best Practices**](/awesome-agv/best-practices) — Tips for getting the most out of the setup

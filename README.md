@@ -39,7 +39,7 @@ For example, the principles of the [Rugged Software Constitution](.agents/rules/
 
 *   📏 **25 Rules** — covering security, reliability, architecture, and maintainability. Distilled to project-specific decisions only — rules encode *what overrides model defaults*, not what models already know.
 *   🛠️ **56 Skills** — specialized capabilities loaded on demand: language idioms, debugging, design, testing, performance, CI/CD, and more.
-*   🔄 **10 Workflows** — end-to-end development processes from research to ship, plus specialized testing pipelines.
+*   🔄 **11 Workflows** — end-to-end development processes from research to ship, plus specialized testing pipelines.
 *   🤖 **21 Agent Personas** — specialized sub-agents for multi-agent orchestration arranged in a 4-tier hierarchy.
 *   🏗️ **Three-Tier Loading System** — always-on mandates + contextual principles + on-demand skills for zero-noise enforcement.
 
@@ -299,7 +299,7 @@ Activated by the model only when relevant — zero overhead when not applicable.
 *   **[Accessibility Principles](.agents/rules/accessibility-principles.md)**: WCAG 2.1 AA, semantic HTML, keyboard navigation
 *   **[Git Workflow Principles](.agents/rules/git-workflow-principles.md)**: Conventional commits, branch naming, PR hygiene
 
-### Specialized Skills (60)
+### Specialized Skills (56)
 
 Skills are deep expertise modules loaded on demand — agents only pay the token cost when the skill is relevant.
 
@@ -312,7 +312,7 @@ Skills are deep expertise modules loaded on demand — agents only pay the token
 *   **[Performance Optimization](.agents/skills/perf-optimization/SKILL.md)**: Profile-driven optimization (pprof, Lighthouse, bundle analysis)
 *   **[Refactoring Patterns](.agents/skills/refactoring-patterns/SKILL.md)**: Code smell taxonomy, safe transformation techniques, behavior preservation
 *   **[Research Methodology](.agents/skills/research-methodology/SKILL.md)**: Structured research protocol for technologies and patterns
-*   **[Omni](.agents/skills/omni/SKILL.md)**: Token-efficient communication protocol — opt-in for concise output or agent-to-agent messaging
+
 
 #### 🏛️ Architecture & Infrastructure Skills
 *   **[Testability Patterns](.agents/skills/testability-patterns/SKILL.md)**: I/O isolation, pure logic, dependency direction — code examples across Go, TypeScript, Python, Rust, Dart. *Loaded via reference from `architectural-pattern.md`.*
@@ -320,6 +320,7 @@ Skills are deep expertise modules loaded on demand — agents only pay the token
 *   **[CI/CD](.agents/skills/ci-cd/SKILL.md)**: Pipeline design, multi-stage Docker builds, image scanning, SBOM attestation, environment promotion (Level 0–2)
 *   **[CI/CD GitOps & Kubernetes](.agents/skills/ci-cd/references/gitops-kubernetes.md)**: ArgoCD, Kubernetes deployment patterns — bundled with `ci-cd`
 *   **[Feature Flags](.agents/skills/feature-flags/SKILL.md)**: Release flags, kill switches, experiment flags, lifecycle rules — PRD-gated, loaded only when required
+*   **[Security Audit](.agents/skills/security-audit/SKILL.md)**: Reference material for the security audit workflow — dimension scope cards and final report templates. *Loaded via reference from `security-audit.md` workflow.*
 
 #### 🧪 Testing Skills
 *   **[Testing Strategy](.agents/skills/testing-strategy/SKILL.md)**: Test doubles strategy, integration test infrastructure (Testcontainers, Firebase emulator), naming conventions, test organization patterns
@@ -412,7 +413,7 @@ All code-writing agents are hardened with **always-on mandates** (`security-mand
 
 See the [workflow-team](.agents/workflows/workflow-team.md) workflow for the full dispatch protocol, including adaptive tier routing, recursive parallel dispatch with MECE file ownership, and DAG-based execution ordering.
 
-### Development Workflows (10)
+### Development Workflows (11)
 
 The setup includes opinionated, end-to-end workflows that chain rules and skills into structured development processes.
 
@@ -458,6 +459,7 @@ Specialized workflows for retroactive testing improvements on existing codebases
 | [`/bugfix`](.agents/workflows/bugfix.md) | Bug fixes — from hotfixes to complex debugging sessions |
 | [`/refactor`](.agents/workflows/refactor.md)   | Safely restructure code while preserving behavior    |
 | [`/audit`](.agents/workflows/audit.md)         | Code review and quality inspection (no new features) |
+| [`/security-audit`](.agents/workflows/security-audit.md) | Structured security review using parallel subagents |
 | [`/perf-optimize`](.agents/workflows/perf-optimize.md) | Profile-driven performance optimization              |
 
 <!-- DIRECTORY STRUCTURE -->
@@ -483,6 +485,7 @@ Specialized workflows for retroactive testing improvements on existing codebases
 │   ├── rule-priority.md                  # always_on: conflict resolution
 │   └── ...            # 5 more always-on + 15 contextual principles
 ├── skills/            # 56 specialized skills — loaded on demand, not always
+│   ├── security-audit/          # reference-loaded from security-audit workflow
 │   ├── go-idioms/               # paths: **/*.go — includes references/project-structure.md
 │   ├── typescript-idioms/       # paths: **/*.ts, **/*.tsx
 │   ├── vue-idioms/              # paths: **/*.vue, **/store/**/*.ts, **/*.store.ts
@@ -506,7 +509,7 @@ Specialized workflows for retroactive testing improvements on existing codebases
 │   ├── java-idioms/
 │   ├── incident-response/       # Domain skills
 │   └── ...
-└── workflows/         # 10 development workflows
+└── workflows/         # 11 development workflows
     ├── workflow-solo.md          # Single-agent: lean adaptive pipeline
     ├── workflow-team.md          # Multi-agent: hierarchical orchestration
     ├── test-unit.md              # Testing: unit test coverage improvement
@@ -516,14 +519,15 @@ Specialized workflows for retroactive testing improvements on existing codebases
     ├── bugfix.md                 # Standalone: bug fixes
     ├── refactor.md               # Standalone: code restructuring
     ├── audit.md                  # Standalone: code review
+    ├── security-audit.md         # Standalone: structured security review
     └── perf-optimize.md          # Standalone: performance tuning
 ```
 
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Include more specialized skills to aid development process (60 skills shipped).
-- [x] Add development workflows for structured feature delivery (10 workflows shipped).
+- [x] Include more specialized skills to aid development process (56 skills shipped).
+- [x] Add development workflows for structured feature delivery (11 workflows shipped).
 - [x] Add language-specific idiom skills (Go, TypeScript, Vue, Flutter, Rust, Python + 18 community language skills).
 - [x] Create a CLI tool for easier installation (`npx awesome-agv`).
 - [x] Add multi-agent orchestration with 21 specialized agent personas in a 4-tier RMAS hierarchy.

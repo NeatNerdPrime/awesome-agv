@@ -39,23 +39,14 @@ Agents are organized into five layers:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  L1 Strategic Layer                                 │
+│  L0 Supervisor Layer                                │
 │  @overseer                                          │
 ├─────────────────────────────────────────────────────┤
-│  L2 Domain Layer                                    │
-│  @rally-lead                                        │
+│  L1 Orchestration Layer                             │
+│  @conductor                                         │
 ├─────────────────────────────────────────────────────┤
-│  L3 Execution Layer                                 │
-│  @mission-lead                                      │
-├─────────────────────────────────────────────────────┤
-│  Compliance Layer (Hard Gates)                      │
-│  @arbiter, @tech-lead                               │
-├─────────────────────────────────────────────────────┤
-│  Research Layer (Read-only)                         │
-│  @scout                                             │
-├─────────────────────────────────────────────────────┤
-│  Design Layer (Read-only, produces decisions)       │
-│  @architect + cross-layer experts                   │
+│  Orchestration & Build Layer                        │
+│  @tech-lead                                         │
 ├─────────────────────────────────────────────────────┤
 │  Builder Layer (Write, run in worktrees)            │
 │  @backend-engineer, @frontend-engineer,             │
@@ -65,9 +56,15 @@ Agents are organized into five layers:
 │  @performance-engineer, @refactoring-specialist     │
 ├─────────────────────────────────────────────────────┤
 │  Reviewer Layer (Read-only, post-merge)             │
-│  @qa-analyst, @security-engineer,                   │
-│  @ux-craftsman, @incident-responder,                │
-│  @acceptance-reviewer                               │
+│  @reviewer, @security-engineer, @ux-craftsman,      │
+│  @incident-responder                                │
+├─────────────────────────────────────────────────────┤
+│  Red Team Layer                                     │
+│  @red-team-lead, @delivery-validator,               │
+│  @integration-prober                                │
+├─────────────────────────────────────────────────────┤
+│  Research & Design Layer (Read-only)                │
+│  @scout, @architect                                 │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -87,53 +84,53 @@ L1 Strategic Director. Program director aligning multiple domain streams and man
 | **Boundaries** | No code writing, no direct feature implementation |
 | **Skills** | parallel-dispatch, convergence-loop, fault-recovery |
 
-### Rally Lead
+### Conductor
 
-**File:** `.agents/agents/rally-lead.md`
+**File:** `.agents/agents/conductor.md`
 
-L2 Domain Coordinator. Orchestrates multiple missions within a business vertical.
-
-| Attribute | Details |
-| --- | --- |
-| **Domain** | Domain coordination, mission grouping, feature delivery |
-| **Boundaries** | No code writing |
-| **Skills** | parallel-dispatch, convergence-loop, fault-recovery |
-
-### Mission Lead
-
-**File:** `.agents/agents/mission-lead.md`
-
-L3 Execution Manager. Drives a specific feature slice to completion.
+L1 Build Orchestrator. Assesses task complexity using a 3-signal check (scope, risk, knowledge) and routes to adaptive execution tiers (Tier 1/2/3). Dispatches specialized leads and monitors convergence.
 
 | Attribute | Details |
 | --- | --- |
-| **Domain** | Task execution, parallel dispatch management, merge orchestration |
-| **Boundaries** | No strategic scope |
-| **Skills** | parallel-dispatch, convergence-loop, fault-recovery |
+| **Domain** | Complexity assessment, adaptive tier routing, builder dispatching, convergence monitoring |
+| **Boundaries** | No code writing, no direct implementation |
+| **Skills** | parallel-dispatch, agent-protocols |
 
-### Arbiter
+### Red Team Lead
 
-**File:** `.agents/agents/arbiter.md`
+**File:** `.agents/agents/red-team-lead.md`
 
-Independent compliance authority. Hard gate for quality and security requirements.
-
-| Attribute | Details |
-| --- | --- |
-| **Domain** | Integrity enforcement, spec validation, final decision making |
-| **Boundaries** | No coding, no workflow modifications |
-| **Skills** | integrity-enforcement |
-
-### Acceptance Reviewer
-
-**File:** `.agents/agents/acceptance-reviewer.md`
-
-Ensures spec adherence and deliverables completeness.
+Adversarial validation coordinator. Dispatches delivery validators, integration probers, and security engineers to verify the codebase after development merges.
 
 | Attribute | Details |
 | --- | --- |
-| **Domain** | Spec adherence, validation against requirements |
-| **Boundaries** | No code writing |
-| **Skills** | acceptance-review |
+| **Domain** | Adversarial validation orchestration, validator dispatching |
+| **Boundaries** | No production code writing |
+| **Skills** | parallel-dispatch, agent-protocols |
+
+### Delivery Validator
+
+**File:** `.agents/agents/delivery-validator.md`
+
+Runtime delivery verification agent. Boots applications, runs smoke tests, and verifies developer experience.
+
+| Attribute | Details |
+| --- | --- |
+| **Domain** | Environment bootstrap, boot verification, smoke testing, configuration audit |
+| **Boundaries** | No source code modifications, no test code modifications |
+| **Skills** | browser-automation, research-methodology, agent-protocols |
+
+### Integration Prober
+
+**File:** `.agents/agents/integration-prober.md`
+
+External service integration verifier. Validates real service connections (databases, caches, third-party APIs).
+
+| Attribute | Details |
+| --- | --- |
+| **Domain** | Service connectivity, mock detection, API compatibility, credential validation |
+| **Boundaries** | No source code modifications, no credential value inspection |
+| **Skills** | research-methodology, agent-protocols |
 
 ### Tech Lead
 
@@ -274,17 +271,17 @@ Cross-layer experts (`@ux-craftsman`, `@database-expert`, `@security-engineer`, 
 
 ## Reviewer Layer
 
-### QA Analyst
+### Reviewer
 
-**File:** `.agents/agents/qa-analyst.md`
+**File:** `.agents/agents/reviewer.md`
 
-Senior QA analyst. Quality gate authority. **Read-only — produces findings, never code.**
+Independent quality gate authority. Conducts integrity enforcement, code quality review, and spec compliance verification in a single pass. Read-only — produces verdicts, never code.
 
 | Attribute | Details |
 | --- | --- |
-| **Domain** | Code review, quality gates, defect analysis, performance data review, test coverage verification |
-| **Boundaries** | No production code, no test code (review only), no architecture decisions |
-| **Skills** | code-review, debugging-protocol, perf-optimization, sequential-thinking |
+| **Domain** | Integrity enforcement, code quality review, spec compliance, gate decisions (PASS/FAIL) |
+| **Boundaries** | No production code, no test code, no file modifications except verdict |
+| **Skills** | code-review, sequential-thinking, agent-protocols |
 
 ### Security Engineer
 
@@ -326,16 +323,16 @@ Senior security engineer. Security gate authority. **Read-only — produces find
 Agents reference each other explicitly for handoffs:
 
 - **Discovery → Flagging → Elimination:**
-  `@scout` discovers anti-patterns → `@qa-analyst` flags them with severity → `@refactoring-specialist` eliminates them
+  `@scout` discovers anti-patterns → `@reviewer` flags them with severity → `@refactoring-specialist` eliminates them
 
 - **Research → Design → Build:**
   `@scout` gathers context → `@architect` produces contracts → `@backend-engineer` implements
 
 - **Review → Fix:**
-  `@qa-analyst` produces findings → engineering agents fix issues
+  `@reviewer` produces findings → engineering agents fix issues
 
 - **Profile → Analyze → Optimize:**
-  `@performance-engineer` profiles → `@qa-analyst` reviews data → `@performance-engineer` implements fixes
+  `@performance-engineer` profiles → `@reviewer` reviews data → `@performance-engineer` implements fixes
 
 ### Parallel Dispatch
 

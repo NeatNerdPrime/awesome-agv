@@ -63,7 +63,7 @@ Is this a new feature?
 
 ### Don't Skip the Research Phase
 
-The Research phase (`/phase-research`) exists because:
+The Research phase (inside `workflow-solo`) exists because:
 - AI agents produce better code when they understand the full context
 - Documentation search prevents relying on stale training data
 - Research logs create institutional knowledge for future conversations
@@ -255,7 +255,7 @@ Always run full verification before shipping.
 - **Start small:** Use 2-3 parallel agents before scaling to 5+
 - **MECE is non-negotiable:** Every file must be assigned to exactly one write-agent. Overlap = merge conflicts
 - **Integration tasks are separate:** After parallel agents complete, dispatch a dedicated `[integration]` agent to wire modules together
-- **Review in parallel too:** Dispatch `@qa-analyst[auth]` + `@qa-analyst[tasks]` to review parallel branches simultaneously
+- **Review in parallel too:** Dispatch `@reviewer[auth]` + `@reviewer[tasks]` to review parallel branches simultaneously
 
 ### Agent Composition
 

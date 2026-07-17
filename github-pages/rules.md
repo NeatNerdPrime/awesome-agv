@@ -7,7 +7,7 @@ nav_order: 3
 # Rules Reference
 {: .no_toc }
 
-All 27 rules organized by category, with trigger types and descriptions.
+All 25 rules organized by category, with trigger types and descriptions.
 {: .fs-6 .fw-300 }
 
 <details open markdown="block">
@@ -97,14 +97,6 @@ model_decision
 
 Detailed patterns for safe parallel execution: goroutines, async/await, thread pools, deadlock prevention, and race condition avoidance.
 
-### Concurrency & Threading Mandate
-{: .d-inline-block }
-always_on
-{: .label .label-red }
-
-**File:** `concurrency-and-threading-mandate.md`
-
-When to use concurrency (I/O-bound vs CPU-bound) and when NOT to use it. Prevents premature optimization and overuse of threads.
 
 ### Performance Optimization Principles
 {: .d-inline-block }
@@ -286,8 +278,8 @@ Managing external libraries safely — version pinning, audit, and minimizing at
 
 ### Documentation Principles
 {: .d-inline-block }
-model_decision
-{: .label .label-blue }
+always_on
+{: .label .label-red }
 
 **File:** `documentation-principles.md`
 
@@ -335,17 +327,6 @@ Rules that ensure the development pipeline is reliable and automated.
 >
 > See the [Skills Reference](/awesome-agv/skills#architecture--infrastructure-skills-4) for details.
 
-### Code Completion Mandate
-{: .d-inline-block }
-always_on
-{: .label .label-red }
-
-**File:** `code-completion-mandate.md`
-
-Before marking any code task as complete, you MUST run automated quality checks:
-1. Generate → 2. Validate → 3. Remediate → 4. Verify → 5. Deliver
-
-Delegates language-specific quality commands (linters, formatters, type checkers) to the respective idiom files.
 
 ### Rule Priority
 {: .d-inline-block }
@@ -357,7 +338,7 @@ always_on
 Conflict resolution when rules contradict each other. Priority order:
 1. Security Mandate (always wins)
 2. Rugged Software Constitution
-3. Code Completion Mandate
+3. Code Idioms and Conventions (including completion mandate)
 4. Testability-First Design
 5. Feature-specific principles
 6. PRD-gated principles (feature flags, GitOps)

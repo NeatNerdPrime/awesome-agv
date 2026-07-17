@@ -7,7 +7,7 @@ nav_order: 4
 # Skills Reference
 {: .no_toc }
 
-All 57 specialized skills that extend your agent's capabilities.
+All 56 specialized skills that extend your agent's capabilities.
 {: .fs-6 .fw-300 }
 
 <details open markdown="block">
@@ -246,27 +246,6 @@ Structured research protocol for investigating technologies, patterns, and APIs 
 
 ---
 
-### Omni
-
-**File:** `.agents/skills/omni/SKILL.md`
-
-Maximum token-efficiency communication mode. Telegraphic English with minimal structured notation. 100% technical accuracy, zero fluff, zero waste.
-
-**Activation:** This skill is opt-in. Load it when:
-- User explicitly requests concise output (e.g., "use omni", "be concise")
-- Operating as a sub-agent in `/workflow-team` pipelines where token budget matters
-- Agent-to-agent communication via `/omni headless` modifier
-
-**Never activate by default** in normal conversations — users expect natural language.
-
-**Key Rules:**
-- Zero filler, pleasantries, hedging
-- Never restate the user's question
-- Fragments OK — compress form, never content
-- Code inside markdown blocks = 100% valid, never abbreviated
-- Auto-pause compression for security warnings and destructive actions
-
----
 
 ## Design & UI Skills (2)
 
@@ -312,9 +291,22 @@ Guidelines for creating distinctive, production-grade mobile interfaces for Flut
 
 ---
 
-## Multi-Agent Skills (1)
+## Multi-Agent Skills (2)
 
-This skill powers the `/workflow-team` multi-agent orchestration. It ensures parallel sub-agents can work on the same codebase without file conflicts.
+These skills power the `/workflow-team` multi-agent orchestration, providing routing protocols and conflict-free parallel execution rules.
+
+### Agent Protocols
+
+**File:** `.agents/skills/agent-protocols/SKILL.md`
+
+Shared behavioral protocols for all agents in the multi-agent pipeline: recursive nesting, pre-implementation restatement, parallel dispatch format, and agent definition cascade.
+
+**When to Use:**
+- When coordinating task delegation across named sub-agents
+- Before beginning implementation to write pre-implementation briefs
+- To structure completion reporting and handoffs
+
+---
 
 ### Parallel Dispatch
 
@@ -335,7 +327,7 @@ MECE task decomposition, file ownership enforcement, DAG-based execution, and sa
 
 ---
 
-## Architecture & Infrastructure Skills (4)
+## Architecture & Infrastructure Skills (5)
 
 Cross-cutting skills loaded via rule references — they apply to all languages and load regardless of file type.
 
@@ -381,7 +373,46 @@ Release flags, ops kill switches, experiment flags, and permission gating. Inclu
 
 ---
 
-## Language & Framework Idioms (24)
+### Security Audit
+
+**File:** `.agents/skills/security-audit/SKILL.md`
+
+Orchestration reference for the `/security-audit` workflow. Contains dimension scope cards for parallel subagent dispatch, subagent system prompt templates, and security audit report templates.
+
+**When to Use:**
+- When executing a security audit using the `/security-audit` workflow
+- To define scoping dimensions and prompt subagents for security auditing
+
+---
+
+## Testing Skills (2)
+
+Skills focused on improving unit, integration, and end-to-end testing coverage across platforms.
+
+### Testing Strategy
+
+**File:** `.agents/skills/testing-strategy/SKILL.md`
+
+Detailed testing reference material: test doubles strategy (mocks, stubs, fakes), integration test infrastructure (Testcontainers, Firebase emulator), naming conventions per language, and test organization patterns.
+
+**When to Use:**
+- When setting up test infrastructure or writing unit and integration tests
+- To align test structure and co-location with target language guidelines
+
+---
+
+### Mobile Testing
+
+**File:** `.agents/skills/mobile-testing/SKILL.md`
+
+Mobile E2E testing patterns: Screen Object Model, test data seeding, state reset, environment configuration, device matrix testing, offline detection, and CI emulator/simulator configuration.
+
+**When to Use:**
+- When writing E2E tests for mobile platforms (Flutter, React Native, or native iOS/Android)
+
+---
+
+## Language & Framework Idioms (27)
 
 Language-specific patterns, tooling, and conventions. Each skill follows the same structure: idioms, error handling, testing, anti-patterns, and formatting/linting commands.
 
@@ -396,23 +427,25 @@ Language-specific patterns, tooling, and conventions. Each skill follows the sam
 | [Rust Idioms](.agents/skills/rust-idioms/SKILL.md) | Ownership, tokio, thiserror/anyhow, clippy pedantic | `**/*.rs`, `**/Cargo.toml` |
 | [Python Idioms](.agents/skills/python-idioms/SKILL.md) | Type hints, Protocols, ruff, mypy strict, pytest | `**/*.py`, `**/pyproject.toml` |
 
-**Community language skills (18 additional ecosystems):**
+**Community language skills (21 additional ecosystems):**
 
 | Skill | Ecosystem |
 | --- | --- |
 | **Angular** (`.agents/skills/angular-idioms/SKILL.md`) | Angular components, signals, standalone |
+| **Axum** (`.agents/skills/axum-idioms/SKILL.md`) | Axum HTTP framework patterns — routing, extractors, middleware, state management |
 | **C++** (`.agents/skills/cpp-idioms/SKILL.md`) | Modern C++ (RAII, smart pointers, templates) |
 | **C#** (`.agents/skills/csharp-idioms/SKILL.md`) | .NET, async/await, LINQ |
 | **Django** (`.agents/skills/django-idioms/SKILL.md`) | Django ORM, views, middleware |
 | **.NET** (`.agents/skills/dotnet-idioms/SKILL.md`) | ASP.NET Core, Entity Framework, hosting |
 | **Elixir** (`.agents/skills/elixir-idioms/SKILL.md`) | OTP, GenServer, supervision trees |
+| **Hono** (`.agents/skills/hono-idioms/SKILL.md`) | Hono HTTP framework patterns — routing, middleware, Zod validation, RPC client |
 | **Java** (`.agents/skills/java-idioms/SKILL.md`) | Streams, records, sealed classes, Spring |
 | **JavaScript** (`.agents/skills/javascript-idioms/SKILL.md`) | ES2024+, async patterns, ESM |
 | **Kotlin** (`.agents/skills/kotlin-idioms/SKILL.md`) | Coroutines, sealed classes, Android |
 | **Laravel** (`.agents/skills/laravel-idioms/SKILL.md`) | Eloquent, middleware, queues |
 | **Next.js** (`.agents/skills/nextjs-idioms/SKILL.md`) | App Router, RSC, ISR |
 | **PHP** (`.agents/skills/php-idioms/SKILL.md`) | PHP 8+, type declarations, Composer |
-| **Rails** (`.agents/skills/rails-idioms/SKILL.md`) | ActiveRecord, conventions, Hotwire |
+| **PostgreSQL** (`.agents/skills/postgres-idioms/SKILL.md`) | PostgreSQL best practices — schema design, query performance, indexing, connection management, RLS, concurrency, monitoring, and migrations |
 | **React** (`.agents/skills/react-idioms/SKILL.md`) | Hooks, Suspense, Server Components |
 | **Ruby** (`.agents/skills/ruby-idioms/SKILL.md`) | Blocks, modules, RSpec |
 | **Spring Boot** (`.agents/skills/spring-boot-idioms/SKILL.md`) | Spring DI, JPA, WebFlux |
@@ -420,7 +453,7 @@ Language-specific patterns, tooling, and conventions. Each skill follows the sam
 | **Swift** (`.agents/skills/swift-idioms/SKILL.md`) | SwiftUI, Combine, async/await |
 
 {: .note }
-> These 18 community skills extend coverage beyond the 6 core language stacks (Go, TypeScript, Vue 3, Flutter/Dart, Rust, Python) which auto-load via the rule system.
+> These 21 community skills extend coverage beyond the 6 core language stacks (Go, TypeScript, Vue 3, Flutter/Dart, Rust, Python) which auto-load via the rule system.
 
 ---
 

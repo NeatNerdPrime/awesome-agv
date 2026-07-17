@@ -94,7 +94,7 @@ internal/
 
 **Adaptation steps:**
 1. Edit `project-structure.md` — remove `apps/backend/` prefix
-2. Edit `phase-verify.md` — update paths in validation commands
+2. Update validation paths in `workflow-solo.md` if needed
 3. Remove frontend-related rules if not needed
 
 ---
@@ -122,7 +122,7 @@ src/
 
 **Adaptation steps:**
 1. Edit `project-structure.md` — remove `apps/frontend/` prefix
-2. Edit `phase-verify.md` — remove backend validation commands
+2. Update validation commands in `workflow-solo.md` if needed
 3. Remove backend-specific rules if not needed (database design, etc.)
 
 ---
@@ -288,7 +288,7 @@ tests/
 
 **Adaptation steps:**
 1. Edit `project-structure.md` — use Python Backend layout
-2. Edit `phase-verify.md` — use Python validation commands
+2. Update validation commands in `workflow-solo.md` to use Python commands
 3. Remove frontend/Go-specific rules if not needed
 
 ---
@@ -364,6 +364,6 @@ When adapting, these are the only files you typically need to change:
 | `project-structure.md`                   | Directory layout, app paths                 |
 | `.agents/skills/{lang}-idioms/SKILL.md`  | Language patterns, tooling, conventions     |
 | `.agents/skills/{lang}-idioms/references/project-structure.md` | Language-specific directory layout |
-| `phase-verify.md`                        | Validation commands for your languages      |
-| `code-completion-mandate.md`             | Quality commands (delegates to idiom files) |
+| `workflow-solo.md`                       | Validation phase/commands for your languages|
+| `code-idioms-and-conventions.md`         | Quality commands & workflows (delegates to idioms)|
 | Add/remove rule files                    | Rules for your specific needs               |

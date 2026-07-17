@@ -1,39 +1,34 @@
 {
-  "version": "3.1.0",
+  "version": "3.6.0",
   "core": {
     "paths": ["rules/", "workflows/", "agents/"]
   },
   "skills": {
     "core": [
-      "acceptance-review",
       "adr",
       "api-documentation",
-      "audit-checklist",
       "browser-automation",
       "chaos-testing",
       "ci-cd",
       "cli-development",
       "code-review",
-      "convergence-loop",
       "data-engineering",
       "debugging-protocol",
       "embedded-systems",
-      "fault-recovery",
       "feature-flags",
       "frontend-design",
       "guardrails",
       "incident-response",
-      "integrity-enforcement",
       "logging-implementation",
       "ml-engineering",
       "mobile-design",
       "mobile-testing",
-      "omni",
       "parallel-dispatch",
       "payment-integration",
       "perf-optimization",
       "refactoring-patterns",
       "research-methodology",
+      "security-audit",
       "sequential-thinking",
       "supply-chain-security",
       "testability-patterns",
@@ -177,6 +172,14 @@
         "detect": ["mix.exs"],
         "skills": ["elixir-idioms"]
       },
+      "hono": {
+        "label": "Hono",
+        "description": "Hono routing, middleware, Zod validation, RPC",
+        "group": "community",
+        "requires": ["typescript"],
+        "detect": [],
+        "skills": ["hono-idioms"]
+      },
       "java": {
         "label": "Java",
         "description": "streams, records, sealed classes",
@@ -217,7 +220,7 @@
         "description": "query optimization, indexes, migrations",
         "group": "community",
         "detect": [],
-        "skills": ["sql-idioms"]
+        "skills": ["sql-idioms", "postgres-idioms"]
       },
       "swift": {
         "label": "Swift",
@@ -242,11 +245,7 @@
       "documentation-principles"
     ],
     "rmas_critical_skills": [
-      "convergence-loop",
-      "fault-recovery",
-      "integrity-enforcement",
       "parallel-dispatch",
-      "acceptance-review",
       "agent-protocols"
     ]
   }
