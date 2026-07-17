@@ -88,33 +88,49 @@ invoke_subagent(
 ```
 1. Receive user request
 2. Spawn @conductor with full task context
+   → Set watchdog: schedule(DurationSeconds=900, TimerCondition="{conductor_id}")
 3. LOOP:
      Wait for conductor message →
      
      "plan ready for approval"
        → Present brief.md to user → relay approval/feedback to conductor
+       → (No watchdog while waiting for user — user-facing gate)
+     
+     "user approved"
+       → Relay approval to conductor
+       → Set watchdog: schedule(DurationSeconds=900, TimerCondition="{conductor_id}")
      
      "clarification needed: {question}"
        → Relay question to user → relay answer to conductor
+       → (No watchdog while waiting for user — user-facing gate)
      
      "build + review complete, ready for red team"
        → Spawn @red-team-lead with ONLY original requirements (§Red Team)
+       → Set watchdog: schedule(DurationSeconds=900, TimerCondition="{red_team_id}")
        → Wait for Red Team verdict
        → PASS → message conductor: "proceed to Report"
+         → Set watchdog: schedule(DurationSeconds=900, TimerCondition="{conductor_id}")
        → CONDITIONAL PASS → present warnings to user, relay decision to conductor
-       → FAIL → message conductor: "remediate {summary}" → wait → re-run red team (max 1 cycle)
+       → FAIL → message conductor: "remediate {summary}"
+         → Set watchdog: schedule(DurationSeconds=900, TimerCondition="{conductor_id}")
+         → wait → re-run red team (max 1 cycle)
      
      "succession requested"
        → Spawn fresh conductor with handoff context (§Succession)
+       → Set watchdog: schedule(DurationSeconds=900, TimerCondition="{new_conductor_id}")
      
      "blocked / escalation"
        → Evaluate: retryable? → yes: message conductor "retry: {guidance}"
+         → Set watchdog: schedule(DurationSeconds=900, TimerCondition="{conductor_id}")
        → Not retryable → escalate to user with full context
      
      "final report ready"
        → Read handoff.md → present final report to user
        → Cleanup: rm -rf .agentwork/
-       → EXIT
+       → EXIT (no watchdog — terminal state)
+     
+     WATCHDOG FIRES (no message within 15 min)
+       → Execute §Watchdog Timer Protocol escalation sequence
 ```
 
 ### Autonomous Continuation Rule
@@ -124,6 +140,38 @@ invoke_subagent(
 > 2. Red Team CONDITIONAL PASS (user decides whether to accept warnings)
 > 3. Unrecoverable escalation from conductor (after retries exhausted)
 > 4. Final report delivery
+
+---
+
+## Watchdog Timer Protocol
+
+After dispatching the conductor or red-team-lead, set a **renewable watchdog timer** to detect silent stalls. This is the proactive trigger for Path B succession — without it, the overseer has no mechanism to wake itself up if the conductor stalls silently.
+
+### Timer Rules
+
+1. **After EVERY dispatch** (conductor spawn, red-team-lead spawn):
+   Set `schedule(DurationSeconds=900, TimerCondition="{agent_conversation_id}")`
+   The `TimerCondition` auto-cancels the timer when the agent messages back.
+
+2. **After EVERY message processed** (while pipeline is still running):
+   If you are going back to waiting for more messages from the same agent,
+   set a NEW `schedule(DurationSeconds=900, TimerCondition="{agent_conversation_id}")`.
+   The previous timer auto-cancelled when the message arrived — this resets the window.
+
+3. **On timer fire** (15 min with no message — agent may be stalled):
+   - Message the agent: `"Status check — are you still making progress?"`
+   - Set a shorter follow-up: `schedule(DurationSeconds=300, TimerCondition="{agent_conversation_id}")`
+
+4. **On follow-up timer fire** (5 min with no response to status check):
+   - **For conductor:** Execute Path B forced succession (§Succession Protocol)
+   - **For red-team-lead:** Execute red team retry protocol (§Fault Recovery)
+
+5. **Do NOT set timers** when:
+   - The pipeline is at a **user-facing gate** (waiting for user approval or clarification)
+   - The pipeline has reached a **terminal state** (final report, cleanup)
+   - You have just received `"Final report ready"` (you are about to deliver and cleanup)
+
+> **Why 15 minutes?** Complex autonomous tasks (multi-wave builds, design phases) legitimately go 5-10+ minutes between status messages. 15 min avoids false alarms while catching genuine stalls within a reasonable window. The 5-min follow-up provides a tighter check once suspicion is raised.
 
 ---
 
@@ -186,14 +234,18 @@ Before dispatching any new builders, understand the established project conventi
    (e.g., different file naming, different directory structure)
 ```
 
-### Path B — Overseer-Initiated (External Detection)
-1. Overseer tracks time since last conductor message
-2. If no message for >5 minutes AND no known pending subagent work:
-   - Message conductor: `"Status check — are you still making progress?"`
-3. If conductor responds coherently with progress → continue
-4. If conductor responds incoherently OR doesn't respond:
+### Path B — Overseer-Initiated (External Detection via Watchdog Timer)
+
+Triggered by the **Watchdog Timer Protocol** (§Watchdog Timer Protocol). The overseer's 15-minute renewable watchdog timer is the mechanism that detects conductor silence.
+
+1. Watchdog timer fires (15 min with no conductor message)
+2. Message conductor: `"Status check — are you still making progress?"`
+3. Set follow-up timer: `schedule(DurationSeconds=300, TimerCondition="{conductor_id}")`
+4. If conductor responds coherently with progress → continue → reset 15-min watchdog
+5. If follow-up timer fires (5 min with no response to status check):
    - Read `brief.md` for current state
    - Force succession: spawn fresh conductor with handoff context + the **Convention Continuity** block from Path A's successor prompt
+   - Set watchdog on the new conductor
 
 **Max 5 successions total → escalate to user.**
 
@@ -226,8 +278,9 @@ The overseer handles only conductor-level and red-team-level failures. All build
 | Failure | Recovery |
 |---------|----------|
 | Conductor fails to spawn | Retry once → escalate to user |
-| Conductor stops responding | Status check → force succession → if succession also fails → escalate to user |
+| Conductor stops responding | Watchdog fires (15 min) → status check → follow-up (5 min) → force succession → if succession also fails → escalate to user |
 | Red Team Lead fails | Retry once → if still fails → report to user with "red team validation incomplete" |
+| Red Team Lead stops responding | Watchdog fires (15 min) → status check → follow-up (5 min) → retry with fresh instance → if still fails → report to user |
 | 429 / RESOURCE_EXHAUSTED | `schedule(DurationSeconds=60)` → retry → `schedule(DurationSeconds=120)` → retry → escalate to user |
 
 ---

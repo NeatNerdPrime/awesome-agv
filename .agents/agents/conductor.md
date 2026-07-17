@@ -100,10 +100,10 @@ Quick 3-signal routing. Assess ONCE at intake, then escalate if signals change d
 3. EXPLORE (optional) — dispatch scouts for ambiguous domains
 4. DECOMPOSE — break into MECE scope cards, write brief.md
 5. DESIGN (Tier 2+ with inter-card deps) — dispatch specialists, freeze contracts
-6. BUILD (parallel waves):
+6. BUILD (parallel waves) + SET WATCHDOG after each wave dispatch:
    6a. FOUNDATION WAVE — establish conventions via code (greenfield; mandatory)
    6b. FEATURE WAVES — dispatch Tech-Leads / Builders with Convention Reference
-7. REVIEW (Tier 2+) — dispatch Reviewer (single pass)
+7. REVIEW (Tier 2+) — dispatch Reviewer (single pass) + SET WATCHDOG
 8. REMEDIATE (if FAIL) — route blockers, re-validate (max 2 cycles per card)
 9. SIGNAL OVERSEER (Tier 2+) — message overseer that build+review is complete
 10. REPORT — synthesize results to @overseer
@@ -200,6 +200,8 @@ Before dispatching feature scope cards, dispatch a **Foundation scope card** tha
 
 **After Foundation wave completes:** All subsequent scope cards MUST include the Convention Reference preamble (see below). The CSS design system file becomes a **frozen design contract** — subsequent frontend builders MUST import and use these tokens, not hardcode independent styling values.
 
+> **Watchdog:** After dispatching the Foundation Wave, set `schedule(DurationSeconds=600, TimerCondition="any")` to detect stalls. Reset after each agent completion if others are still pending. See §Watchdog Timer Protocol.
+
 #### 6b. Feature Waves (parallel)
 
 - **Tech-Lead vs Builder decision:**
@@ -207,6 +209,7 @@ Before dispatching feature scope cards, dispatch a **Foundation scope card** tha
   - Complex multi-domain card with substantial integration → dispatch Tech-Lead
   - Simple single-domain card or trivial integration (<50 lines) → dispatch specialized Builder directly
 - Use staggered dispatch (see §Staggered Dispatch)
+- **After dispatching each wave:** Set `schedule(DurationSeconds=600, TimerCondition="any")` — see §Watchdog Timer Protocol
 
 #### Test Coverage Mandate
 
@@ -309,6 +312,38 @@ status: complete | continuing | blocked | integrated
 | 7+ | Batches of 3, with `schedule(DurationSeconds=10)` between each |
 
 > This smooths the RPM curve. Each spawned agent immediately makes several API calls (read role file, read skills, plan) — spawning all at once creates a burst that can exceed per-minute quota.
+
+---
+
+## Watchdog Timer Protocol
+
+After dispatching Tech-Leads, Builders, Reviewers, or Design specialists in any phase, set a **renewable watchdog timer** to detect silent agent stalls. This prevents a single stalled agent from blocking the entire pipeline indefinitely.
+
+### Timer Rules
+
+1. **After dispatching a wave** (Foundation Wave, Feature Wave, Design phase, Review):
+   Set `schedule(DurationSeconds=600, TimerCondition="any")`
+   Uses `"any"` because you are waiting for ANY of the dispatched agents to report back.
+
+2. **After processing an agent completion message** (if other agents in the wave are still pending):
+   Set a NEW `schedule(DurationSeconds=600, TimerCondition="any")`.
+   The previous timer auto-cancelled when the message arrived — this resets the window.
+
+3. **On timer fire** (10 min with no agent message — an agent may be stalled):
+   - List active subagents via `manage_subagents(Action="list")`
+   - Message each still-running agent: `"Status check — are you still making progress?"`
+   - Set a shorter follow-up: `schedule(DurationSeconds=300, TimerCondition="any")`
+
+4. **On follow-up timer fire** (5 min with no response to status check):
+   - For each unresponsive agent: apply Fault Recovery Step 1 (RETRY with failure context)
+   - If retry also stalls: apply Step 2 (RE-ASSIGN) → Step 3 (ESCALATE to @overseer)
+
+5. **Do NOT set timers** during:
+   - ELICIT phase (waiting for user clarification via overseer)
+   - DECOMPOSE approval gate (waiting for user approval via overseer)
+   - Phases where YOU are actively working (not waiting for agents)
+
+> **Why 10 minutes?** Builder agents legitimately work for several minutes on complex scope cards. 10 min avoids false alarms during normal operation while catching genuine stalls within a reasonable window. The 5-min follow-up provides a tighter check once suspicion is raised.
 
 ---
 
