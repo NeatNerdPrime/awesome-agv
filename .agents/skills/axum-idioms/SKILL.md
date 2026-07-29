@@ -139,6 +139,35 @@ Axum (0.8+) rewards composability via Tower, type-safe extractors, and zero-cost
 
 3. **Layer ordering:** `ServiceBuilder` applies bottom-to-top — last `.layer()` wraps closest to handler.
 
+4. **Propagate correlation IDs with `TraceLayer`:**
+   ```rust
+   use tower_http::trace::TraceLayer;
+   use tracing::Span;
+
+   // ✅ Inject x-request-id into every span for log correlation
+   let trace_layer = TraceLayer::new_for_http()
+       .make_span_with(|request: &Request<_>| {
+           let request_id = request
+               .headers()
+               .get("x-request-id")
+               .and_then(|v| v.to_str().ok())
+               .unwrap_or("unknown");
+           tracing::info_span!(
+               "request",
+               method = %request.method(),
+               uri = %request.uri(),
+               request_id = %request_id,
+           )
+       });
+
+   let app = Router::new()
+       .nest("/api/v1", api_routes())
+       .layer(trace_layer)
+       .with_state(state);
+   ```
+
+   > All `tracing::info!`, `warn!`, `error!` calls inside a handler will automatically inherit the span fields above (method, uri, request_id). This satisfies the `correlationId` requirement from the Logging Mandate. See `logging-implementation/SKILL.md` §Rust for the full `init_tracing()` setup.
+
 ### Error Handling
 
 1. **Unified `AppError` enum with `IntoResponse`:**
@@ -231,6 +260,64 @@ Axum (0.8+) rewards composability via Tower, type-safe extractors, and zero-cost
    }
    ```
 
+### Response Types and Domain Conversion
+
+1. **Separate request and response types** — never expose domain models directly to the API:
+   ```rust
+   // --- Request type (deserialize + validate) ---
+   #[derive(Debug, Deserialize, Validate)]
+   #[serde(rename_all = "camelCase")]
+   pub struct CreateTaskRequest {
+       #[validate(length(min = 1, max = 255))]
+       pub title: String,
+       #[serde(default)]
+       pub description: Option<String>,
+       #[validate(range(min = 1, max = 5))]
+       #[serde(default = "default_priority")]
+       pub priority: u8,
+   }
+
+   fn default_priority() -> u8 { 3 }
+
+   // --- Response type (serialize) ---
+   #[derive(Debug, Serialize)]
+   #[serde(rename_all = "camelCase")]
+   pub struct TaskResponse {
+       pub id: Uuid,
+       pub title: String,
+       #[serde(skip_serializing_if = "Option::is_none")]
+       pub description: Option<String>,
+       pub priority: u8,
+       pub created_at: DateTime<Utc>,
+   }
+
+   // --- Domain → Response conversion ---
+   impl From<Task> for TaskResponse {
+       fn from(task: Task) -> Self {
+           Self {
+               id: task.id,
+               title: task.title,
+               description: task.description,
+               priority: task.priority,
+               created_at: task.created_at,
+           }
+       }
+   }
+   ```
+
+2. **Use `.into()` in handlers** for clean conversion:
+   ```rust
+   async fn get_task(
+       State(state): State<Arc<AppState>>,
+       Path(id): Path<Uuid>,
+   ) -> Result<Json<TaskResponse>, AppError> {
+       let task = state.task_service.find(id).await?;
+       Ok(Json(task.into()))  // From<Task> for TaskResponse
+   }
+   ```
+
+3. **For serde attribute patterns** (rename_all, deny_unknown_fields, skip_serializing_if), see `rust-idioms/references/serde-patterns.md`.
+
 ### Testing
 
 > For universal testing principles, see `.agents/rules/testing-strategy.md`. Below: Axum-specific patterns only.
@@ -289,3 +376,5 @@ axum::serve(listener, app)
 - Testing Strategy @.agents/rules/testing-strategy.md
 - Logging and Observability Mandate @.agents/rules/logging-and-observability-mandate.md
 - Logging Implementation @.agents/skills/logging-implementation/SKILL.md
+- Serde Patterns @.agents/skills/rust-idioms/references/serde-patterns.md
+- SQLx Patterns @.agents/skills/rust-idioms/references/sqlx-patterns.md
