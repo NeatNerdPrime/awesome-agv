@@ -110,7 +110,6 @@ class InMemoryTaskStorage:
 
 ```rust
 // storage.rs — Contract via trait
-#[async_trait]
 pub trait TaskStorage: Send + Sync {
     async fn get_by_id(&self, id: &str) -> Result<Task, StorageError>;
     async fn create(&self, task: &Task) -> Result<(), StorageError>;
@@ -119,7 +118,6 @@ pub trait TaskStorage: Send + Sync {
 // storage_pg.rs — Production adapter
 pub struct PostgresTaskStorage { pool: PgPool }
 
-#[async_trait]
 impl TaskStorage for PostgresTaskStorage {
     async fn get_by_id(&self, id: &str) -> Result<Task, StorageError> {
         // real sqlx query
@@ -131,7 +129,6 @@ pub struct InMemoryTaskStorage {
     tasks: Mutex<HashMap<String, Task>>,
 }
 
-#[async_trait]
 impl TaskStorage for InMemoryTaskStorage {
     async fn get_by_id(&self, id: &str) -> Result<Task, StorageError> {
         self.tasks.lock().unwrap()
@@ -141,6 +138,8 @@ impl TaskStorage for InMemoryTaskStorage {
     }
 }
 ```
+
+> **Note (Rust 1.75+):** Native `async fn` in traits uses static dispatch. Use `#[async_trait]` (from the `async-trait` crate) only when you need dynamic dispatch via `dyn Trait` — e.g., `Box<dyn TaskStorage>` for runtime polymorphism. Prefer static dispatch (`impl TaskStorage` or `T: TaskStorage`) by default.
 
 #### Flutter / Dart (Riverpod)
 
