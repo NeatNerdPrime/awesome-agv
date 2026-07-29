@@ -7,7 +7,7 @@ nav_order: 4
 # Skills Reference
 {: .no_toc }
 
-All 56 specialized skills that extend your agent's capabilities.
+All 57 specialized skills that extend your agent's capabilities.
 {: .fs-6 .fw-300 }
 
 <details open markdown="block">
@@ -243,6 +243,18 @@ Structured research protocol for investigating technologies, patterns, and APIs 
 - Pattern discovery before implementation
 - API investigation and compatibility analysis
 - During the Research phase of any workflow
+
+---
+
+### Code Audit
+
+**File:** `.agents/skills/code-audit/SKILL.md`
+
+Orchestration reference for the `/audit` workflow. Contains dimension scope cards for parallel subagent dispatch, subagent system prompt templates, and code audit report templates.
+
+**When to Use:**
+- When executing a multi-dimensional code audit using the `/audit` workflow
+- To define scoping dimensions and prompt subagents for parallel code auditing
 
 ---
 

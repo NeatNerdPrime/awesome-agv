@@ -25,23 +25,21 @@ Instead of just generating code that works, the rules and skills ensure agents g
 
 > **⚠️ Opinionated by design.** Awesome AGV ships with opinionated defaults for specific technology stacks. See [Opinionated Technology Choices](#opinionated-technology-choices) for details and how to customize.
 
-While this configuration is originally designed for **Antigravity**, it is built on standard markdown-based context protocols that are easily portable to other AI coding tools. As a matter of fact, the original form [Technical Constitution](https://github.com/irahardianto/technical-constitution/blob/main/technical-constitution-full.md) was first created for **Gemini CLI**
-
-You can drop this configuration into the context or custom rule settings of:
-
-*   **Roo Code**
-*   **Claude Code**
-*   Any other agentic tool that supports custom system prompts or context loading.
-
-For example, the principles of the [Rugged Software Constitution](.agents/rules/rugged-software-constitution.md) which is based on [Rugged Software Manifesto](https://ruggedsoftware.org/) are universal and will improve the output of any LLM-based coding assistant.
+While this configuration is originally designed for **Antigravity**, it is built on standard markdown-based context protocols that are easily portable to other AI coding tools. As a matter of fact, the original form [Technical Constitution](https://github.com/irahardianto/technical-constitution/blob/main/technical-constitution-full.md) was first created for **Gemini CLI**. For example, the principles of the [Rugged Software Constitution](.agents/rules/rugged-software-constitution.md) which is based on [Rugged Software Manifesto](https://ruggedsoftware.org/) are universal and will improve the output of any LLM-based coding assistant.
 
 ### Key Features
 
 *   📏 **25 Rules** — covering security, reliability, architecture, and maintainability. Distilled to project-specific decisions only — rules encode *what overrides model defaults*, not what models already know.
-*   🛠️ **56 Skills** — specialized capabilities loaded on demand: language idioms, debugging, design, testing, performance, CI/CD, and more.
+*   🛠️ **57 Skills** — specialized capabilities loaded on demand: language idioms, debugging, design, testing, performance, CI/CD, and more.
 *   🔄 **11 Workflows** — end-to-end development processes from research to ship, plus specialized testing pipelines.
 *   🤖 **21 Agent Personas** — specialized sub-agents for multi-agent orchestration arranged in a 4-tier hierarchy.
 *   🏗️ **Three-Tier Loading System** — always-on mandates + contextual principles + on-demand skills for zero-noise enforcement.
+
+#### Equipped with Long Running Recursive Multi-Agent System That Gets The Work Done!
+
+<div align="center">
+  <img src="rmas-design.png" alt="Awesome AGV" width="800" />
+</div>
 
 > **💡 Everything is modular.** Rules, skills, agents, and workflows work independently — you don't need everything to benefit. Use only what you need, modify anything, or build your own. It's a toolkit, not a framework.
 
@@ -299,7 +297,7 @@ Activated by the model only when relevant — zero overhead when not applicable.
 *   **[Accessibility Principles](.agents/rules/accessibility-principles.md)**: WCAG 2.1 AA, semantic HTML, keyboard navigation
 *   **[Git Workflow Principles](.agents/rules/git-workflow-principles.md)**: Conventional commits, branch naming, PR hygiene
 
-### Specialized Skills (56)
+### Specialized Skills (57)
 
 Skills are deep expertise modules loaded on demand — agents only pay the token cost when the skill is relevant.
 
@@ -320,6 +318,7 @@ Skills are deep expertise modules loaded on demand — agents only pay the token
 *   **[CI/CD](.agents/skills/ci-cd/SKILL.md)**: Pipeline design, multi-stage Docker builds, image scanning, SBOM attestation, environment promotion (Level 0–2)
 *   **[CI/CD GitOps & Kubernetes](.agents/skills/ci-cd/references/gitops-kubernetes.md)**: ArgoCD, Kubernetes deployment patterns — bundled with `ci-cd`
 *   **[Feature Flags](.agents/skills/feature-flags/SKILL.md)**: Release flags, kill switches, experiment flags, lifecycle rules — PRD-gated, loaded only when required
+*   **[Code Audit](.agents/skills/code-audit/SKILL.md)**: Reference material for the audit workflow — dimension scope cards and final report templates. *Loaded via reference from `audit.md` workflow.*
 *   **[Security Audit](.agents/skills/security-audit/SKILL.md)**: Reference material for the security audit workflow — dimension scope cards and final report templates. *Loaded via reference from `security-audit.md` workflow.*
 
 #### 🧪 Testing Skills
@@ -484,7 +483,8 @@ Specialized workflows for retroactive testing improvements on existing codebases
 │   ├── architectural-pattern.md          # always_on: I/O isolation, testability
 │   ├── rule-priority.md                  # always_on: conflict resolution
 │   └── ...            # 5 more always-on + 15 contextual principles
-├── skills/            # 56 specialized skills — loaded on demand, not always
+├── skills/            # 57 specialized skills — loaded on demand, not always
+│   ├── code-audit/              # reference-loaded from audit workflow
 │   ├── security-audit/          # reference-loaded from security-audit workflow
 │   ├── go-idioms/               # paths: **/*.go — includes references/project-structure.md
 │   ├── typescript-idioms/       # paths: **/*.ts, **/*.tsx
@@ -526,7 +526,7 @@ Specialized workflows for retroactive testing improvements on existing codebases
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Include more specialized skills to aid development process (56 skills shipped).
+- [x] Include more specialized skills to aid development process (57 skills shipped).
 - [x] Add development workflows for structured feature delivery (11 workflows shipped).
 - [x] Add language-specific idiom skills (Go, TypeScript, Vue, Flutter, Rust, Python + 18 community language skills).
 - [x] Create a CLI tool for easier installation (`npx awesome-agv`).

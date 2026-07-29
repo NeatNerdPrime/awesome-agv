@@ -144,20 +144,20 @@ When rules conflict, the priority system resolves them:
 │  /workflow-solo → phases → ship            │
 │  /workflow-team → agents → primitives       │
 ├───────────────────────────────────────────┤
-│  Tier 3: Skills (50)                        │
+│  Tier 3: Skills (57)                        │
 │  (Procedural capabilities, on demand)       │
 │                                             │
-│  Language Idioms (24), parallel-dispatch,   │
+│  Language Idioms (27), parallel-dispatch,   │
 │  debugging-protocol, code-review, adr,      │
 │  ci-cd, feature-flags, perf-optimization... │
 ├───────────────────────────────────────────┤
-│  Tier 2: Principles (16)                    │
+│  Tier 2: Principles (15)                    │
 │  (Contextual rules, agent-activated)        │
 │                                             │
 │  Security Principles, Database Design,      │
 │  Testing Strategy, API Design...            │
 ├───────────────────────────────────────────┤
-│  Tier 1: Mandates (12)                      │
+│  Tier 1: Mandates (10)                      │
 │  (Always-on, non-negotiable constraints)    │
 │                                             │
 │  Security Mandate, Code Completion Mandate, │

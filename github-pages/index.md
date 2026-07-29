@@ -27,7 +27,7 @@ The setup is built on the [Rugged Software Manifesto](https://ruggedsoftware.org
 | Component     | Count | Purpose                                                                           |
 | ------------- | ----- | --------------------------------------------------------------------------------- |
 | **Rules**     | 25    | Security, reliability, architecture, and maintainability |
-| **Skills**    | 56    | Specialized capabilities for debugging, design, performance optimization, language idioms, and more |
+| **Skills**    | 57    | Specialized capabilities for debugging, design, performance optimization, language idioms, and more |
 | **Workflows** | 11    | End-to-end development processes from research to ship                             |
 | **Agents**    | 21    | Specialized personas for multi-agent orchestration arranged in a 4-tier hierarchy |
 
@@ -101,7 +101,7 @@ While originally designed for **Antigravity**, the setup is built on standard ma
 .agents/
 ├── rules/             # 25 rules (mandates + principles)
 ├── agents/            # 21 agent personas
-├── skills/            # 56 specialized skills
+├── skills/            # 57 specialized skills
 └── workflows/         # 11 development workflows
 ```
 
@@ -110,7 +110,7 @@ While originally designed for **Antigravity**, the setup is built on standard ma
 Explore each component in detail:
 
 - [**Rules Reference**](/awesome-agv/rules) — All 25 rules organized by category
-- [**Skills Reference**](/awesome-agv/skills) — All 56 specialized skills
+- [**Skills Reference**](/awesome-agv/skills) — All 57 specialized skills
 - [**Workflows Reference**](/awesome-agv/workflows) — All 11 development workflows
 - [**Agent Personas**](/awesome-agv/agents) — 21 specialized agent personas for multi-agent orchestration
 - [**Architecture**](/awesome-agv/architecture) — How the rule system is designed
