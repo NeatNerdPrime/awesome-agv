@@ -19,6 +19,31 @@ Vue 3 Composition API is the default for all new code. `<script setup>` is the c
 
 > **Scope:** This file covers Vue 3 *coding idioms* for components, stores, and composables. For TypeScript type system patterns, see `@.agents/skills/typescript-idioms/SKILL.md`. For file and folder layout, see `references/project-structure.md`. For test naming, see `testing-strategy.md`. For logging, see `@.agents/skills/logging-implementation/SKILL.md`.
 
+## When to Load References
+
+> **Always load `typescript-idioms` first** — it is required alongside this skill for any Vue work.
+> Load these **before** writing code in the matching context — not after.
+
+| Situation | Reference to Load |
+|---|---|
+| TypeScript type system, async, Zod, error types | `@.agents/skills/typescript-idioms/SKILL.md` (always co-load) |
+| Starting a new Vue project or reviewing file layout | `references/project-structure.md` |
+| Choosing Vue ecosystem package versions, Vite/Vitest config | `references/recommended-dependencies.md` |
+| Defining Zod schemas or validating boundaries | `@.agents/skills/typescript-idioms/references/zod-patterns.md` |
+| Writing code that handles user input, async, or I/O | `@.agents/skills/typescript-idioms/references/ts-patterns-and-anti-patterns.md` |
+
+### Toolchain and Version Milestones
+
+> Default to the latest Vue 3 stable. As of July 2026, Vue **3.5+** with Vite 6+.
+
+**Key version milestones that affect this skill:**
+- **3.5+** — `useTemplateRef` (type-safe template refs), improved `useId`, Suspense stable
+- **3.4+** — `defineModel` (replaces verbose v-model boilerplate), improved `watch` generics
+- **3.3+** — `defineOptions`, `defineSlots`, generic components with `<script setup>`
+- **3.2+** — `<script setup>` syntax finalized
+
+> For recommended package versions and starter configs, see `references/recommended-dependencies.md`.
+
 ---
 
 ### `<script setup>` — The Only Style
@@ -262,7 +287,26 @@ Composables are the Vue equivalent of custom hooks — self-contained, reusable 
    }>();
    ```
 
-3. **`v-model` contract: always `modelValue` prop + `update:modelValue` emit**
+3. **`defineModel` (Vue 3.4+) — preferred v-model pattern**
+   ```vue
+   <script setup lang="ts">
+   // ✅ Vue 3.4+ — one line replaces modelValue prop + emit boilerplate
+   const modelValue = defineModel<string>({ required: true });
+
+   // Named models for multi-v-model components
+   const title = defineModel<string>('title');
+   const priority = defineModel<'low' | 'medium' | 'high'>('priority', { default: 'medium' });
+   </script>
+
+   <!-- Usage by parent: <TaskForm v-model="name" v-model:priority="prio" /> -->
+   ```
+
+   Pre-3.4 fallback (when `defineModel` is unavailable):
+   ```typescript
+   // ❌ Verbose — use defineModel instead on Vue 3.4+
+   const props = defineProps<{ modelValue: string }>();
+   const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
+   ```
 
 4. **`defineExpose` to selectively expose methods to parent refs**
    ```typescript
@@ -349,36 +393,252 @@ When using `<Transition>` or `<RouterView>` with transition effects, CSS framewo
 
 ---
 
-### Testing
+### Error Handling
 
-> Test naming and pyramid proportions are defined in `testing-strategy.md`. This section covers Vue-specific tooling.
+> For error type hierarchies, custom error classes, and `Result<T, E>`, see `@.agents/skills/typescript-idioms/SKILL.md` §Error Handling. This section covers Vue-specific error handling only.
 
-1. **Use `createTestingPinia` to stub stores in component tests**
+1. **Global error handler — register at app startup:**
    ```typescript
-   import { vi } from 'vitest';
+   // main.ts — catches all unhandled errors in any component
+   app.config.errorHandler = (err, instance, info) => {
+     logger.error('Unhandled Vue error', {
+       error: err instanceof Error ? err.message : String(err),
+       componentInfo: info,
+       stack: err instanceof Error ? err.stack : undefined,
+     });
+   };
+   ```
 
-   const wrapper = mount(TaskView, {
-       global: {
-           plugins: [createTestingPinia({ createSpy: vi.fn })],
-       },
+2. **Component-level error capture with `onErrorCaptured`:**
+   ```typescript
+   // ✅ Catches errors from child component tree — use for error boundary components
+   const error = ref<Error | null>(null);
+   onErrorCaptured((err) => {
+     error.value = err instanceof Error ? err : new Error(String(err));
+     return false; // stop propagation to parent
    });
    ```
 
-2. **Test component behaviour, not implementation details** — query by accessible role, not CSS class
+3. **Async errors in lifecycle hooks — always handle:**
+   ```typescript
+   // ❌ Floating promise — error silently lost
+   onMounted(() => { loadTasks(); });
 
-3. **Test stores independently** — use `setActivePinia(createPinia())` in store unit tests
+   // ✅ Catch and surface to reactive error state
+   onMounted(async () => {
+     try {
+       await loadTasks();
+     } catch (err) {
+       error.value = err instanceof Error ? err : new Error(String(err));
+     }
+   });
+   ```
 
 ---
 
-### Linting and Type Checking
+### Form Handling
 
-| Tool                | Purpose                     |
-| ------------------- | --------------------------- |
-| `vue-tsc --noEmit`  | Full-template type checking |
-| `eslint-plugin-vue` | Vue-specific lint rules     |
-| `prettier`          | Canonical formatting        |
+> For Zod schema patterns, see `@.agents/skills/typescript-idioms/references/zod-patterns.md`. This section covers Vue-specific form binding only.
 
-See `code-idioms-and-conventions.md` for exact commands.
+1. **`defineModel` for simple forms (Vue 3.4+)** — see Component Design §3 above.
+
+2. **VeeValidate + Zod for validated forms:**
+   ```vue
+   <script setup lang="ts">
+   import { useForm, useField } from 'vee-validate';
+   import { toTypedSchema } from '@vee-validate/zod';
+   import { z } from 'zod';
+
+   const schema = toTypedSchema(z.object({
+     title: z.string().min(1, 'Title is required').max(200),
+     priority: z.enum(['low', 'medium', 'high']),
+   }));
+
+   const { handleSubmit, errors } = useForm({ validationSchema: schema });
+   const { value: title } = useField<string>('title');
+   const { value: priority } = useField<string>('priority');
+
+   const onSubmit = handleSubmit(async (values) => {
+     await taskStore.createTask(values);
+   });
+   </script>
+
+   <template>
+     <form @submit="onSubmit">
+       <input v-model="title" />
+       <span v-if="errors.title">{{ errors.title }}</span>
+       <select v-model="priority">
+         <option value="low">Low</option>
+         <option value="medium">Medium</option>
+         <option value="high">High</option>
+       </select>
+       <button type="submit">Create</button>
+     </form>
+   </template>
+   ```
+
+3. **Client-side validation is UX, not security** — always validate at the API boundary too. See `@.agents/rules/security-principles.md`.
+
+---
+
+### Performance
+
+> Profile before optimizing — see `@.agents/skills/perf-optimization/SKILL.md` for methodology. This section covers Vue-specific patterns only.
+
+1. **`defineAsyncComponent` for lazy loading heavy components:**
+   ```typescript
+   import { defineAsyncComponent } from 'vue';
+   const HeavyChart = defineAsyncComponent(() => import('./HeavyChart.vue'));
+   ```
+
+2. **Lazy route loading with Vue Router:**
+   ```typescript
+   const routes = [
+     { path: '/tasks', component: () => import('../views/TaskView.vue') },
+     { path: '/settings', component: () => import('../views/SettingsView.vue') },
+   ];
+   ```
+
+3. **`<KeepAlive>` for caching expensive component state:**
+   ```html
+   <!-- Caches up to 10 component instances — avoids teardown/remount cost -->
+   <KeepAlive :max="10">
+     <component :is="currentTab" />
+   </KeepAlive>
+   ```
+
+4. **`v-memo` for expensive list rendering (Vue 3.2+):**
+   ```html
+   <!-- Re-renders item only when its id or selected state changes -->
+   <div v-for="item in list" :key="item.id" v-memo="[item.id, item === selected]">
+     <ExpensiveComponent :item="item" />
+   </div>
+   ```
+
+5. **`v-once` for static content that never changes:**
+   ```html
+   <footer v-once>© 2026 Acme Corp</footer>
+   ```
+
+---
+
+### Testing
+
+> For test naming, pyramid ratios, and the AAA pattern, see `@.agents/rules/testing-strategy.md`. This section covers **Vue-specific tooling only**.
+
+1. **Mount wrapper with `@vue/test-utils` + `createTestingPinia`:**
+   ```typescript
+   import { mount } from '@vue/test-utils';
+   import { createTestingPinia } from '@pinia/testing';
+   import { vi } from 'vitest';
+
+   function mountComponent(overrides: Record<string, unknown> = {}) {
+     return mount(TaskView, {
+       global: {
+         plugins: [createTestingPinia({ createSpy: vi.fn })],
+         stubs: { RouterLink: true },
+       },
+       ...overrides,
+     });
+   }
+   ```
+
+2. **Component interaction — test behaviour, not implementation:**
+   ```typescript
+   test('calls createTask when form submitted', async () => {
+     const wrapper = mountComponent();
+     const store = useTaskStore();
+
+     await wrapper.find('[data-testid="title-input"]').setValue('New Task');
+     await wrapper.find('form').trigger('submit');
+
+     expect(store.createTask).toHaveBeenCalledWith(
+       expect.objectContaining({ title: 'New Task' }),
+     );
+   });
+   ```
+
+3. **Test composables in isolation:**
+   ```typescript
+   import { createApp } from 'vue';
+
+   /** Runs a composable inside a throwaway component context. */
+   function withSetup<T>(composable: () => T): [T, ReturnType<typeof createApp>] {
+     let result!: T;
+     const app = createApp({
+       setup() { result = composable(); return () => {}; },
+     });
+     app.mount(document.createElement('div'));
+     return [result, app];
+   }
+
+   test('useCounter increments', () => {
+     const [{ count, increment }] = withSetup(() => useCounter(0));
+     expect(count.value).toBe(0);
+     increment();
+     expect(count.value).toBe(1);
+   });
+   ```
+
+4. **Test Pinia stores independently:**
+   ```typescript
+   import { setActivePinia, createPinia } from 'pinia';
+
+   beforeEach(() => { setActivePinia(createPinia()); });
+
+   test('loadTasks populates store', async () => {
+     const store = useTaskStore();
+     await store.loadTasks();
+     expect(store.tasks).toHaveLength(3);
+   });
+   ```
+
+5. **Snapshot testing for complex output:**
+   ```typescript
+   test('renders task card correctly', () => {
+     const wrapper = mountComponent({ props: { task: mockTask } });
+     expect(wrapper.html()).toMatchSnapshot();
+   });
+   ```
+
+---
+
+### Feedback Loop — Development Workflow
+
+> **Critical:** Use `vue-tsc --noEmit` instead of `tsc --noEmit` for Vue projects.
+> `tsc` cannot type-check `.vue` `<template>` blocks — template errors will be **invisible**.
+
+| Phase | Command | Purpose |
+|---|---|---|
+| TDD / rapid iteration | `vue-tsc --noEmit` | Type-check templates + scripts — fastest loop |
+| Pre-commit | `eslint .` | Static analysis (`eslint-plugin-vue` required) — **zero warnings** |
+| Pre-commit | `prettier --write .` | Format — non-negotiable |
+| Pre-commit | `vitest run` | Unit tests — must all pass |
+| Coverage verification | `vitest run --coverage` | Verify before merging |
+
+**Rules:**
+- **Never** use `tsc --noEmit` on Vue projects — it skips all `.vue` template checking.
+- `eslint-plugin-vue` must be configured with `plugin:vue/vue3-recommended` or stricter.
+- `prettier` must handle `.vue` files (it does by default).
+
+---
+
+### Anti-Patterns
+
+> Quick reference — if you're about to do any of these, stop and use the recommended pattern.
+
+- ❌ **Options API in new code** — always use `<script setup lang="ts">`
+- ❌ **Destructuring reactive objects** — loses reactivity; use `toRefs()` or `storeToRefs()`
+- ❌ **Side effects in `computed`** — computed must be pure; use `watch` or `watchEffect`
+- ❌ **`v-if` + `v-for` on the same element** — wrap with `<template>`
+- ❌ **`:key="index"` on dynamic lists** — use stable unique IDs
+- ❌ **Direct store mutation from components** — use store actions
+- ❌ **Business logic in `<template>`** — move to `computed` or composables
+- ❌ **`tsc --noEmit` on Vue projects** — use `vue-tsc --noEmit` (template checking)
+- ❌ **`ref(null)` for template refs in Vue 3.5+** — use `useTemplateRef()` instead
+- ❌ **Verbose `modelValue` + emit in Vue 3.4+** — use `defineModel()` instead
+- ❌ **Importing API clients directly in stores** — inject via `inject()` for testability
+- ❌ **`watch` for derived state** — use `computed` instead (it's cached and more efficient)
 
 ---
 

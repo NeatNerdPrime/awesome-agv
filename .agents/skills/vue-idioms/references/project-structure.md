@@ -1,3 +1,8 @@
+---
+name: Vue Frontend Project Structure
+description: Directory layout for Vue 3 frontend apps with Vite, Pinia, and vertical feature slices.
+---
+
 ## Vue/React Frontend Layout
 
 Use this structure for web frontend applications. The vertical slice principle applies — features are self-contained modules, not scattered across global folders.
@@ -64,6 +69,50 @@ Use this structure for web frontend applications. The vertical slice principle a
 - `composables/` at root for global reactive logic; feature-specific hooks inside the feature
 
 > This structure applies equally to React (.tsx), Vue (.vue), and Svelte (.svelte). Replace component file extensions and state management (Redux/Zustand for React, Pinia for Vue) as needed.
+
+---
+
+### Test Organization
+
+> For test naming conventions and pyramid ratios, see `@.agents/rules/testing-strategy.md`. This section covers file placement only.
+
+**Unit Tests — Co-located (`.spec.ts` next to source)**
+```
+features/task/
+  components/
+    TaskForm.vue
+    TaskForm.spec.ts           # ← co-located component test
+  store/
+    task.store.ts
+    task.store.spec.ts         # ← co-located store test
+  services/
+    task.service.ts
+    task.service.spec.ts       # ← co-located logic test
+  api/
+    task.api.ts                # interface (no test needed)
+    task.api.mock.ts           # test double
+```
+
+**Integration Tests — Separate `tests/` directory**
+```
+tests/
+  helpers/
+    test-server.ts             # Shared setup/teardown
+    factories.ts               # Test data factories
+  integration/
+    task-api.integration.spec.ts
+```
+
+**E2E Tests — Isolated**
+```
+tests/
+  e2e/
+    task-flow.e2e.spec.ts      # Full browser tests (Playwright)
+```
+
+> For monorepos: E2E tests go in `apps/e2e/`. For single apps: `tests/e2e/`.
+
+---
 
 ### Related Principles
 - Project Structure @.agents/rules/project-structure.md (core philosophy)
