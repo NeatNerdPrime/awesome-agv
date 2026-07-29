@@ -855,8 +855,65 @@ ${c.green}${c.bold}  Installation complete! ${icon.rocket}${c.reset}
      ${c.cyan}/workflow-team${c.reset}  ${c.dim}Build with multi-agent orchestration${c.reset}
      ${c.cyan}/audit${c.reset}          ${c.dim}Review code quality${c.reset}
 
+
   ${icon.shield}  ${c.dim}Learn more: ${c.cyan}https://github.com/${REPO_OWNER}/${REPO_NAME}${c.reset}
 `);
+}
+
+// ── Open URL in default browser (cross-platform zero-dependency) ───────────────
+function openUrl(url) {
+  const platform = os.platform();
+  try {
+    if (platform === 'darwin') {
+      execSync(`open "${url}"`, { stdio: 'ignore' });
+    } else if (platform === 'win32') {
+      execSync(`start "" "${url}"`, { stdio: 'ignore' });
+    } else {
+      execSync(`xdg-open "${url}"`, { stdio: 'ignore' });
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ── Offer to Star Repository ───────────────────────────────────────────────────
+async function offerStarRepo() {
+  // Only offer in interactive TTY sessions
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    return;
+  }
+
+  const repoUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
+  const repoSlug = `${REPO_OWNER}/${REPO_NAME}`;
+
+  const answer = await promptUser(
+    `  ⭐  ${c.bold}Would you like to star our repository on GitHub?${c.reset} ${c.dim}(Y/n)${c.reset} `
+  );
+
+  if (answer === '' || answer === 'y' || answer === 'yes') {
+    let starredViaGh = false;
+    try {
+      execSync(`gh repo star ${repoSlug}`, { stdio: 'pipe' });
+      starredViaGh = true;
+    } catch {
+      // gh CLI not present, not logged in, or failed
+    }
+
+    if (starredViaGh) {
+      console.log(`\n  ${icon.check} ${c.green}${c.bold}Thank you for starring ${repoSlug}! ⭐${c.reset}\n`);
+    } else {
+      console.log(`\n  ${icon.rocket} ${c.cyan}Opening ${repoUrl} in your browser...${c.reset}`);
+      const opened = openUrl(repoUrl);
+      if (opened) {
+        console.log(`  ${icon.check} ${c.green}${c.bold}Thank you for your support! ⭐${c.reset}\n`);
+      } else {
+        console.log(`  ${icon.arrow} ${c.dim}Please visit: ${c.cyan}${repoUrl}${c.reset} ${c.dim}to star! ⭐${c.reset}\n`);
+      }
+    }
+  } else {
+    console.log(`  ${c.dim}No problem! Enjoy using Awesome AGV. 🚀${c.reset}\n`);
+  }
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
@@ -1051,6 +1108,9 @@ async function main() {
 
     // ── Success ──
     printSuccess(options.targetDir, mode, selectedStackKeys, gitignoreResult);
+
+    // ── Optional Star Repository Prompt ──
+    await offerStarRepo();
   } catch (err) {
     console.error(`\n  ${icon.error} ${c.red}Installation failed:${c.reset} ${err.message}\n`);
 
