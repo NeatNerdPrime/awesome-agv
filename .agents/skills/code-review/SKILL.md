@@ -9,7 +9,7 @@ description: Structured code review protocol for inspecting code quality against
 Systematically review code against the full antigravity rule set. Catches issues that linters miss: architectural violations, missing observability, business logic errors, pattern inconsistencies.
 
 ## When to Invoke
-- During the `/audit` workflow (Phase 1: Code Review)
+- During the `/audit` workflow (as part of parallel subagent dispatch)
 - When user asks for a code review outside any workflow
 - **Best practice:** Invoke in a fresh conversation (not the same one that authored the code) to avoid confirmation bias
 
@@ -44,8 +44,8 @@ Review each file/feature against these categories, in order from `rule-priority.
 - **Naming** — unclear variable/function names
 - **Code organization** — functions too long, mixed responsibilities
 
-#### Nit (Optional)
-- **Style** — formatting issues the linter would catch
+#### Enhancement (Backlog)
+- **Style** — formatting issues or non-critical refactorings
 - **Documentation** — missing comments on complex logic
 
 ### 4. Produce Findings
@@ -59,7 +59,7 @@ Reviewer: AI Agent (fresh context)
 
 ## Summary
 - **Files reviewed:** N
-- **Issues found:** N (X critical, Y major, Z minor, W nit)
+- **Issues found:** N (X critical, Y major, Z minor, W enhancement)
 
 ## Critical Issues
 - [ ] **[SEC]** {description} — [{file}:{line}](file:///path)
@@ -72,7 +72,7 @@ Reviewer: AI Agent (fresh context)
 ## Minor Issues
 - [ ] **[PAT]** {description} — [{file}:{line}](file:///path)
 
-## Nit
+## Enhancement Issues
 - [ ] {description} — [{file}:{line}](file:///path)
 
 ## Rules Applied
@@ -130,7 +130,7 @@ Load the anti-pattern checklist for the language(s) under review:
 
 ### 8. Cross-Boundary Checks
 
-For full audits, cross-boundary concerns (integration contracts, database schema, configuration hygiene, dependency health, test coverage gaps) are checked via the dedicated dimension checklist in the `/audit` workflow — **Phase 1.5: Cross-Boundary Review**.
+For full audits, cross-boundary concerns (integration contracts, database schema, configuration hygiene, dependency health, test coverage gaps) are checked via the dedicated MECE dimension scope cards in the `/audit` workflow (Dimension F & G) — defined in `.agents/skills/code-audit/references/audit-dimensions.md`.
 
 When invoking this skill standalone (outside `/audit`), apply the applicable dimensions from that checklist manually and tag findings with `[INT]`, `[DB]`, or `[CFG]` as appropriate.
 
