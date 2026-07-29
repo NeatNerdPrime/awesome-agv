@@ -157,6 +157,93 @@ user_id=user_id,
 
 ```
 
+##### Rust (using tracing + tracing-subscriber)
+
+**Basic tracing setup with subscriber configuration:**
+```rust
+use tracing_subscriber::EnvFilter;
+
+fn init_tracing() {
+    let filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new("info"));
+
+    tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .json() // Production: JSON format
+        .with_target(true)
+        .with_thread_ids(true)
+        .init();
+}
+```
+
+**Environment-specific config (dev vs prod):**
+```rust
+fn init_tracing(env: &str) {
+    let filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new("info"));
+
+    match env {
+        "development" => {
+            tracing_subscriber::fmt()
+                .with_env_filter(EnvFilter::new("debug"))
+                .pretty() // Pretty-printed for dev
+                .init();
+        }
+        _ => {
+            tracing_subscriber::fmt()
+                .with_env_filter(filter)
+                .json() // JSON for staging/prod
+                .with_target(true)
+                .init();
+        }
+    }
+}
+```
+
+**Structured logging with operation context (using #[instrument]):**
+```rust
+use tracing::{info, error, instrument};
+use uuid::Uuid;
+
+#[instrument(
+    skip(service),
+    fields(correlation_id = %Uuid::new_v4(), user_id = %user_id)
+)]
+pub async fn create_task(
+    service: &TaskService,
+    user_id: &str,
+    request: CreateTaskRequest,
+) -> Result<Task, AppError> {
+    info!(title = %request.title, "creating task");
+    let start = std::time::Instant::now();
+
+    let task = service.create(request).await.map_err(|e| {
+        error!(error = %e, "failed to create task");
+        e
+    })?;
+
+    info!(
+        task_id = %task.id,
+        duration_ms = start.elapsed().as_millis() as u64,
+        "task created successfully"
+    );
+    Ok(task)
+}
+```
+
+**Propagating spans across async tasks:**
+```rust
+use tracing::Instrument;
+
+// ✅ Propagate trace context into spawned tasks
+tokio::spawn(
+    async move { process_background_job(job_id).await }
+        .instrument(tracing::info_span!("background_job", job_id = %job_id))
+);
+```
+
+> For async runtime debugging (task starvation, blocked tasks), use `tokio-console` with `console-subscriber`. For distributed tracing, bridge `tracing` to OpenTelemetry via `tracing-opentelemetry`.
+
 ##### Log Patterns by Operation Type
 
 ##### API Request/Response
@@ -286,7 +373,7 @@ log.Fatal("critical dependency unavailable",
 | **Production**  | INFO  | JSON             | Stdout → CloudWatch/GCP |
 
 **Configuration (Go example):**
-```
+```go
 
 func configureLogger() *slog.Logger {
 var handler slog.Handler
@@ -306,6 +393,27 @@ var handler slog.Handler
     return slog.New(handler)
     }
 
+```
+
+**Configuration (Rust example):**
+```rust
+fn configure_logger() {
+    let env = std::env::var("ENV").unwrap_or_else(|_| "development".into());
+    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+
+    if env == "development" {
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::EnvFilter::new("debug"))
+            .pretty()
+            .init();
+    } else {
+        tracing_subscriber::fmt()
+            .with_env_filter(filter)
+            .json()
+            .init();
+    }
+}
 ```
 
 #### Testing Logs
