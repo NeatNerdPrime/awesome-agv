@@ -93,7 +93,7 @@
         "description": "hooks, Suspense, Server Components",
         "group": "core",
         "requires": ["typescript"],
-        "detect": [],
+        "detect": ["*.jsx", "*.tsx"],
         "skills": ["react-idioms"]
       },
       "nextjs": {
