@@ -11,6 +11,8 @@ paths:
 
 Axum (0.8+) rewards composability via Tower, type-safe extractors, and zero-cost abstractions. Idiomatic Axum = thin handlers, tower middleware, typed errors.
 
+> **Version note:** This skill targets Axum **0.8+** (released 2025). Key changes from 0.7: path parameter syntax changed from `:name` to `{name}`, `State` extractor is now in `axum::extract`, and `axum::serve` replaces `axum::Server`. If you encounter an existing codebase on 0.7, check the [Axum 0.8 changelog](https://github.com/tokio-rs/axum/blob/main/axum/CHANGELOG.md) before applying these patterns.
+
 > **Scope:** Axum-specific patterns. For Rust fundamentals: @.agents/skills/rust-idioms/SKILL.md. For project structure: @.agents/skills/rust-idioms/references/project-structure.md.
 
 ### Router and Route Organization
@@ -110,11 +112,42 @@ Axum (0.8+) rewards composability via Tower, type-safe extractors, and zero-cost
            ServiceBuilder::new()
                .layer(TraceLayer::new_for_http())
                .layer(CompressionLayer::new())
-               .layer(CorsLayer::permissive()) // tighten for production
+               .layer(CorsLayer::permissive()) // development ONLY — see below
                .layer(TimeoutLayer::new(Duration::from_secs(30)))
        )
        .with_state(state);
    ```
+
+   > **Never ship `CorsLayer::permissive()` to production.** It allows any origin, any method, any header, and sends no `Access-Control-Allow-Credentials`. Use an explicit, allow-listed layer instead. Load allowed origins from config, not literals:
+   ```rust
+    use tower_http::cors::CorsLayer;
+   use http::HeaderValue;
+
+   // ✅ Production-safe — explicit allow-list
+   fn cors_layer(allowed_origins: &[String]) -> CorsLayer {
+       let origins: Vec<HeaderValue> = allowed_origins
+           .iter()
+           .filter_map(|o| HeaderValue::try_from(o).ok())
+           .collect();
+       CorsLayer::new()
+           .allow_origin(origins)                                      // explicit list, NEVER Any in prod
+           .allow_methods([                                            // methods you actually serve
+               axum::http::Method::GET,
+               axum::http::Method::POST,
+               axum::http::Method::PUT,
+               axum::http::Method::DELETE,
+           ])
+           .allow_headers([
+               axum::http::header::AUTHORIZATION,
+               axum::http::header::CONTENT_TYPE,
+               axum::http::header::ACCEPT,
+           ])
+           .allow_credentials(true)                                    // required for cookies / auth
+           .max_age(Duration::from_secs(3600))                         // cache preflight 1h
+   }
+   // .layer(cors_layer(&config.cors.allowed_origins))
+   ```
+   > **Rule:** `allow_credentials(true)` is incompatible with `allow_origin(Any)` — browsers reject it. If you need credentials, you MUST enumerate origins. See `security-principles.md` §CORS.
 
 2. **Custom middleware with `from_fn`:**
    ```rust
@@ -147,11 +180,12 @@ Axum (0.8+) rewards composability via Tower, type-safe extractors, and zero-cost
    // ✅ Inject x-request-id into every span for log correlation
    let trace_layer = TraceLayer::new_for_http()
        .make_span_with(|request: &Request<_>| {
-           let request_id = request
-               .headers()
-               .get("x-request-id")
-               .and_then(|v| v.to_str().ok())
-               .unwrap_or("unknown");
+            let request_id = request
+                .headers()
+                .get("x-request-id")
+                .and_then(|v| v.to_str().ok())
+                .map(String::from)
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
            tracing::info_span!(
                "request",
                method = %request.method(),
@@ -167,6 +201,21 @@ Axum (0.8+) rewards composability via Tower, type-safe extractors, and zero-cost
    ```
 
    > All `tracing::info!`, `warn!`, `error!` calls inside a handler will automatically inherit the span fields above (method, uri, request_id). This satisfies the `correlationId` requirement from the Logging Mandate. See `logging-implementation/SKILL.md` §Rust for the full `init_tracing()` setup.
+
+5. **Request body size limits** — prevent denial-of-service via large payloads:
+   ```rust
+   use axum::extract::DefaultBodyLimit;
+
+   let app = Router::new()
+       .nest("/api/v1", api_routes())
+       .layer(DefaultBodyLimit::max(1024 * 1024))  // 1 MB global limit
+       .with_state(state);
+
+   // Per-route override for file uploads:
+   let upload_routes = Router::new()
+       .route("/upload", post(upload_file))
+       .layer(DefaultBodyLimit::max(50 * 1024 * 1024));  // 50 MB for uploads
+   ```
 
 ### Error Handling
 
@@ -243,8 +292,8 @@ Axum (0.8+) rewards composability via Tower, type-safe extractors, and zero-cost
 
        async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
            let Json(value) = Json::<T>::from_request(req, state)
-               .await
-               .map_err(|e| AppError::Validation(e.body_text()))?;
+                .await
+                .map_err(|e| AppError::Validation(e.to_string()))?;
            value.validate().map_err(|e| AppError::Validation(e.to_string()))?;
            Ok(ValidatedJson(value))
        }
@@ -336,21 +385,63 @@ Axum (0.8+) rewards composability via Tower, type-safe extractors, and zero-cost
    }
    ```
 
-2. **Mock state helpers** — create a `test_app_state()` fn that swaps real services for test doubles.
-3. **Integration tests** use a real database via `sqlx::test` or Testcontainers.
+2. **Mock state helpers** — inject trait-based test doubles for isolation:
+   ```rust
+   /// Build test AppState with mock services (no real DB needed)
+   fn test_app_state() -> Arc<AppState> {
+       let mock_task_service = MockTaskService::new();  // implements TaskService trait
+       Arc::new(AppState {
+           task_service: Box::new(mock_task_service),
+           config: test_config(),
+       })
+   }
+   ```
+   > This follows the trait-based DI pattern from `@.agents/rules/architectural-pattern.md` — swap real I/O implementations for test doubles at the `AppState` level.
+
+3. **`tower` dev-dependency required** — add `tower = { version = "0.5", features = ["util"] }` to `[dev-dependencies]` to use `ServiceExt::oneshot`.
+4. **Integration tests** use a real database via `sqlx::test` or Testcontainers.
 
 ### Graceful Shutdown
 
+Container orchestrators (Kubernetes, Docker `stop`) send **SIGTERM**, not SIGINT — handle BOTH. Use `tokio_util::sync::CancellationToken` (the recommended cancellation primitive per `@.agents/skills/rust-idioms/SKILL.md` §Async and Concurrency) so in-flight handlers and background tasks can observe the shutdown and unwind cooperatively. Axum's `with_graceful_shutdown` then drains active connections before exiting.
+
 ```rust
-// ✅ Signal-based graceful shutdown
+use tokio::signal;
+use tokio_util::sync::CancellationToken;
+
+// Wire the token into AppState so background tokio tasks can observe shutdown.
+let shutdown = CancellationToken::new();
+let state = Arc::new(AppState { /* ... */ shutdown: shutdown.clone() });
+
 let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
 axum::serve(listener, app)
-    .with_graceful_shutdown(async {
-        tokio::signal::ctrl_c().await.expect("failed to install CTRL+C handler");
-        tracing::info!("shutdown signal received");
-    })
+    .with_graceful_shutdown(shutdown_signal(shutdown.clone()))
     .await?;
 ```
+
+```rust
+/// ✅ Unified signal handler — fires on SIGINT (ctrl-c) OR SIGTERM (container stop).
+async fn shutdown_signal(token: CancellationToken) {
+    let ctrl_c = async { signal::ctrl_c().await.expect("install ctrl-c handler") };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("install SIGTERM handler")
+            .recv().await;
+    };
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c    => tracing::info!("SIGINT received, shutting down"),
+        _ = terminate => tracing::info!("SIGTERM received, shutting down"),
+    }
+    token.cancel(); // notify background tasks + long-lived handlers to unwind
+}
+```
+
+> **Why:** Axum stops accepting new connections and drains in-flight requests before exiting. The shared `CancellationToken` lets your background workers (queue consumers, scheduled jobs, long-poll handlers) observe the same shutdown and exit cooperatively instead of being killed mid-write. Add `tokio-util` (with the `rt` feature) to your dependencies. See `rust-idioms` §Async and Concurrency for the cancellation-safety policy.
 
 ### Anti-Patterns
 
