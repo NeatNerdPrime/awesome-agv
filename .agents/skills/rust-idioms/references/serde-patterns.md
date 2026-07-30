@@ -139,9 +139,63 @@ pub enum Input {
 
 ---
 
+## Newtype Serialization
+
+### `transparent` — Newtype Wrappers
+
+Use `#[serde(transparent)]` on newtype structs to serialize/deserialize as the inner type. Critical for Domain-Driven Design where domain IDs wrap primitives:
+
+```rust
+// ✅ Serializes as a plain UUID string, not {"0": "..."}
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[serde(transparent)]
+pub struct TaskId(pub Uuid);
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct Email(pub String);
+
+// JSON: "550e8400-e29b-41d4-a716-446655440000" (not wrapped in an object)
+let id = TaskId(Uuid::new_v4());
+let json = serde_json::to_string(&id).unwrap();
+```
+
+> **Rule:** Every newtype wrapper that appears in API request/response types MUST have `#[serde(transparent)]`. Without it, serde serializes the newtype as a single-field struct, breaking API contracts.
+
+## Struct-Level Defaults
+
+### `default` at Struct Level
+
+Apply `#[serde(default)]` at the struct level to use `Default::default()` for ALL missing fields during deserialization. This differs from field-level `#[serde(default)]` which applies to individual fields:
+
+```rust
+// ✅ All fields use their Default impl when missing from input
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct PaginationParams {
+    pub page: u32,          // defaults to 0
+    pub per_page: u32,      // defaults to 0 — override with manual Default impl
+    pub sort_by: String,    // defaults to ""
+}
+
+impl Default for PaginationParams {
+    fn default() -> Self {
+        Self {
+            page: 1,
+            per_page: 20,
+            sort_by: String::from("created_at"),
+        }
+    }
+}
+```
+
+> Use struct-level `#[serde(default)]` for config structs and query parameters where most fields have sensible defaults. Use field-level `#[serde(default = "fn_name")]` when only specific fields need custom defaults.
+
+---
+
 ## Request / Response Type Pattern
 
-The full request/response type pattern (struct definitions, `#[validate]` attributes, `From<Domain> for Response` conversion, and `.into()` in handlers) is documented in `axum-idioms/SKILL.md` §Response Types and Domain Conversion.
+The full request/response type pattern (struct definitions, `#[validate]` attributes, `From<Domain> for Response` conversion, and `.into()` in handlers) is documented in `@.agents/skills/axum-idioms/SKILL.md` §Response Types and Domain Conversion.
 
 **Key serde attributes for the pattern:**
 - Request structs: `#[serde(rename_all = "camelCase")]` + `#[serde(default)]` on optional fields
@@ -154,9 +208,9 @@ The full request/response type pattern (struct definitions, `#[validate]` attrib
 
 ## Anti-Patterns
 
-- ❌ **Using `serde_json::Value` for typed data** — always deserialize into typed structs for compile-time safety
+- ❌ **Using `serde_json::Value` for typed data** — always deserialize into typed structs for compile-time safety. Acceptable uses of `Value`: JSON merge patches (RFC 7396), schema-less metadata fields (`metadata: Value`), and forwarding unknown JSON between services without inspection.
 - ❌ **Applying `deny_unknown_fields` on external API responses** — breaks when API evolves
-- ❌ **Mixing `flatten` with `deny_unknown_fields`** — produces unpredictable behavior
+- ❌ **Mixing `flatten` with `deny_unknown_fields`** — produces unpredictable behavior. `#[serde(flatten)]` is valid for embedding shared field structs (e.g., pagination fields into a response), but be aware it disables `deny_unknown_fields` on the outer struct and has a ~20% deserialization performance overhead due to internal buffering.
 - ❌ **Renaming fields individually** when `rename_all` covers the entire struct
 - ❌ **Using `String` for structured data** — parse into domain types at the boundary
 - ❌ **Skipping `#[serde(default)]` on optional fields** in requests — forces clients to send every field

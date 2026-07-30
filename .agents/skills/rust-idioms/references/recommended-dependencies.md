@@ -6,6 +6,8 @@ description: A curated list of recommended crates and versions for new Rust proj
 # Recommended Dependencies (Rust — July 2026)
 
 > **Target:** Rust stable 1.97+. All crates below are actively maintained, widely adopted, and represent the community-recommended choices as of July 2026. Always check crates.io for the latest patch version within these major lines.
+>
+> **Last verified:** July 2026. Review this list quarterly or when starting a new project.
 
 ## Core Stack
 
@@ -15,7 +17,7 @@ description: A curated list of recommended crates and versions for new Rust proj
 | HTTP Framework | `axum` | `0.8` | — | Tokio-native, Tower-based. See `axum-idioms` skill. |
 | Tower Middleware | `tower` | `0.5` | — | Often transitive via axum. |
 | Tower HTTP | `tower-http` | `0.6` | `trace`, `cors`, `compression` | HTTP-specific middleware layers. |
-| Serialization | `serde` | `1` | `derive` | De facto standard. See `references/serde-patterns.md`. |
+| Serialization | `serde` | `1` | `derive` | De facto standard. See `serde-patterns.md` (in this skill's `references/`). |
 | JSON | `serde_json` | `1` | — | JSON serialization/deserialization. |
 | Error (library) | `thiserror` | `2` | — | Typed error enums with `#[derive(Error)]`. Supports `no_std`. |
 | Error (application) | `anyhow` | `1` | — | Ergonomic error chaining for app code. Never in library crates. |
@@ -27,14 +29,19 @@ description: A curated list of recommended crates and versions for new Rust proj
 | Date/Time | `chrono` | `0.4` | `serde` | Or `time` crate — pick one per project, don't mix. |
 | CLI | `clap` | `4` | `derive` | CLI argument parsing with derive macros. |
 | Config | `config` | `0.14` | — | Layered configuration (env, file, defaults). |
+| Env Loading | `dotenvy` | `0.15` | — | Load `.env` files into env vars. Maintained fork of `dotenv`. |
+| Regex | `regex` | `1` | — | Fast, safe regular expressions. Use `once_cell` or `LazyLock` for compiled patterns. |
+| Randomness | `rand` | `0.9` | — | Random number generation. Use `rand::thread_rng()` for non-crypto, `rand_chacha` for reproducible. |
 
 ## Resilience & Networking
 
 | Category | Crate | Version | Notes |
 |---|---|---|---|
-| Retry / Circuit Breaker | `tower-resilience` | latest | Retry, circuit breaker, bulkhead. Replaces hand-rolled retry logic. |
+| Retry / Circuit Breaker | `tower-resilience` | `0.10` | Retry, circuit breaker, bulkhead, coalesce, hedge. Replaces hand-rolled retry logic. Enable features per middleware (e.g. `circuitbreaker`, `retry`). |
 | HTTP Client | `reqwest` | `0.12` | Tokio-based HTTP client. Use with `json` and `rustls-tls` features. |
 | gRPC | `tonic` | `0.12` | gRPC over HTTP/2 with tokio. |
+| Data Parallelism | `rayon` | `1` | CPU-bound parallel iterators. Never mix with tokio — use `spawn_blocking` bridge. |
+| Complex Serde | `serde_with` | `3` | Custom serialization helpers (base64, display/fromstr, timestamps). |
 
 ## Testing
 
@@ -54,11 +61,11 @@ description: A curated list of recommended crates and versions for new Rust proj
 | Category | Tool | Notes |
 |---|---|---|
 | Formatting | `cargo fmt` (rustfmt) | Non-negotiable. Run before every commit. |
-| Linting | `cargo clippy` | Must pass with zero warnings. See SKILL.md §Clippy. |
+| Linting | `cargo clippy` | Must pass with zero warnings. See `@.agents/skills/rust-idioms/SKILL.md` §Clippy. |
 | Type checking | `cargo check` | Fastest feedback loop during development. |
 | Audit | `cargo audit` | Check for known vulnerabilities in deps. |
 | Async debugging | `tokio-console` + `console-subscriber` | Visual async runtime inspector. |
-| Profiling | `cargo-flamegraph` | CPU flamegraphs. See `perf-optimization/languages/rust.md`. |
+| Profiling | `cargo-flamegraph` | CPU flamegraphs. See `@.agents/skills/perf-optimization/languages/rust.md`. |
 | Binary bloat | `cargo-bloat` | Analyze binary size by crate. |
 | Feature testing | `cargo-hack` | Test all feature flag combinations in CI. |
 
@@ -143,7 +150,7 @@ workspace = true
 - ❌ Pinning exact versions `dep = "=1.2.3"` — prevents security patches
 - ❌ Mixing `log` and `tracing` in the same app — choose `tracing` for async
 - ❌ Using `thiserror` 1.x in new projects — use `thiserror` 2.x
-- ❌ Adding `async-trait` as a default dependency — only include it when `dyn Trait` dynamic dispatch is explicitly required (e.g., `Box<dyn MyTrait>` or `Arc<dyn MyTrait>`). For static dispatch (`impl MyTrait` or generic `T: MyTrait`), use native `async fn` in traits (stable since Rust 1.75).
+- ❌ Adding `async-trait` as a default dependency — only include it when `dyn Trait` dynamic dispatch is explicitly required. For the full policy (static vs dynamic dispatch, when to add the crate), see `@.agents/skills/rust-idioms/SKILL.md` §Toolchain (1.75+ milestone) — single source of truth.
 - ❌ Using `actix-web` for new projects without specific reason — `axum` is the ecosystem default
 
 ### Related

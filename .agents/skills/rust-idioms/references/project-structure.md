@@ -57,9 +57,11 @@ For CLI tools, standalone servers, and single-purpose applications.
 
 **Key Rust conventions:**
 - `src/lib.rs` + `src/main.rs` — enables integration testing against `lib.rs` public API
-- `mod.rs` re-exports — each feature's `mod.rs` is its public boundary
+- **Module style:** Both `foo/mod.rs` and `foo.rs` + `foo/` directory styles are valid Rust. This project uses `mod.rs` style for consistency — each feature directory has a `mod.rs` that re-exports public items. Pick one style per project and stay consistent.
 - `error.rs` per feature — typed errors with `thiserror`, composed at app level with `#[from]`
 - `tests/` directory — integration tests see only the public API, enforcing encapsulation
+- `examples/` directory — runnable examples (`cargo run --example name`) for library crates
+- `benches/` directory — benchmarks with `criterion` (`cargo bench`)
 - No `controllers/` or `services/` at the top level — features are the top-level organization
 
 ---
@@ -225,5 +227,5 @@ Each service is its own directory under `apps/` with its own `Cargo.toml` and `D
 
 ### Related Principles
 - Project Structure @.agents/rules/project-structure.md (core philosophy)
-- Rust Idioms and Patterns @../SKILL.md
+- Rust Idioms and Patterns @.agents/skills/rust-idioms/SKILL.md
 - Testing Strategy @.agents/rules/testing-strategy.md

@@ -176,6 +176,90 @@ Spinning in an empty `loop {}` consumes 100% CPU on a core.
 - **Anti-Pattern:** `loop {}` used for blocking or waiting.
 - **Recommended Practice:** Use `thread::sleep`, async synchronization primitives (`tokio::sync::notify`), or thread parking (`thread::park()`).
 
+### Blocking the Async Runtime
+
+Performing CPU-heavy computation or synchronous I/O inside an `async` function starves the tokio runtime, blocking all other tasks on that worker thread.
+
+- **Anti-Pattern:** Calling `std::fs::read`, `std::thread::sleep`, or running CPU-intensive computations directly in an `async fn`.
+- **Recommended Practice:** Use `tokio::task::spawn_blocking` to move blocking work to a dedicated thread pool.
+
+```rust
+// ❌ Anti-pattern — blocks the async runtime thread
+async fn process_file(path: &Path) -> Result<Data> {
+    let content = std::fs::read_to_string(path)?;  // Synchronous I/O!
+    parse_data(&content)  // CPU-heavy parsing
+}
+
+// ✅ Recommended — offload to blocking thread pool
+async fn process_file(path: PathBuf) -> Result<Data> {
+    tokio::task::spawn_blocking(move || {
+        let content = std::fs::read_to_string(&path)?;
+        parse_data(&content)
+    })
+    .await?
+}
+```
+
+> **Rule of thumb:** If an operation takes >10µs or does any synchronous I/O, it must be in `spawn_blocking`. For async file I/O, prefer `tokio::fs` over `std::fs`.
+
+### Abusing `Deref` for Inheritance
+
+Implementing `Deref` on a type to "inherit" methods from an inner type creates confusing APIs and violates the principle of least astonishment.
+
+- **Anti-Pattern:** Using `Deref` to simulate OOP inheritance (e.g., `Deref<Target = InnerType>` to access `InnerType` methods on the outer type).
+- **Recommended Practice:** Use explicit delegation, composition, or trait implementations. `Deref` should only be used for smart pointer types (`Box`, `Arc`, `Rc`, `MutexGuard`) where the wrapper truly "is-a" transparent handle to the inner value.
+
+```rust
+// ❌ Anti-pattern — Deref as "inheritance"
+struct Admin {
+    user: User,
+}
+impl Deref for Admin {
+    type Target = User;
+    fn deref(&self) -> &User { &self.user }
+}
+// admin.username() works but hides the delegation — confusing API
+
+// ✅ Recommended — explicit delegation
+struct Admin {
+    user: User,
+}
+impl Admin {
+    pub fn username(&self) -> &str { self.user.username() }
+    pub fn email(&self) -> &str { self.user.email() }
+}
+```
+
+### `Pin` and Self-Referential Structs
+
+Async Rust relies on `Pin` to prevent moving futures that contain self-referential state (pointers to their own fields).
+
+- **Key rules:**
+  - Most async code doesn't need to interact with `Pin` directly — `async`/`.await` handles it
+  - When implementing `Stream` or `Future` manually, use `Pin<Box<dyn Future>>` to heap-allocate and pin
+  - Never move a value after pinning it — this is the core `Pin` invariant
+  - If the compiler says your type is `!Unpin`, it likely contains a self-referential future — use `Box::pin()` to resolve
+
+```rust
+// ✅ Pinning a future for storage in a collection
+use std::pin::Pin;
+use std::future::Future;
+
+type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
+
+struct TaskQueue {
+    pending: Vec<BoxFuture<'static, Result<(), Error>>>,
+}
+
+impl TaskQueue {
+    fn push<F: Future<Output = Result<(), Error>> + Send + 'static>(&mut self, fut: F) {
+        self.pending.push(Box::pin(fut));
+    }
+}
+```
+
+> For most application code, you won't need to use `Pin` directly. It becomes relevant when building custom futures, streams, or storing heterogeneous future collections.
+
 ---
 
 ## 3. Memory Safety, Smart Pointers, and Indirection
@@ -473,7 +557,6 @@ let millis = duration.subsec_millis();
 | `vec.iter().count()` | `vec.len()` | Direct `.len()` query on collections with length properties. |
 | `iter.skip(n).next()` | `iter.nth(n)` | Direct `nth()` implementation avoids unnecessary adapter allocation. |
 | `string.extend(other.chars())` | `string.push_str(&other)` | `push_str` copies byte slices in bulk rather than char-by-char iteration. |
-| `vec.into_iter().filter(p).collect()` | `vec.retain(p)` | `.retain()` modifies existing buffer in-place without reallocating. |
 | `match val { Some(x) => expr, _ => () }` | `if let Some(x) = val { expr }` | `if let` reduces nesting and visual complexity for single-arm matches. |
 | `Arc<RwLock<HashMap<K, V>>>` | `Arc<DashMap<K, V>>` | Lock-sharded concurrent map reduces thread contention under write loads. |
 | `s.replace('a', "x").replace('b', "x")` | `s.replace(\|c\| matches!(c, 'a' \| 'b'), "x")` | Single string pass avoids intermediate heap allocations. |
@@ -537,3 +620,14 @@ let service = ServiceBuilder::new()
 ### Idempotency Requirement
 
 > **Never retry non-idempotent operations** unless the operation has an idempotency key. `GET`, `PUT`, and `DELETE` are generally safe to retry. `POST` requires an explicit idempotency key header or transaction ID.
+
+---
+
+### Related
+- Rust Idioms and Patterns @.agents/skills/rust-idioms/SKILL.md
+- Security Mandate @.agents/rules/security-mandate.md
+- Security Principles @.agents/rules/security-principles.md
+- Concurrency and Threading Principles @.agents/rules/concurrency-and-threading-principles.md
+- Resources and Memory Management Principles @.agents/rules/resources-and-memory-management-principles.md
+- Performance Optimization Principles @.agents/rules/performance-optimization-principles.md
+- Performance (Rust) @.agents/skills/perf-optimization/languages/rust.md
