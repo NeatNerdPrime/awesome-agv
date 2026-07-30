@@ -9,19 +9,22 @@ Common patterns for `zod` runtime validation in TypeScript applications.
 
 ## Zod Version Compatibility
 
-> **This file targets Zod 3.x (the default).** Always check the project's `package.json` before assuming v3 behavior.
+> **Zod 4 is the current stable release** (stable since mid-2025; the default for new projects as of July 2026). **Always check the project's `package.json` before writing schemas** — many existing codebases still run Zod 3.x.
 
 | Version | Status | Notes |
 |---|---|---|
-| Zod 3.x | Stable default | All patterns in this file apply |
-| Zod 4.x | Breaking changes | Released May 2025 — see migration notes below |
+| Zod 4.x | Current stable (default for new projects) | All patterns in this file apply unless noted |
+| Zod 3.x | Legacy, still widely deployed | Use the v3 variants where noted; `import { z } from 'zod/v3'` is available in the v4 package for incremental migration |
 
-**Zod 4.x breaking changes (check `package.json` before writing schemas):**
+**Zod 4 breaking changes (verify against `package.json` before writing schemas):**
 - `z.object()` is now **strict by default** (equivalent to old `.strict()`) — use `z.looseObject()` for old passthrough behavior
-- `z.string().email()` uses a stricter RFC 5321 validator — test against your actual data set
-- `import { z } from 'zod'` still works (no path change for clean v4 installs)
+- `z.string().email()` uses a stricter RFC 5321 validator — test against your actual data set. Prefer the new top-level `z.email()` (string formats are now top-level functions)
+- `import { z } from 'zod'` still works (no path change for clean v4 installs); `zod/v3` subpath available for compat
 - `z.interface()` is a new alternative to `z.object()` for open types — prefer `z.object()` unless you need it
-- Error formatting API changed: `error.formErrors` → prefer `error.flatten()` (stable in both versions)
+- Error formatting: use `error.flatten()` (stable in both versions); `z.prettifyError()` is new in v4 for human-readable output
+- Error customization: prefer the unified `error` parameter over the deprecated `message`/`required_error`/`invalid_type_error`
+- `.refine()` now lives inside schemas (no longer wraps in `ZodEffects`), so it composes with `.min()` etc.
+- New: `z.toJSONSchema()`, `z.templateLiteral()`, `z.file()`, `z.stringbool()`, `z.meta()` (replaces `.describe()`)
 
 ## Schema-First Design — Single Source of Truth
 Define the Zod schema first, then infer the TypeScript type. Never duplicate.

@@ -10,7 +10,12 @@ paths:
 ## Core Philosophy
 TypeScript's type system is your documentation, your test, and your specification — all at once. Make the type system encode the invariants of your domain so that invalid states are unrepresentable. Lean into the compiler.
 
-> **Scope:** This file covers TypeScript-specific *type system and language idioms*. For framework-specific patterns, see the respective idiom skill (Vue, React, Angular, Next.js, Hono). For file layout, see `references/project-structure.md`. For detailed safety, SAST patterns, and performance patterns, see `references/ts-patterns-and-anti-patterns.md`. For quality commands, see `code-idioms-and-conventions.md`. For logging library, see `@.agents/skills/logging-implementation/SKILL.md`.
+> **Scope:** This file covers TypeScript-specific *type system and language idioms*. For framework-specific patterns, see the respective idiom skill (Vue, React, Angular, Next.js, Hono). For file layout, see `references/project-structure.md`. For detailed safety, SAST patterns, and performance patterns, see `references/ts-patterns-and-anti-patterns.md`. For quality commands, see `@.agents/rules/code-idioms-and-conventions.md`. For logging library, see `@.agents/skills/logging-implementation/SKILL.md`.
+
+> **Loading guards:**
+> - **Plain JavaScript (no `tsconfig.json`):** load `@.agents/skills/javascript-idioms/SKILL.md` instead — this skill assumes strict-mode TS.
+> - **Hono backend:** `hono` has no repo-level marker file, so it is not auto-detected. If `hono` appears in `package.json` dependencies, **co-load `@.agents/skills/hono-idioms/SKILL.md`** alongside this skill.
+> - **Test-file naming diverges by framework:** see `references/project-structure.md` § Test Organization for the reconciliation rule before creating test files.
 
 ## When to Load References
 

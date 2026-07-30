@@ -41,14 +41,14 @@ Place tests **next to the file** they test. This keeps tests visible, encourages
 
 | Language | Unit | Integration |
 |---|---|---|
-| TS/JS | `*.spec.ts` | `*.integration.spec.ts` |
+| TS/JS | framework-dependent — see note below | framework-dependent |
 | Go | `*_test.go` | `*_integration_test.go` |
 | Dart/Flutter | `*_test.dart` (in `test/` mirroring `lib/`) | `*_integration_test.dart` |
 | Python | `test_*.py` | `test_*_integration.py` |
 | Java | `*Test.java` | `*IT.java` |
 | Rust | `#[cfg(test)] mod tests` inline | `tests/` at crate root |
 
-> Strictly follow the convention for the target language. Do not mix `test` and `spec` suffixes in the same application context.
+> **TS/JS test-naming is framework-dependent, not a single suffix.** Authoritative rule: `@.agents/skills/typescript-idioms/references/project-structure.md` §Test Organization. Summary: Vue & Angular use `*.spec.ts` (CLI default); React uses `*.test.tsx`; generic TS, Hono, and Next.js App Router use `*.test.ts` (Next.js co-locates in `__tests__/`). Do not mix `test` and `spec` suffixes within a single package — follow that package's framework convention.
 
 ### Language-Specific Overrides
 

@@ -7,9 +7,11 @@ description: Directory layout for Node.js/TypeScript backend services, libraries
 
 TypeScript is framework-agnostic. For framework-specific layouts, see the relevant skill:
 
-- **Vue/React Frontend (Vite)**: See `@.agents/skills/vue-idioms/references/project-structure.md`
-- **Angular Frontend**: See `@.agents/skills/angular-idioms/references/project-structure.md`
-- **Next.js**: See `@.agents/skills/nextjs-idioms/references/project-structure.md`
+- **Vite SPA frontend (React / Vue / Svelte)**: See `@.agents/skills/frontend-design/references/frontend-layout.md` (framework-neutral) + the framework's deltas
+- **React SPA**: `@.agents/skills/react-idioms/references/project-structure.md`
+- **Vue SPA**: `@.agents/skills/vue-idioms/references/project-structure.md`
+- **Angular**: See `@.agents/skills/angular-idioms/references/project-structure.md` (uses `app/` not `src/`, different layout)
+- **Next.js**: See `@.agents/skills/nextjs-idioms/references/project-structure.md` (App Router, not Vite SPA)
 - **Hono / Node.js Backend**: See `@.agents/skills/hono-idioms/references/project-structure.md`
 
 ### Generic TypeScript Backend (Single App)
@@ -162,6 +164,8 @@ project-root/
 ---
 
 ### Test Organization in TypeScript
+
+> **Reconciliation rule (authoritative — framework skills defer to this):** Test-file naming follows the **framework CLI default** when one exists; otherwise co-located `*.test.ts`. Concretely: Vue and Angular use `*.spec.ts` (their CLI conventions); Next.js App Router uses `__tests__/*.test.ts`; Hono and generic TS use co-located `*.test.ts`. In a monorepo mixing frameworks, each package follows its own framework's convention — do not force one across all packages.
 
 TypeScript has a convention-based two-tier test system:
 

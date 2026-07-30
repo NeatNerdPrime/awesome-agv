@@ -15,7 +15,7 @@ description: Curated packages, starter configs (tsconfig, vitest, eslint), and v
 | Runtime | Node.js | 24 LTS | |
 | Language | TypeScript | 5.8+ | |
 | Dev Execution | tsx | | replaces ts-node |
-| Validation | zod | **3.x** (default) | v4 released May 2025 — has breaking changes; check `package.json` and see `references/zod-patterns.md` §Version Compatibility before writing schemas |
+| Validation | zod | **4.x** (default for new projects) | v3 still widely deployed; check `package.json` and see `references/zod-patterns.md` §Version Compatibility before writing schemas |
 | HTTP Framework | Depends on project | | Hono, Express, Fastify (see framework skills) |
 | Serialization | superjson | | preserves Date, Map, Set, BigInt |
 | Date/Time | date-fns | 4.x | or Temporal API (when stable) |
