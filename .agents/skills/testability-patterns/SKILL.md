@@ -115,14 +115,12 @@ pub trait TaskStorage: Send + Sync {
     async fn create(&self, task: &Task) -> Result<(), StorageError>;
 }
 
-// storage_pg.rs — Production adapter
-pub struct PostgresTaskStorage { pool: PgPool }
-
-impl TaskStorage for PostgresTaskStorage {
-    async fn get_by_id(&self, id: &str) -> Result<Task, StorageError> {
-        // real sqlx query
-    }
-}
+// storage_pg.rs — Production adapter (sqlx)
+// The full PostgresTaskStorage implementation (sqlx::query_as!, pool wiring,
+// error mapping, transaction handling) lives in a single source of truth:
+// @.agents/skills/rust-idioms/references/sqlx-patterns.md §Repository Pattern.
+// Do not duplicate the production adapter here — this skill shows only the
+// contract + test double that make the trait testable in isolation.
 
 // In tests — In-memory adapter
 pub struct InMemoryTaskStorage {
@@ -139,7 +137,7 @@ impl TaskStorage for InMemoryTaskStorage {
 }
 ```
 
-> **Note (Rust 1.75+):** Native `async fn` in traits uses static dispatch. Use `#[async_trait]` (from the `async-trait` crate) only when you need dynamic dispatch via `dyn Trait` — e.g., `Box<dyn TaskStorage>` for runtime polymorphism. Prefer static dispatch (`impl TaskStorage` or `T: TaskStorage`) by default.
+> **`async fn` in traits (Rust 1.75+):** Native `async fn` in traits uses static dispatch — no `async-trait` crate required for `impl Trait` / `T: Trait`. Use `#[async_trait]` only when you need dynamic dispatch via `dyn Trait` (`Box<dyn TaskStorage>`, `Arc<dyn TaskStorage>`). See `@.agents/skills/rust-idioms/SKILL.md` §Toolchain (MSRV milestones) for the single source of truth on this policy.
 
 #### Flutter / Dart (Riverpod)
 

@@ -12,7 +12,7 @@ paths:
 
 Rust's type system and ownership model are your primary tools for correctness. Lean into the compiler — it is your strongest ally. Write code that is idiomatic, safe, and expressive.
 
-> **Scope:** This file covers Rust-specific *coding idioms*. For file layout, see `references/project-structure.md`. For detailed safety, SAST security invariants, and performance patterns, see `references/rust-patterns-and-anti-patterns.md`. For test naming conventions, see `testing-strategy.md`. For logging library choice, see @.agents/skills/logging-implementation/SKILL.md.
+> **Scope:** This file covers Rust-specific *coding idioms*. For file layout, see `references/project-structure.md` (in this skill). For detailed safety, SAST security invariants, and performance anti-patterns, see `references/rust-patterns-and-anti-patterns.md` (in this skill). For Rust test naming and conventions, see §Testing below; for universal testing principles, see `@.agents/rules/testing-strategy.md`. For logging library choice and setup, see `@.agents/skills/logging-implementation/SKILL.md`.
 
 ### Toolchain and Minimum Supported Rust Version
 
@@ -25,7 +25,10 @@ rust-version = "1.97"
 ```
 
 **Key version milestones that affect this skill:**
-- **1.75+** — Native `async fn` in traits (no `async_trait` crate needed for static dispatch)
+- **1.75+** — Native `async fn` in traits (no `async_trait` crate needed for static dispatch). This milestone is the **single source of truth** for the `async-trait` crate policy:
+  - **Prefer static dispatch** — `impl MyTrait` return params or generic `T: MyTrait` bounds use native `async fn` in traits; no crate required and zero dispatch overhead.
+  - **Use the `async-trait` crate only when** dynamic dispatch via `dyn Trait` is explicitly required — e.g. `Box<dyn MyTrait>`, `Arc<dyn MyTrait>` for runtime polymorphism, object-safe trait objects, or storing heterogeneous trait impls in a collection.
+  - **Never add `async-trait` as a default dependency** just for ergonomics — it adds a heap allocation and dynamic dispatch cost. Add it only for the specific crates/traits that need `dyn` dispatch.
 - **1.74+** — Workspace lint inheritance (`[workspace.lints]`)
 - **1.63+** — `Mutex::new()` in `const` context (no `OnceCell` wrapper needed)
 
@@ -100,15 +103,13 @@ pub enum PathfinderError {
 // ❌ Bad — stringly-typed, unmatchable
 fn do_thing() -> Result<(), String> { ... }
 
-// ✅ Annotate public Result-producing functions to force callers to handle them
+// ✅ Use #[must_use] on functions returning non-Result types that callers must handle
 #[must_use]
-pub fn create_task(req: CreateTaskRequest) -> Result<Task, TaskError> { ... }
+pub fn compute_checksum(data: &[u8]) -> u64 { ... }
 
-// Triggers a compiler warning when the return value is fully ignored:
-//   create_task(req);          // warning: unused `Result` that must be used
-//
-// This does NOT trigger the warning (intentional discard — still valid when used deliberately):
-//   let _ = create_task(req);  // explicit discard, silences warning by design
+// ℹ️ Result<T, E> already has #[must_use] in std — adding it to Result-returning
+// functions is redundant. The compiler warns on unused Result values automatically.
+pub fn create_task(req: CreateTaskRequest) -> Result<Task, TaskError> { ... }
 ```
 
 4. **Use lazy evaluation for fallback values:**
@@ -142,6 +143,12 @@ pub fn create_task(req: CreateTaskRequest) -> Result<Task, TaskError> { ... }
    - Never call blocking I/O inside async context
    - Use `tokio::task::spawn_blocking` for CPU-heavy or blocking work
    - Use `tokio::fs` instead of `std::fs` inside async functions
+
+4. **Use `tracing` instead of `log`** for all structured diagnostics in async applications:
+   - `tracing` is span-aware — log entries inherit context from parent spans (correlation IDs, request metadata)
+   - `log` is fire-and-forget with no span concept — unsuitable for async where context flows across `.await` boundaries
+   - Use `#[tracing::instrument]` on async functions to automatically create spans with function arguments
+   - See `@.agents/skills/logging-implementation/SKILL.md` §Rust for the full setup
 
 ### Unsafe Code
 
@@ -295,7 +302,7 @@ pub fn create_task(req: CreateTaskRequest) -> Result<Task, TaskError> { ... }
      - `assert!(true)` → remove entirely (it tests nothing)
      - These are dead-code signals that should use proper constructs
 
-4. **Property testing:** Use `proptest` or `quickcheck` for functions with wide input spaces
+4. **Property testing:** Use `proptest` (preferred) or `quickcheck` for functions with wide input spaces. `proptest` is preferred for its superior strategy composability, automatic shrinking, and more expressive generators.
 
 5. **Test coverage is non-negotiable for new code:**
    - Every new `pub fn`, `pub struct` method, and `impl` block MUST have at least one test
@@ -373,7 +380,7 @@ pub fn create_task(req: CreateTaskRequest) -> Result<Task, TaskError> { ... }
    }
    ```
 
-   > **Prefer hand-written fakes** for core domain traits — they are easier to debug and don't couple tests to implementation details. Use `mockall` when you genuinely need interaction verification (call counts, argument matching).
+   > **Prefer hand-written fakes** for core domain traits — they are easier to debug and don't couple tests to implementation details. Use `mockall` only when the trait has many methods or you genuinely need interaction verification (call counts, argument matching, call ordering). Over-mocking with `mockall` leads to brittle tests that break on implementation changes.
 
 ### Clippy and Formatting
 
@@ -445,7 +452,7 @@ pub fn create_task(req: CreateTaskRequest) -> Result<Task, TaskError> { ... }
    | Lint | When Acceptable |
    |---|---|
    | `unwrap_used` | In `#[cfg(test)]` modules only |
-   | `expect_used` | With `// SAFETY:` comment proving infallibility, or in test code |
+   | `expect_used` | In `#[cfg(test)]` modules, OR with a `// SAFETY:` comment proving infallibility, OR in a CLI `main()` that owns the process exit (clear message + exit code). This reconciles with the `expect_used = "warn"` lint level in `recommended-dependencies.md` — `warn` permits these uses while still surfacing every other `expect()` for review. |
    | `module_name_repetitions` | When the repetition is intentional API design |
    | `must_use_candidate` | On internal functions where the caller pattern is known |
    | `missing_errors_doc` | Temporarily during development (must be resolved before merge) |
@@ -546,7 +553,13 @@ pub fn create_task(req: CreateTaskRequest) -> Result<Task, TaskError> { ... }
 
 ### Safety, Security, and Performance
 
-> For safety invariants, SAST patterns, concurrency rules (lock guards, atomics, async), memory safety (double indirection, transmute, pointer casts), collection best practices (retain, deterministic iteration), and security (TOCTOU, path traversal, cookie flags, CSP), see `references/rust-patterns-and-anti-patterns.md`. Load it before writing any unsafe code, concurrent code, or I/O handling code.
+**Key safety rules (non-negotiable):**
+- Never use `unsafe` without a `// SAFETY:` comment documenting the invariant
+- Never `transmute` across types of different sizes or with different validity invariants
+- Validate all `as` casts with explicit bounds checks — `as` silently truncates
+- Never block the async runtime — use `tokio::task::spawn_blocking` for CPU-heavy or synchronous I/O work inside async contexts
+
+> For the full catalog of safety invariants, SAST patterns, concurrency rules (lock guards, atomics, async), memory safety (double indirection, transmute, pointer casts), collection best practices (retain, deterministic iteration), and security (TOCTOU, path traversal, cookie flags, CSP), see `references/rust-patterns-and-anti-patterns.md`. Load it before writing any unsafe code, concurrent code, or I/O handling code.
 >
 > For performance patterns (arena allocation, SmallVec, zero-copy parsing, Cow, pre-sized collections, benchmarking), see `perf-optimization/languages/rust.md`.
 
