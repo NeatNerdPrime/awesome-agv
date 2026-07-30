@@ -10,9 +10,23 @@ paths:
 
 ### Core Philosophy
 
-React 19 rewards composition, hooks, and server-aware patterns. Idiomatic React = functional, performant, accessible. Prefer co-located features, custom hooks for logic reuse, and server state libraries over hand-rolled fetch logic.
+React 19+ rewards composition, hooks, and server-aware patterns. Idiomatic React = functional, performant, accessible. Prefer co-located features, custom hooks for logic reuse, and server state libraries over hand-rolled fetch logic.
 
-> **Scope:** This file covers React-specific coding idioms for components, hooks, state, routing, and forms. For TypeScript type system patterns, see `@.agents/skills/typescript-idioms/SKILL.md`. For file and folder layout, see `references/project-structure.md`. For general frontend design, see `@.agents/skills/frontend-design/SKILL.md`.
+> **Scope:** This file covers React-specific coding idioms for components, hooks, state, routing, and forms. For TypeScript type system patterns, see `@.agents/skills/typescript-idioms/SKILL.md`. For file and folder layout, see `references/project-structure.md` (and the shared `@.agents/skills/frontend-design/references/frontend-layout.md`). For general frontend design, see `@.agents/skills/frontend-design/SKILL.md`.
+>
+> **Loading guard:** If the project uses Next.js (App Router — `app/` dir or `next.config.*`), load `@.agents/skills/nextjs-idioms/SKILL.md` **instead of** this skill for App-Router-specific patterns. This skill still applies to client components and pure-React (Vite) SPAs.
+
+## When to Load References
+
+> Load these **before** writing code in the matching context — not after.
+
+| Situation | Reference to Load |
+|---|---|
+| Starting a React (Vite) project or reviewing file layout | `references/project-structure.md` + `@.agents/skills/frontend-design/references/frontend-layout.md` |
+| TypeScript type system, async, Zod, error types | `@.agents/skills/typescript-idioms/SKILL.md` (always co-load) |
+| Zod schemas / boundary validation | `@.agents/skills/typescript-idioms/references/zod-patterns.md` |
+| Async / I/O / coercion pitfalls | `@.agents/skills/typescript-idioms/references/ts-patterns-and-anti-patterns.md` |
+| Next.js App Router (RSC, Server Actions, caching) | `@.agents/skills/nextjs-idioms/SKILL.md` (use that skill instead for Next projects) |
 
 ---
 
@@ -417,7 +431,9 @@ React Testing Library + Vitest/Jest. Test behavior, not implementation.
 - Code Idioms and Conventions @.agents/rules/code-idioms-and-conventions.md
 - TypeScript Idioms @.agents/skills/typescript-idioms/SKILL.md
 - React Project Structure @.agents/skills/react-idioms/references/project-structure.md
+- Frontend Layout (framework-neutral, shared with Vue) @.agents/skills/frontend-design/references/frontend-layout.md
 - Frontend Design @.agents/skills/frontend-design/SKILL.md
+- Next.js Idioms (for Next.js App Router projects) @.agents/skills/nextjs-idioms/SKILL.md
 - Security Principles @.agents/rules/security-principles.md
 - Accessibility Principles @.agents/rules/accessibility-principles.md
 - Testing Strategy @.agents/rules/testing-strategy.md

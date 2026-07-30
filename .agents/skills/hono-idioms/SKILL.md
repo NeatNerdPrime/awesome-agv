@@ -12,6 +12,20 @@ paths:
 Hono rewards thin handlers, middleware composition, multi-runtime portability, and end-to-end type safety. Idiomatic Hono = typed routes, validator middleware, RPC client — no code generation needed.
 
 > **Scope:** Hono-specific patterns. For TypeScript fundamentals: @.agents/skills/typescript-idioms/SKILL.md. For project structure: @.agents/skills/hono-idioms/references/project-structure.md.
+>
+> **Loading guard / auto-detection:** Hono has no canonical marker file, so it is **not reliably auto-detected** by file glob (only `wrangler.toml` — the Cloudflare Workers case — triggers this skill directly). For Node.js / Bun / Deno Hono projects, co-load this skill alongside `@.agents/skills/typescript-idioms/SKILL.md` whenever `hono` appears in `package.json`. Do NOT load this skill for Express, Fastify, or NestJS — it is Hono-only.
+
+## When to Load References
+
+> Load these **before** writing code in the matching context — not after.
+
+| Situation | Reference to Load |
+|---|---|
+| Starting a Hono project or reviewing file layout | `references/project-structure.md` |
+| TypeScript type system, async, Zod, error types | `@.agents/skills/typescript-idioms/SKILL.md` (always co-load) |
+| Zod schemas / boundary validation (`zValidator`) | `@.agents/skills/typescript-idioms/references/zod-patterns.md` |
+| Async / I/O / coercion / security pitfalls | `@.agents/skills/typescript-idioms/references/ts-patterns-and-anti-patterns.md` |
+| Shared tooling (ESLint, Prettier, Vitest, tsconfig) | `@.agents/skills/typescript-idioms/references/recommended-dependencies.md` |
 
 ### Router and Route Organization
 
@@ -183,6 +197,7 @@ Hono rewards thin handlers, middleware composition, multi-runtime portability, a
 ### Testing
 
 > For universal testing principles, see `.agents/rules/testing-strategy.md`. Below: Hono-specific patterns only.
+> Test-file naming: `*.test.ts` co-located next to source (matches the generic-TS convention; see `@.agents/skills/typescript-idioms/references/project-structure.md` §Test Organization for the cross-framework rule).
 
 1. **`app.request()` — test handlers without starting a server:**
    ```typescript

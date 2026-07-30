@@ -17,7 +17,9 @@ paths:
 
 Vue 3 Composition API is the default for all new code. `<script setup>` is the canonical syntax. Think in terms of reactive *data flows*, not component lifecycle hooks. Composables (`use*` functions) are the primary unit of logic reuse.
 
-> **Scope:** This file covers Vue 3 *coding idioms* for components, stores, and composables. For TypeScript type system patterns, see `@.agents/skills/typescript-idioms/SKILL.md`. For file and folder layout, see `references/project-structure.md`. For test naming, see `testing-strategy.md`. For logging, see `@.agents/skills/logging-implementation/SKILL.md`.
+> **Scope:** This file covers Vue 3 *coding idioms* for components, stores, and composables. For TypeScript type system patterns, see `@.agents/skills/typescript-idioms/SKILL.md`. For file and folder layout, see `references/project-structure.md` (and the shared `@.agents/skills/frontend-design/references/frontend-layout.md`). For test naming, see `@.agents/rules/testing-strategy.md`. For logging, see `@.agents/skills/logging-implementation/SKILL.md`.
+>
+> **Loading guard:** Do NOT load this skill for non-Vue projects. React → `react-idioms`; Angular → `angular-idioms`; Next.js → `nextjs-idioms`. This skill co-loads with `typescript-idioms` (required for any Vue work).
 
 ## When to Load References
 
@@ -643,12 +645,14 @@ When using `<Transition>` or `<RouterView>` with transition effects, CSS framewo
 ---
 
 ### Related Principles
-- Code Idioms and Conventions @code-idioms-and-conventions.md
+- Code Idioms and Conventions @.agents/rules/code-idioms-and-conventions.md
 - TypeScript Idioms and Patterns @.agents/skills/typescript-idioms/SKILL.md
 - Project Structure — Vue Frontend @.agents/skills/vue-idioms/references/project-structure.md
+- Frontend Layout (framework-neutral, shared with React) @.agents/skills/frontend-design/references/frontend-layout.md
+- Frontend Design @.agents/skills/frontend-design/SKILL.md
 - Security Principles @.agents/rules/security-principles.md
 - Accessibility Principles @.agents/rules/accessibility-principles.md
-- Architectural Patterns — Testability-First Design @architectural-pattern.md
-- Testing Strategy @testing-strategy.md
-- Error Handling Principles @error-handling-principles.md
+- Architectural Patterns — Testability-First Design @.agents/rules/architectural-pattern.md
+- Testing Strategy @.agents/rules/testing-strategy.md
+- Error Handling Principles @.agents/rules/error-handling-principles.md
 - Logging and Observability Principles @.agents/skills/logging-implementation/SKILL.md

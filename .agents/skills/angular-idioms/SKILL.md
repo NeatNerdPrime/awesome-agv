@@ -8,7 +8,6 @@ paths:
   - "**/*.pipe.ts"
   - "**/*.guard.ts"
   - "**/angular.json"
-  - "**/tsconfig*.json"
 ---
 
 ## Angular Idioms and Patterns
@@ -18,6 +17,19 @@ paths:
 Angular (19+) rewards signals, standalone components, and reactive patterns. Idiomatic Angular = typed, modular, RxJS-aware, OnPush by default.
 
 > **Scope:** This file covers Angular-specific coding idioms for components, services, and patterns. For TypeScript type system patterns, see `@.agents/skills/typescript-idioms/SKILL.md`. For file and folder layout, see `references/project-structure.md`.
+>
+> **Loading guard:** Do NOT load this skill for non-Angular projects. Vue → `vue-idioms`; React → `react-idioms`; Next.js → `nextjs-idioms`. Angular file suffixes (`.component.ts`, `.service.ts`, etc.) and `angular.json` are the reliable triggers — `tsconfig*.json` alone is NOT an Angular signal (every TS project has one).
+
+## When to Load References
+
+> Load these **before** writing code in the matching context — not after.
+
+| Situation | Reference to Load |
+|---|---|
+| Starting an Angular project or reviewing file layout | `references/project-structure.md` |
+| TypeScript type system, async, Zod, error types | `@.agents/skills/typescript-idioms/SKILL.md` (always co-load) |
+| Zod schemas / boundary validation | `@.agents/skills/typescript-idioms/references/zod-patterns.md` |
+| Async / I/O / coercion / RxJS pitfalls | `@.agents/skills/typescript-idioms/references/ts-patterns-and-anti-patterns.md` |
 
 ### Standalone Components (Default)
 
@@ -348,6 +360,7 @@ tasks = toSignal(this.taskService.getTasks(), { initialValue: [] });
 ### Testing
 
 > For universal testing principles, see `.agents/rules/testing-strategy.md`. Below: Angular-specific patterns only.
+> Test-file naming: `*.spec.ts` co-located (Angular CLI default — `.component.spec.ts` beside `.component.ts`). For the cross-framework reconciliation rule, see `@.agents/skills/typescript-idioms/references/project-structure.md` §Test Organization.
 
 1. **Angular Testing Library** for component tests (preferred over TestBed):
    ```typescript
@@ -393,6 +406,7 @@ tasks = toSignal(this.taskService.getTasks(), { initialValue: [] });
 - Code Idioms and Conventions @.agents/rules/code-idioms-and-conventions.md
 - TypeScript Idioms @.agents/skills/typescript-idioms/SKILL.md
 - Angular Project Structure @.agents/skills/angular-idioms/references/project-structure.md
+- Frontend Layout (framework-neutral, shared with React/Vue) @.agents/skills/frontend-design/references/frontend-layout.md
 - Frontend Design @.agents/skills/frontend-design/SKILL.md
 - Security Principles @.agents/rules/security-principles.md
 - Accessibility Principles @.agents/rules/accessibility-principles.md

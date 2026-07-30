@@ -6,6 +6,10 @@ paths:
   - "**/app/**/page.tsx"
   - "**/app/**/layout.tsx"
   - "**/app/**/route.ts"
+  - "**/app/**/error.tsx"
+  - "**/app/**/loading.tsx"
+  - "**/app/**/not-found.tsx"
+  - "**/app/**/default.tsx"
   - "**/middleware.ts"
 ---
 
@@ -14,6 +18,20 @@ paths:
 Next.js (15+) rewards App Router, Server Components, and Server Actions. Idiomatic Next.js = server-first, streaming, edge-ready. Push logic to the server, keep the client thin.
 
 > **Scope:** Next.js-specific patterns only. For React: `@.agents/skills/react-idioms/SKILL.md`. For TypeScript: `@.agents/skills/typescript-idioms/SKILL.md`. For project layout: `references/project-structure.md`.
+>
+> **Loading guard:** This skill assumes the Next.js **App Router** (Next.js 15+, `app/` directory). For Pages Router (`pages/`) legacy code, most React idioms still apply but App-Router-specific sections (RSC, Server Actions, parallel/intercepting routes, `'use cache'`) do not. Co-load `@.agents/skills/react-idioms/SKILL.md` for client-component patterns.
+
+## When to Load References
+
+> Load these **before** writing code in the matching context — not after.
+
+| Situation | Reference to Load |
+|---|---|
+| Starting a Next.js project or reviewing file layout | `references/project-structure.md` |
+| TypeScript type system, async, Zod, error types | `@.agents/skills/typescript-idioms/SKILL.md` (always co-load) |
+| Zod schemas / boundary validation (API routes, Server Actions, env) | `@.agents/skills/typescript-idioms/references/zod-patterns.md` |
+| Async / I/O / coercion / security pitfalls | `@.agents/skills/typescript-idioms/references/ts-patterns-and-anti-patterns.md` |
+| Client-component hooks/state/forms (non-App-Router) | `@.agents/skills/react-idioms/SKILL.md` |
 
 ---
 
@@ -263,18 +281,7 @@ Next.js (15+) rewards App Router, Server Components, and Server Actions. Idiomat
    const apiUrl = process.env.NEXT_PUBLIC_API_URL;  // ✅ Client + server
    const dbUrl = process.env.DATABASE_URL;           // ✅ Server-only
    ```
-2. **Type-safe env validation** — validate at startup, fail fast:
-   ```tsx
-   // src/lib/env.ts
-   import { z } from 'zod';
-   const envSchema = z.object({
-     DATABASE_URL: z.string().url(),
-     SESSION_SECRET: z.string().min(32),
-     NEXT_PUBLIC_API_URL: z.string().url(),
-     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-   });
-   export const env = envSchema.parse(process.env);
-   ```
+2. **Type-safe env validation** — validate at startup, fail fast. Use the Zod `EnvSchema.parse(process.env)` pattern from `@.agents/skills/typescript-idioms/references/zod-patterns.md` §Environment Variable Validation. Add Next.js-specific vars (`NEXT_PUBLIC_*`, `SESSION_SECRET`) to the schema. Never use `process.env` in business logic — import from the validated `env` module.
 3. **Never use `process.env` in business logic** — import from validated `env` module.
 4. **`.env.local`** for local overrides (gitignored). **`.env`** for defaults (committed, no secrets).
 
@@ -409,7 +416,7 @@ Next.js (15+) rewards App Router, Server Components, and Server Actions. Idiomat
 | Tool | Purpose | Command |
 |---|---|---|
 | Prettier | Formatting | `npx prettier --write .` |
-| ESLint + `eslint-config-next` | Linting | `npx next lint` |
+| ESLint + `eslint-config-next` | Linting | `npx eslint .` (`next lint` was **removed in Next.js 16** — use the ESLint CLI directly with `eslint-config-next/core-web-vitals`) |
 | TypeScript | Type checking | `npx tsc --noEmit` |
 
 ---
