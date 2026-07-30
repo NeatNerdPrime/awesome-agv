@@ -151,6 +151,7 @@ Load these when implementing. Don't rely on memory — read the module.
 | `references/color-palettes.md` | Choosing colors — 15 named palettes, light + dark |
 | `references/motion-patterns.md` | Implementing animations — entrance, hover, scroll, micro |
 | `references/layout-compositions.md` | Structuring pages — 15 named compositions |
+| `references/frontend-layout.md` | Framework-neutral project layout (vertical slices, shared by React/Vue) |
 | `references/mobile-responsive.md` | Mobile-first methodology, touch targets, viewport units, navigation patterns |
 | `references/pwa-checklist.md` | Manifest, service worker, offline fallback, install prompt, Lighthouse PWA |
 | `frameworks/vue.md` | Building in Vue 3 |

@@ -83,5 +83,6 @@ Use this structure for Angular applications. The vertical slice principle applie
 
 ### Related Principles
 - Project Structure @.agents/rules/project-structure.md (core philosophy)
+- Frontend Layout (framework-neutral) @.agents/skills/frontend-design/references/frontend-layout.md
 - Angular Idioms and Patterns @../SKILL.md (signals, DI, testing, coding patterns)
 - TypeScript Idioms and Patterns @.agents/skills/typescript-idioms/SKILL.md (type system)
