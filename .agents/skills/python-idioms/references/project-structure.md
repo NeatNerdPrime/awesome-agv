@@ -6,8 +6,14 @@ Use this structure for Python backend applications. The vertical slice principle
 apps/
   backend/                          # Backend application source code
     pyproject.toml                  # Project metadata, dependencies, tool configs
+    alembic/                        # Database migrations (if using SQLAlchemy + Alembic)
+      alembic.ini
+      env.py
+      versions/
+        001_create_tasks_table.py
     src/
       yourapp/                      # Importable package (src-layout, preferred)
+        py.typed                    # PEP 561 marker: signals mypy to read types from this package
         main.py                     # Entry point: creates app, wires dependencies, starts server
         platform/                   # Foundational technical concerns (the "Framework")
           database.py               # DB engine and session factory
@@ -17,6 +23,7 @@ apps/
         features/                   # Business Features (Vertical Slices)
           task/                     # Task management
             __init__.py
+            conftest.py             # Shared fixtures scoped to this feature's tests
 
             # --- Public API ---
             service.py              # TaskService class (public API of this feature)
@@ -48,6 +55,7 @@ apps/
             storage_pg.py
             storage_mock.py
             ...
+    conftest.py                     # Root-level fixtures shared across all features (e.g. app client, DB session)
     tests/                          # Optional: top-level E2E tests (cross-feature boundaries)
       e2e/
         test_create_task_api.e2e.py
@@ -57,10 +65,12 @@ apps/
 
 - **`src/` layout** is strongly preferred — prevents accidental imports of the development tree and matches packaging best practices (PEP 517 / `pypa/build`)
 - **`pyproject.toml`** is the single configuration file for `ruff`, `mypy`, `pytest`, `bandit`, and packaging metadata — do not create `setup.cfg`, `.flake8`, or `mypy.ini` files
+- **`py.typed`** is a zero-byte marker file (PEP 561) that signals to `mypy` and downstream consumers that this package ships type information. Add it to the package root for any library or published service.
 - **Feature packages** use `__init__.py` — keep it empty or use it solely to re-export the feature's public API
 - **`platform/`** holds technical infrastructure that features depend on (database sessions, configuration, logging); features never import each other's `platform/` code directly
 - **Tests co-locate** with the code they test (`test_*.py` in the same directory) except for E2E tests which go in `tests/e2e/`
-- **`storage_mock.py`** is a production-quality in-memory implementation, not a `unittest.Mock` — it is the recommended test double for unit and integration tests
+- **`conftest.py` placement:** place at the project root for fixtures shared across all features (app instance, database session factory, auth headers); place at the feature level for fixtures scoped to that feature only. Pytest discovers `conftest.py` by walking up the directory tree.
+- **`storage_mock.py`** is a production-quality in-memory implementation of the `Storage` Protocol, not a `unittest.Mock` — it is the recommended test double for unit tests of business logic and component tests of routers. Use `pytest-mock` (`mocker.patch`) when you need to verify call counts or argument matching against a third-party library or adapter that you cannot replace via dependency injection.
 
 ### Dependency Wiring (main.py)
 
@@ -110,21 +120,21 @@ build-backend = "hatchling.build"
 
 [project]
 name = "yourapp"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/yourapp"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py313"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "UP", "S", "B", "ANN"]
+select = ["E", "F", "I", "N", "UP", "S", "B", "ANN", "PT", "SIM", "RUF", "C4", "DTZ", "T20", "PIE", "RET", "SLF", "ARG"]
 
 [tool.mypy]
 strict = true
-python_version = "3.11"
+python_version = "3.13"
 
 [tool.pytest.ini_options]
 testpaths = ["src"]
@@ -137,3 +147,4 @@ skips = ["B101"]   # assert statements allowed in test files
 ### Related Principles
 - Project Structure @.agents/rules/project-structure.md (core philosophy)
 - Python Idioms and Patterns @../SKILL.md (coding idioms, error handling, naming)
+- Recommended Dependencies @recommended-dependencies.md (curated packages, starter configs)

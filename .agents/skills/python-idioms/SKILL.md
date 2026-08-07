@@ -11,452 +11,433 @@ paths:
 
 ### Core Philosophy
 
-Python rewards explicitness and readability over cleverness. Follow the **Zen of Python** (`import this`) — beautiful code is not a luxury, it's a professional necessity. If it reads like plain English, it's probably idiomatic Python.
+Python rewards explicitness and readability over cleverness. Follow the Zen of Python. If it reads like plain English, it's probably idiomatic.
 
-> **Scope:** This file covers Python-specific *coding idioms*. For file layout, see `references/project-structure.md`. For test naming conventions, see `testing-strategy.md`. For logging library choice, see @.agents/skills/logging-implementation/SKILL.md.
+> **Scope**: This skill covers Python-specific coding idioms. For file layout see `references/project-structure.md`. For safety/SAST/performance patterns see `references/python-patterns-and-anti-patterns.md`. For logging see `logging-implementation` skill. For quality commands see `code-idioms-and-conventions` rule.
 
----
+### Loading Guards
+
+- If no `pyproject.toml` or `*.py` files, this skill does not apply
+- If Django project (`django` in dependencies), co-load `django-idioms` skill alongside this one
+
+### When to Load References
+
+| Situation | Reference to Load |
+|---|---|
+| Starting a new project or setting up file layout | `references/project-structure.md` |
+| Choosing packages, `pyproject.toml` setup, or ruff config | `references/recommended-dependencies.md` |
+| Writing code that handles user input, async operations, or I/O | `references/python-patterns-and-anti-patterns.md` |
+
+### Toolchain and Python Version
+
+- Default to latest stable Python. As of August 2026, Python 3.14. Minimum target: 3.13+.
+- Key version milestones:
+  - **3.14+** — Deferred evaluation of annotations (PEP 649, no more `from __future__ import annotations`), template strings (PEP 750)
+  - **3.13+** — Improved error messages, experimental free-threaded build, experimental JIT
+  - **3.12+** — Type parameter syntax `type X = ...` (PEP 695), `@override` decorator, improved f-strings, `itertools.batched`
+  - **3.11+** — `StrEnum`, `ExceptionGroup` + `except*`, `asyncio.TaskGroup`, `tomllib`, fine-grained error locations
+  - **3.10+** — Pattern matching (`match`/`case`), `X | Y` union syntax, `TypeAlias`
 
 ### Type Hints — Non-Negotiable
 
-**Always annotate function signatures and public APIs.** Use `from __future__ import annotations` for forward references.
+Type hints are required for all public APIs, class attributes, and function signatures.
+
+- Use standard collections (`list`, `dict`, `set`) for typing, not `typing.List` etc.
+- Use `X | Y` instead of `Union[X, Y]` or `Optional[X]`.
+- Use PEP 695 type parameter syntax (3.12+) for generic types: `type Vector[T] = list[T]`
+- Use `@override` (3.12+) to ensure methods actually override a base class method.
+- Use `TypeVar` with constraints and bounds when necessary.
+- Use `Never` for functions that always raise an exception or never return.
 
 ```python
-# ✅ Fully annotated — self-documenting and mypy-verifiable
-from __future__ import annotations
-from collections.abc import Sequence
+# ❌ Anti-pattern: Untyped or legacy typing
+from typing import List, Optional, TypeVar
 
-def calculate_discount(items: Sequence[Item], coupon: Coupon) -> float: ...
+T = TypeVar('T')
 
-# ❌ Untyped — opaque to both mypy and the next developer
-def calculate_discount(items, coupon): ...
+def process_items(items: List[T], strict: Optional[bool] = None) -> List[T]: ...
+
+class Worker(BaseWorker):
+    def run(self): ... # Overrides base class? Maybe.
 ```
 
-1. **Use `X | None` over `Optional[X]`** (Python 3.10+)
-   ```python
-   # ✅ Modern union syntax
-   def find_user(user_id: str) -> User | None: ...
+```python
+# ✅ Recommended pattern: Modern typing syntax
+from typing import override, Never
 
-   # ❌ Verbose legacy form (still valid, but prefer the above)
-   from typing import Optional
-   def find_user(user_id: str) -> Optional[User]: ...
-   ```
+type Vector[T] = list[T]
 
-2. **Use `TypeAlias` and `TypeVar` for reusable generics**
-   ```python
-   from typing import TypeVar, TypeAlias
+def process_items[T](items: Vector[T], strict: bool | None = None) -> Vector[T]: ...
 
-   T = TypeVar("T")
-   UserId: TypeAlias = str
-   ```
+class Worker(BaseWorker):
+    @override
+    def run(self) -> None: ...
 
-3. **Use `Protocol` for structural interfaces instead of ABCs when duck-typing is sufficient**
-   ```python
-   from typing import Protocol
+def crash_and_burn(msg: str) -> Never:
+    raise RuntimeError(msg)
+```
 
-   class TaskStorage(Protocol):
-       def get_by_id(self, task_id: str) -> Task: ...
-       def save(self, task: Task) -> None: ...
-   ```
+**Protocols for Structural Subtyping**
+Define required behavior via `Protocol` instead of inheritance when depending on abstractions.
 
-4. **`TypedDict` for structured dicts crossing system boundaries (JSON, configs)**
-   ```python
-   from typing import TypedDict
-
-   class CreateTaskRequest(TypedDict):
-       title: str
-       priority: Literal["low", "medium", "high"]
-   ```
-
----
+**TypedDict for JSON/Dict payloads**
+When dealing with dictionaries that have a fixed schema, use `TypedDict`.
 
 ### Error Handling
 
-> For general error handling principles, see `error-handling-principles.md`. This section covers Python-specific idioms.
+- Raise specific exceptions, not generic `Exception`.
+- Build a domain-specific exception hierarchy (e.g. `AppError` base class).
+- Never explicitly silence errors without handling or logging (`except Exception: pass`). Use `contextlib.suppress()` if appropriate and intentional.
+- Use exception groups and `except*` (3.11+) when multiple errors can occur simultaneously.
+- Use `add_note()` (3.11+) to attach additional context to exceptions before re-raising.
+- **Pattern:** Never assign the result of functions that return `None` (DeepSource bug risk).
+- **Pattern:** `finally` blocks should not swallow exceptions; they are for cleanup only.
 
-1. **Prefer specific exception types over broad `except Exception`**
-   ```python
-   # ✅ Precise — catches exactly what you expect
-   try:
-       task = storage.get_by_id(task_id)
-   except TaskNotFoundError:
-       raise HTTPException(status_code=404, detail="Task not found")
+```python
+# ❌ Anti-pattern: Broad except, swallowing errors, assigning None
+def load_data():
+    try:
+        data = fetch()
+        return data
+    except Exception as e:
+        print(f"Failed: {e}")
+        
+    finally:
+        return None # Swallows exception!
 
-   # ❌ Broad — may swallow programming errors
-   try:
-       task = storage.get_by_id(task_id)
-   except Exception:
-       raise HTTPException(status_code=500, detail="Error")
-   ```
+res = dict.get("key") # Might return None, then what?
+```
 
-2. **Define domain-specific exception hierarchies**
-   ```python
-   class FathError(Exception):
-       """Base exception for all domain errors."""
+```python
+# ✅ Recommended pattern: Specific exceptions, exception groups, add_note
+class AppError(Exception): pass
+class NetworkError(AppError): pass
 
-   class NotFoundError(FathError):
-       def __init__(self, resource: str, resource_id: str) -> None:
-           self.resource = resource
-           self.resource_id = resource_id
-           super().__init__(f"{resource} '{resource_id}' not found")
+def load_data() -> dict:
+    try:
+        return fetch()
+    except TimeoutError as e:
+        e.add_note("Timeout while fetching external data")
+        raise NetworkError("Failed to fetch") from e
 
-   class ValidationError(FathError):
-       def __init__(self, field: str, message: str) -> None:
-           self.field = field
-           self.message = message
-           super().__init__(f"Validation failed on '{field}': {message}")
-   ```
-
-3. **Never silence exceptions** — if an exception is caught and not re-raised, log it explicitly
-   ```python
-   # ❌ Silent swallow
-   try:
-       notify_user(user_id)
-   except Exception:
-       pass
-
-   # ✅ Explicit intent + observability
-   try:
-       notify_user(user_id)
-   except NotificationError:
-       logger.warning("notification_failed", user_id=user_id, exc_info=True)
-   ```
-
-4. **Use `contextlib.suppress` only for truly expected, inconsequential exceptions**
-   ```python
-   from contextlib import suppress
-
-   with suppress(FileNotFoundError):
-       cache_path.unlink()  # OK — cleanup, not business logic
-   ```
-
----
+# Exception groups (3.11+)
+try:
+    raise ExceptionGroup("Multiple failures", [NetworkError(), ValueError()])
+except* NetworkError as e:
+    handle_network(e)
+except* ValueError as e:
+    handle_value(e)
+```
 
 ### Dataclasses and Pydantic
 
-1. **Use `dataclasses` for internal domain models** (no I/O, no validation)
-   ```python
-   from dataclasses import dataclass, field
+- Use `@dataclass` for internal data structures.
+- Use `@dataclass(frozen=True, slots=True)` (3.10+) as the recommended default for value objects. `slots=True` avoids `__dict__` creation, saving memory and speeding up attribute access.
+- Use `@dataclass(kw_only=True)` (3.10+) to require keyword arguments.
+- Use Pydantic `BaseModel` when data crosses system boundaries (I/O, APIs, config) and requires validation.
+- Use Pydantic v2 `model_validator` and `field_validator` for complex validation rules.
 
-   @dataclass(frozen=True)   # frozen = immutable value object
-   class Task:
-       id: str
-       title: str
-       priority: str
-       tags: tuple[str, ...] = field(default_factory=tuple)
-   ```
+```python
+# ✅ Recommended pattern: Dataclasses
+from dataclasses import dataclass
 
-2. **Use Pydantic `BaseModel` for data crossing system boundaries** (API requests/responses, config)
-   ```python
-   from pydantic import BaseModel, Field
+@dataclass(frozen=True, slots=True, kw_only=True)
+class UserConfig:
+    id: int
+    username: str
+    active: bool = True
+```
 
-   class CreateTaskRequest(BaseModel):
-       title: str = Field(min_length=1, max_length=200)
-       priority: Literal["low", "medium", "high"] = "medium"
-       due_date: datetime | None = None
+```python
+# ✅ Recommended pattern: Pydantic Validation
+from pydantic import BaseModel, field_validator, model_validator
 
-       model_config = ConfigDict(frozen=True)  # Pydantic v2
-   ```
+class User(BaseModel):
+    password: str
+    password_confirm: str
 
-3. **Keep domain models separate from API schemas** — never use a Pydantic model as a domain entity
-   ```
-   models.py   → dataclasses (pure domain)
-   schemas.py  → Pydantic models (API boundary)
-   ```
+    @model_validator(mode="after")
+    def check_passwords_match(self) -> "User":
+        if self.password != self.password_confirm:
+            raise ValueError("Passwords do not match")
+        return self
+```
 
----
+**When to use which:**
+
+| Use Case | Recommendation |
+|---|---|
+| Untrusted / external data (API input, config files, webhook payloads) | `pydantic.BaseModel` |
+| Internal value objects, domain entities (no validation needed) | `@dataclass(frozen=True, slots=True)` |
+| Dictionary-shaped typed data (JSON response shapes, kwargs mappings) | `TypedDict` |
+| Named string or integer constants | `enum.StrEnum` / `enum.IntEnum` |
 
 ### Interfaces and Dependency Injection
 
-Python uses Protocols and constructor injection to achieve the same testability goal as Go interfaces.
+Prefer composition and dependency injection over deep inheritance hierarchies. Depend on `typing.Protocol` to define the interface a function or class expects.
 
-1. **Define the Protocol where it is *used*, not where it is *implemented***
-   ```python
-   # task/storage.py  ← defined in the consumer feature
-   from typing import Protocol
+```python
+# ✅ Recommended pattern: Dependency Injection with Protocols
+from typing import Protocol
 
-   class TaskStorage(Protocol):
-       def get_by_id(self, task_id: str) -> Task: ...
-       def save(self, task: Task) -> None: ...
-       def delete(self, task_id: str) -> None: ...
-   ```
+class MessageSender(Protocol):
+    def send(self, msg: str) -> None: ...
 
-2. **Inject dependencies through `__init__`** — never instantiate concrete dependencies inside a class
-   ```python
-   # ✅ Testable — storage is injected
-   class TaskService:
-       def __init__(self, storage: TaskStorage) -> None:
-           self._storage = storage
+class EmailSender:
+    def send(self, msg: str) -> None:
+        pass # Implementation
 
-   # ❌ Not testable — concrete dependency hardwired
-   class TaskService:
-       def __init__(self) -> None:
-           self._storage = PostgresTaskStorage()
-   ```
-
-3. **Wire dependencies in the entry point** (e.g., `main.py`, `app.py`, or DI container)
-   ```python
-   # app/main.py
-   storage = PostgresTaskStorage(db=database)
-   service = TaskService(storage=storage)
-   router.include_router(build_task_router(service))
-   ```
-
----
+def notify_user(sender: MessageSender) -> None:
+    sender.send("Hello")
+```
 
 ### Async / Await
 
-> For general async principles (when to add concurrency), see `core-design-principles.md` § Concurrency. This section covers Python-specific async idioms.
+- Use `asyncio.TaskGroup` (3.11+) as the preferred way to run concurrent tasks over `asyncio.gather`. It provides structured concurrency and better error handling.
+- Use `asyncio.Runner` (3.11+) for managing the event loop lifecycle instead of raw `get_event_loop()`.
+- **Never** call `asyncio.run()` from inside an already running event loop.
+- Use `asyncio.to_thread()` to offload blocking/CPU-bound work to a thread pool so the event loop is not blocked.
 
-1. **Choose one async paradigm and stay consistent** — do not mix `asyncio.run` entry points
-   ```python
-   # ✅ Fully async service layer
-   async def get_task(self, task_id: str) -> Task:
-       return await self._storage.get_by_id(task_id)
-   ```
+```python
+# ❌ Anti-pattern: Unstructured concurrency
+import asyncio
 
-2. **Never call blocking I/O directly in an async function**
-   ```python
-   # ❌ Blocks the event loop
-   async def load_file(path: str) -> str:
-       return open(path).read()
+async def main():
+    await asyncio.gather(task1(), task2()) # Errors in one task don't cancel the other easily
+```
 
-   # ✅ Use async I/O or run in executor
-   import asyncio, aiofiles
+```python
+# ✅ Recommended pattern: Structured concurrency with TaskGroup
+import asyncio
 
-   async def load_file(path: str) -> str:
-       async with aiofiles.open(path) as f:
-           return await f.read()
-   ```
-
-3. **Use `asyncio.gather` for concurrent independent operations**
-   ```python
-   # ✅ Concurrent fan-out
-   user, tasks = await asyncio.gather(
-       get_user(user_id),
-       get_tasks(user_id),
-   )
-   ```
-
-4. **Use `asyncio.TaskGroup` (Python 3.11+) for structured concurrency with cancellation safety**
-   ```python
-   async with asyncio.TaskGroup() as tg:
-       user_task = tg.create_task(get_user(user_id))
-       tasks_task = tg.create_task(get_tasks(user_id))
-   user = user_task.result()
-   tasks = tasks_task.result()
-   ```
-
----
+async def main():
+    try:
+        async with asyncio.TaskGroup() as tg:
+            task1 = tg.create_task(fetch_data())
+            task2 = tg.create_task(process_data())
+        # tg automatically waits for all tasks. If one fails, others are cancelled.
+    except* Exception as e:
+        print(f"Task group failed: {e}")
+```
 
 ### Naming Conventions
 
-Follow **PEP 8** rigorously. No exceptions.
+| Entity | Convention | Example |
+|---|---|---|
+| Variables, Functions, Methods | snake_case | `calculate_total()` |
+| Classes, Protocols, TypeAliases | PascalCase | `UserRepository` |
+| Constants | UPPER_SNAKE_CASE | `MAX_RETRIES` |
+| Protected/Private members | _leading_underscore | `_internal_cache` |
+| Dunder methods | \_\_dunder\_\_ | `__init__` |
 
-| Construct               | Convention         | Example                      |
-| ----------------------- | ------------------ | ---------------------------- |
-| Module / Package        | `snake_case`       | `task_service.py`            |
-| Class                   | `PascalCase`       | `TaskService`                |
-| Function / Method       | `snake_case`       | `get_by_id`                  |
-| Private method/attr     | `_snake_case`      | `_validate_title`            |
-| Constant                | `UPPER_SNAKE_CASE` | `MAX_TITLE_LENGTH = 200`     |
-| Type alias              | `PascalCase`       | `UserId = str`               |
-| Protocol / Interface    | `PascalCase`       | `TaskStorage`                |
-
-1. **Never use single-letter names outside list comprehensions or math** — names must be descriptive
-2. **Avoid `data`, `info`, `obj`, `result` as standalone names** — describe the *domain concept*
-3. **Boolean variables and functions should read as yes/no questions**
-   ```python
-   # ✅
-   is_active: bool
-   has_permission: bool
-   def can_edit(user: User, task: Task) -> bool: ...
-
-   # ❌
-   active: bool
-   permission: bool
-   ```
-
----
+- Be descriptive. `fetch_user_by_id(user_id: int)` is better than `get_u(i)`.
 
 ### Idiomatic Patterns
 
-1. **Context managers for resource cleanup** — always prefer `with` over manual `close()`
-   ```python
-   # ✅
-   async with database.transaction() as tx:
-       await tx.execute(query)
+- **Context Managers:** Use `with` statements for resource management (files, network connections, locks).
+- **Generators:** Use `yield` for lazy evaluation and memory efficiency when dealing with large sequences.
+- **`dataclasses.replace`:** Use for immutable updates to dataclasses.
+- **`functools.cache` / `lru_cache`:** Use for memoizing expensive deterministic function calls.
+- **`__slots__`:** Use via `@dataclass(slots=True)` or explicitly to save memory on heavily instantiated classes.
+- **`StrEnum`:** (3.11+) Use for string-based enumerations.
+- **Pattern Matching (3.10+):** Use `match`/`case` for structural pattern matching instead of long `if/elif/else` chains.
+- **String Affixes (3.9+):** Use `str.removeprefix()` and `str.removesuffix()` instead of error-prone slicing or `strip()`.
+- **Dict Merge Operator (3.9+):** Use `dict1 | dict2` to merge dictionaries.
+- **Walrus Operator `:=`:** Use for assignment expressions to avoid repeating expensive calls or improving loop conditions.
+- **`itertools.batched` (3.12+):** Use to cleanly chunk iterables into batches.
+- **`pathlib.Path`:** ALWAYS prefer over `os.path` for file operations.
+- **Mutable Defaults:** NEVER use mutable default arguments (`[]`, `{}`). Use `None` as a sentinel. (DeepSource #1 bug risk)
 
-   # ❌
-   tx = database.begin()
-   tx.execute(query)
-   tx.commit()  # easily forgotten on exception
-   ```
+```python
+# ❌ Anti-pattern: Mutable default argument
+def add_item(item: str, items: list = []) -> list:
+    items.append(item)
+    return items
 
-2. **Generator expressions over list comprehensions for lazy evaluation**
-   ```python
-   # ✅ Lazy — does not materialise the entire list
-   active_ids = (task.id for task in tasks if task.is_active)
+# ✅ Recommended pattern: None sentinel
+def add_item(item: str, items: list | None = None) -> list:
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+```
 
-   # Use list comprehension only when you need the full list
-   active_tasks = [task for task in tasks if task.is_active]
-   ```
+```python
+# ✅ Recommended pattern: Pattern matching & itertools.batched
+import itertools
 
-3. **`dataclasses.replace()` for immutable updates** (preferred over mutating frozen dataclasses)
-   ```python
-   from dataclasses import replace
-
-   updated_task = replace(task, title="New Title")
-   ```
-
-4. **`functools.cache` / `functools.lru_cache` for pure function memoization**
-   ```python
-   from functools import cache
-
-   @cache
-   def get_config() -> AppConfig:  # called once; result reused
-       return _load_config_from_env()
-   ```
-
-5. **`__slots__` on hot-path, frequently instantiated classes**
-   ```python
-   @dataclass
-   class Vector:
-       __slots__ = ("x", "y")
-       x: float
-       y: float
-   ```
-
-6. **`enum.Enum` (not raw strings) for domain-level constants**
-   ```python
-   from enum import StrEnum   # Python 3.11+
-
-   class Priority(StrEnum):
-       LOW    = "low"
-       MEDIUM = "medium"
-       HIGH   = "high"
-   ```
-
----
+def process(command: dict | list):
+    match command:
+        case {"action": "delete", "id": int(id_val)}:
+            delete_record(id_val)
+        case list(items):
+            for batch in itertools.batched(items, 100):
+                process_batch(batch)
+```
 
 ### Testing
 
-> Test file naming and pyramid proportions are defined in `testing-strategy.md`. This section covers Python-specific tooling only.
+Write deterministic tests focusing on behavior.
+- Test coverage non-negotiable policy (same as Rust/TS).
+- Coverage commands: `pytest --cov=src --cov-report=term-missing`
+- Prefer `@pytest.mark.parametrize` for data-driven testing.
+- Use `pytest-asyncio` for async tests.
+- Use typed mock factories or fixtures instead of `patch` decorators when possible.
 
-1. **Use `pytest` as the sole test runner** — never mix with `unittest.TestCase` classes
-   ```python
-   # ✅ Idiomatic pytest
-   def test_calculate_discount_returns_zero_for_no_items() -> None:
-       result = calculate_discount(items=[], coupon=Coupon(code="SAVE10"))
-       assert result == 0.0
-   ```
+**Test Double Selection Table:**
 
-2. **Parametrize test cases with `@pytest.mark.parametrize`**
-   ```python
-   @pytest.mark.parametrize("priority,expected_score", [
-       ("low",    1),
-       ("medium", 5),
-       ("high",  10),
-   ])
-   def test_priority_score(priority: str, expected_score: int) -> None:
-       assert priority_score(priority) == expected_score
-   ```
+| Approach | When to Use |
+|---|---|
+| Hand-written fake (implement Protocol) | Simple interface, few methods, need stateful behavior |
+| `pytest-mock` (mocker fixture) | Verify call counts, argument matching |
+| `respx` | HTTP boundary mocking — intercepts httpx calls |
+| `@pytest.mark.parametrize` | Same logic, multiple input/output pairs |
+| Snapshot (`syrupy`) | Large outputs — JSON responses, CLI output |
+| `hypothesis` | Property-based testing for wide input spaces |
 
-3. **Use `pytest-mock` (`mocker` fixture) for mocking — not `unittest.mock` directly**
-   ```python
-   def test_task_service_creates_task(mocker: MockerFixture) -> None:
-       mock_storage = mocker.create_autospec(TaskStorage, instance=True)
-       service = TaskService(storage=mock_storage)
+### Lint Suppression Policy
 
-       service.create(title="Test", priority="high")
+**NEVER suppress these — they signal structural problems:**
 
-       mock_storage.save.assert_called_once()
-   ```
+| Rule | What It Signals | What To Do Instead |
+|---|---|---|
+| `F841` (unused variable) | Dead code | Remove the variable |
+| `S` rules (security) | Security vulnerability | Fix the vulnerability |
+| `B006` (mutable default) | Shared mutable state bug | Use `None` sentinel pattern |
+| `ANN` (missing annotations) | Untyped public API | Add type annotations |
+| `E712` (`== True/False/None`) | Identity vs equality confusion | Use `is` / `is not` |
 
-4. **Use a typed mock factory for Protocol-based interfaces**
-   ```python
-   # storage_mock.py  ← co-locate with storage.py
-   class InMemoryTaskStorage:
-       """In-memory TaskStorage implementation for unit tests."""
+**Acceptable suppressions (with mandatory `# noqa:` + reason comment):**
 
-       def __init__(self) -> None:
-           self._store: dict[str, Task] = {}
+| Rule | When Acceptable |
+|---|---|
+| `S101` (assert) | In test files only |
+| `ANN101`/`ANN102` (self/cls annotations) | Standard convention — self/cls never need annotations |
+| `T20` (print) | In CLI tools or scripts |
+| `ARG` (unused argument) | In interface implementations where signature is fixed |
 
-       def get_by_id(self, task_id: str) -> Task:
-           if task_id not in self._store:
-               raise NotFoundError("Task", task_id)
-           return self._store[task_id]
+**Rule of thumb:** If you're about to write `# noqa:`, stop and ask: "Am I suppressing a real design problem?"
 
-       def save(self, task: Task) -> None:
-           self._store[task.id] = task
+### Formatting and Static Analysis — Feedback Loop
 
-       def delete(self, task_id: str) -> None:
-           self._store.pop(task_id, None)
-   ```
+Adopt the standard Rust/TS-style static analysis workflow:
 
-5. **Use `pytest-asyncio` for async tests** — mark the whole module or use `asyncio_mode = "auto"` in `pyproject.toml`
-   ```python
-   import pytest
+| Phase | Command | Purpose |
+|---|---|---|
+| TDD / rapid iteration | `mypy src/ --strict` | Type-check only — fastest feedback |
+| Pre-commit | `ruff check . --fix` | Lint — must pass with **zero warnings** |
+| Pre-commit | `ruff format .` | Formatting — non-negotiable |
+| Pre-commit | `pytest` | Unit tests — must all pass |
+| Coverage verification | `pytest --cov=src --cov-report=term-missing` | Verify before merging |
+| Security audit | `bandit -r src/ -c pyproject.toml` | Security scanning |
+| Dependency audit | `pip-audit` | CVE scanning |
 
-   @pytest.mark.asyncio
-   async def test_async_create_task() -> None:
-       service = TaskService(storage=InMemoryTaskStorage())
-       task = await service.create(title="Async Task", priority="low")
-       assert task.title == "Async Task"
-   ```
+Configure all tools in `pyproject.toml` — never use per-file pragma comments to disable checks without a `# noqa:` reason comment.
 
-6. **Fixtures for reusable setup** — never repeat identical `Arrange` blocks across tests
-   ```python
-   @pytest.fixture
-   def task_service() -> TaskService:
-       return TaskService(storage=InMemoryTaskStorage())
-   ```
+Never use `print()` in production. Always use a configured logger (see `logging-implementation` skill).
 
----
+### Documentation
 
-### Formatting and Static Analysis
+**Document all public items:**
+- Every public function, class, method, and module MUST have a docstring.
+- Use Google-style docstrings (recommended) or NumPy-style (for scientific code).
+- At minimum: one-line summary. For complex items: summary + Args + Returns + Raises.
 
-All of the following **must pass with zero warnings/errors** before any commit. See `code-idioms-and-conventions.md` for the full checklist.
-
-| Tool         | Purpose                           | Command                            |
-| ------------ | --------------------------------- | ---------------------------------- |
-| `ruff format`| Canonical formatting (fast)       | `ruff format .`                    |
-| `ruff check` | Lint (replaces flake8, isort, ...) | `ruff check . --fix`              |
-| `mypy`       | Static type checking              | `mypy src/ --strict`               |
-| `bandit`     | Security scanning                 | `bandit -r src/ -c pyproject.toml` |
-| `pip-audit`  | Dependency CVE scanning           | `pip-audit`                        |
-
-Configure all tools in `pyproject.toml` — never use per-file pragma comments to disable checks without a `# NOQA:` reason comment.
-
-```toml
-[tool.ruff]
-line-length = 100
-target-version = "py311"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "N", "UP", "S", "B", "ANN"]
-ignore = []
-
-[tool.mypy]
-strict = true
-python_version = "3.11"
-
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
+```python
+# ❌ Anti-pattern: Undocumented public API
+def calculate_discount(price: float, rate: float) -> float:
+    return price * (1 - rate)
 ```
 
-> **Logging:** Never use `print()` in production code — it produces unstructured output. Use the standard `logging` module or `structlog` for structured JSON logs. See @.agents/skills/logging-implementation/SKILL.md for the required patterns.
+```python
+# ✅ Recommended pattern: Documented public API
+def calculate_discount(price: float, rate: float) -> float:
+    """Calculates the final price after applying a discount rate.
 
----
+    Args:
+        price: The original price.
+        rate: The discount rate as a decimal (e.g., 0.2 for 20%).
+
+    Returns:
+        The final discounted price.
+        
+    Raises:
+        ValueError: If the rate is not between 0.0 and 1.0.
+    """
+    if not (0.0 <= rate <= 1.0):
+        raise ValueError("Rate must be between 0.0 and 1.0")
+    return price * (1 - rate)
+```
+
+### Dependency Management
+
+1. Minimize dependency count — each dependency is an attack surface.
+2. Audit regularly — run `pip-audit` in CI.
+3. Use `pyproject.toml` as the single source of truth for project metadata.
+4. Commit lockfiles for applications (`uv.lock`, `requirements.lock`).
+5. Prefer stdlib over third-party when feature parity exists.
+6. Check for unused dependencies with import analysis.
+
+> For the full curated dependency list with versions, see `references/recommended-dependencies.md`.
+
+### Configuration and Environment
+
+1. Never scatter `os.environ` / `os.getenv()` calls throughout the codebase.
+2. Use pydantic-settings `BaseSettings` for validated, typed config.
+3. Fail fast on missing required config at boot, not at first use.
+
+```python
+# ❌ Anti-pattern: Scattered os.getenv calls
+import os
+
+def connect_db():
+    db_url = os.getenv("DATABASE_URL") # Fails later if missing
+    # connect...
+```
+
+```python
+# ✅ Recommended pattern: Centralized typed config
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    database_url: str
+    api_key: str
+
+# Fails immediately at startup if env vars are missing or invalid
+settings = Settings() 
+
+def connect_db():
+    db_url = settings.database_url
+    # connect...
+```
+
+### Safety, Security, and Performance
+
+- **Key safety rules (non-negotiable):** 
+  - Never use `eval()` or `exec()` with untrusted input.
+  - Never use `pickle` on untrusted data.
+  - Always parameterize SQL queries; never concatenate strings to build SQL.
+  - Always validate user input at system boundaries.
+- See `references/python-patterns-and-anti-patterns.md` for the full catalog of safety and security patterns.
+- See `perf-optimization` skill for profiling and performance guidance.
 
 ### Related Principles
-- Code Idioms and Conventions @code-idioms-and-conventions.md
-- Project Structure — Python Backend references/project-structure.md
-- Security Principles @security-principles.md
-- Architectural Patterns — Testability-First Design @architectural-pattern.md
-- Testing Strategy @testing-strategy.md
-- Error Handling Principles @error-handling-principles.md
-- Core Design Principles § Concurrency @core-design-principles.md
-- Logging and Observability Mandate @logging-and-observability-mandate.md
-- Logging and Observability Principles @.agents/skills/logging-implementation/SKILL.md
-- Dependency Management Principles @dependency-management-principles.md
+
+- Code Idioms and Conventions `@code-idioms-and-conventions.md`
+- Project Structure — Python Backend `@references/project-structure.md`
+- Security Principles `@security-principles.md`
+- Architectural Patterns — Testability-First Design `@architectural-pattern.md`
+- Testing Strategy `@testing-strategy.md`
+- Error Handling Principles `@error-handling-principles.md`
+- Core Design Principles § Concurrency `@core-design-principles.md`
+- Logging and Observability Mandate `@logging-and-observability-mandate.md`
+- Logging Implementation `@.agents/skills/logging-implementation/SKILL.md`
+- Django Idioms `@.agents/skills/django-idioms/SKILL.md`
+- Testability Patterns `@.agents/skills/testability-patterns/SKILL.md`
+- Concurrency and Threading Principles `@concurrency-and-threading-principles.md`
+- Performance Optimization Principles `@performance-optimization-principles.md`
+- Resource and Memory Management Principles `@resources-and-memory-management-principles.md`
+- Security Mandate `@security-mandate.md`
+- Dependency Management Principles `@dependency-management-principles.md`
+- Recommended Dependencies `@references/recommended-dependencies.md`
+- Python Patterns and Anti-Patterns `@references/python-patterns-and-anti-patterns.md`
