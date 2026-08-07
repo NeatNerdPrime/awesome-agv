@@ -137,25 +137,87 @@ logger.error({
 ```
 
 ##### Python (using structlog)
-```python
 
+**Setup — configure once at application startup:**
+```python
+import contextvars
+import logging
+import structlog
+
+# Async-safe correlation ID propagation via contextvars (NOT thread-locals)
+correlation_id_var: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "correlation_id", default=""
+)
+
+def add_correlation_id(
+    logger: structlog.types.WrappedLogger,
+    method_name: str,
+    event_dict: structlog.types.EventDict,
+) -> structlog.types.EventDict:
+    """Injects the current context's correlation_id into every log entry."""
+    if cid := correlation_id_var.get():
+        event_dict["correlation_id"] = cid
+    return event_dict
+
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,   # merge bind_contextvars() calls
+        add_correlation_id,                         # inject from ContextVar
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        # Development: pretty console; Production: JSON
+        structlog.dev.ConsoleRenderer()             # swap for JSONRenderer() in prod
+    ],
+    wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+    context_class=dict,
+    logger_factory=structlog.PrintLoggerFactory(),
+)
+```
+
+**ASGI Middleware — set correlation_id at the request boundary:**
+```python
+import uuid
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        cid = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
+        token = correlation_id_var.set(cid)
+        try:
+            response = await call_next(request)
+            response.headers["X-Correlation-Id"] = cid
+            return response
+        finally:
+            correlation_id_var.reset(token)  # always restore context
+
+# Register in app startup:
+# app.add_middleware(CorrelationIdMiddleware)
+```
+
+**Usage in handlers and services:**
+```python
 import structlog
 
 logger = structlog.get_logger()
 
+# correlation_id is automatically included via the ContextVar processor
 logger.info("task_created",
-correlation_id=correlation_id,
-user_id=user_id,
-task_id=task.id,
+    user_id=user_id,
+    task_id=task.id,
+    duration_ms=elapsed_ms,
 )
 
 logger.error("task_creation_failed",
-correlation_id=correlation_id,
-error=str(err),
-user_id=user_id,
+    user_id=user_id,
+    error=str(err),
 )
-
 ```
+
+> **Why `contextvars` not thread-locals?** Thread-locals are unsafe in async code — coroutines can switch context between `await` points. `contextvars.ContextVar` is propagated correctly across `await` boundaries and `asyncio.create_task()` calls, making it the only correct approach for async Python logging.
 
 ##### Rust (using tracing + tracing-subscriber)
 
