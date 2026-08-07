@@ -16,6 +16,22 @@ description: >
 - A benchmark regression is detected
 - After deploying a new feature that touches a hot path
 
+## Contents
+
+| Reference | Purpose | Used By |
+|---|---|---|
+| `references/perf-dimensions.md` | 6 MECE performance dimension scope cards + subagent prompt template | Coordinator dispatching parallel subagents in `/perf-optimize` workflow |
+| `references/perf-report-template.md` | Structured report template for performance analysis and results output | Coordinator writing Phase 3 analysis report and Phase 6 results |
+
+## Usage
+
+The `/perf-optimize` workflow loads this skill automatically.
+
+- **Methodology & patterns:** The coordinator reads this file for the core methodology (Profile → Analyze → Optimize → Benchmark), optimization pattern catalog, anti-patterns, and when-to-stop heuristics.
+- **Dimension scope cards:** Read `references/perf-dimensions.md` to get the scope definition for each dimension (A–F) and the system prompt template for subagent dispatch.
+- **Report template:** Read `references/perf-report-template.md` when writing the Phase 3 analysis report and updating it with Phase 6 implementation results.
+- **Language modules:** Read `languages/{lang}.md` for language-specific profiling tools, irreducible floors, and runtime-specific patterns.
+
 ## Core Methodology
 
 ```mermaid
