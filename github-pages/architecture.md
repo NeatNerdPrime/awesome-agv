@@ -144,7 +144,7 @@ When rules conflict, the priority system resolves them:
 │  /workflow-solo → phases → ship            │
 │  /workflow-team → agents → primitives       │
 ├───────────────────────────────────────────┤
-│  Tier 3: Skills (57)                        │
+│  Tier 3: Skills (58)                        │
 │  (Procedural capabilities, on demand)       │
 │                                             │
 │  Language Idioms (27), parallel-dispatch,   │

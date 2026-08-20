@@ -18,6 +18,7 @@
       "embedded-systems",
       "feature-flags",
       "frontend-design",
+      "git-commit-integrity",
       "guardrails",
       "incident-response",
       "logging-implementation",
@@ -93,7 +94,7 @@
         "description": "hooks, Suspense, Server Components",
         "group": "core",
         "requires": ["typescript"],
-        "detect": [],
+        "detect": ["*.jsx", "*.tsx"],
         "skills": ["react-idioms"]
       },
       "nextjs": {

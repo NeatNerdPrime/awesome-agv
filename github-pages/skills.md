@@ -7,7 +7,7 @@ nav_order: 4
 # Skills Reference
 {: .no_toc }
 
-All 57 specialized skills that extend your agent's capabilities.
+All 58 specialized skills that extend your agent's capabilities.
 {: .fs-6 .fw-300 }
 
 <details open markdown="block">
@@ -27,7 +27,7 @@ Skills differ from rules in that they are **procedural** — they describe a *pr
 
 ---
 
-## Core Engineering Skills (9)
+## Core Engineering Skills (10)
 
 ### Debugging Protocol
 
@@ -255,6 +255,25 @@ Orchestration reference for the `/audit` workflow. Contains dimension scope card
 **When to Use:**
 - When executing a multi-dimensional code audit using the `/audit` workflow
 - To define scoping dimensions and prompt subagents for parallel code auditing
+
+---
+
+### Git Commit Integrity
+
+**File:** `.agents/skills/git-commit-integrity/SKILL.md`
+
+Ensures every commit in a series is an isolated, independently buildable, and gate-passing snapshot — not just passing because unstaged changes happened to sit in the ambient working tree.
+
+**When to Use:**
+- Splitting a large, finished diff into multiple logical commits
+- Writing or reviewing pre-commit and pre-push hooks
+- Verifying whether a commit series is clean and bisectable (`git bisect`)
+- Designing isolated working-tree validation algorithms (avoiding `git stash --keep-index` pitfalls)
+
+**Core Patterns:**
+- **Isolated Worktree Replay:** Verifying each commit in an isolated `/tmp` worktree against build and test gates.
+- **Hook Isolation Architecture:** Separating index-native checks (fast staged scans) from filesystem-native checks with diff/patch tree isolation.
+- **Diff Decomposition:** Grouping by concern and validating intermediate state bisectability.
 
 ---
 

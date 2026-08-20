@@ -30,7 +30,7 @@ While this configuration is originally designed for **Antigravity**, it is built
 ### Key Features
 
 *   📏 **25 Rules** — covering security, reliability, architecture, and maintainability. Distilled to project-specific decisions only — rules encode *what overrides model defaults*, not what models already know.
-*   🛠️ **57 Skills** — specialized capabilities loaded on demand: language idioms, debugging, design, testing, performance, CI/CD, and more.
+*   🛠️ **58 Skills** — specialized capabilities loaded on demand: language idioms, debugging, design, testing, performance, CI/CD, and more.
 *   🔄 **11 Workflows** — end-to-end development processes from research to ship, plus specialized testing pipelines.
 *   🤖 **21 Agent Personas** — specialized sub-agents for multi-agent orchestration arranged in a 4-tier hierarchy.
 *   🏗️ **Three-Tier Loading System** — always-on mandates + contextual principles + on-demand skills for zero-noise enforcement.
@@ -297,7 +297,7 @@ Activated by the model only when relevant — zero overhead when not applicable.
 *   **[Accessibility Principles](.agents/rules/accessibility-principles.md)**: WCAG 2.1 AA, semantic HTML, keyboard navigation
 *   **[Git Workflow Principles](.agents/rules/git-workflow-principles.md)**: Conventional commits, branch naming, PR hygiene
 
-### Specialized Skills (57)
+### Specialized Skills (58)
 
 Skills are deep expertise modules loaded on demand — agents only pay the token cost when the skill is relevant.
 
@@ -310,6 +310,7 @@ Skills are deep expertise modules loaded on demand — agents only pay the token
 *   **[Performance Optimization](.agents/skills/perf-optimization/SKILL.md)**: Profile-driven optimization (pprof, Lighthouse, bundle analysis)
 *   **[Refactoring Patterns](.agents/skills/refactoring-patterns/SKILL.md)**: Code smell taxonomy, safe transformation techniques, behavior preservation
 *   **[Research Methodology](.agents/skills/research-methodology/SKILL.md)**: Structured research protocol for technologies and patterns
+*   **[Git Commit Integrity](.agents/skills/git-commit-integrity/SKILL.md)**: Independent per-commit build/lint/test verification, pre-commit hook isolation, and safe diff splitting
 
 
 #### 🏛️ Architecture & Infrastructure Skills
@@ -483,7 +484,7 @@ Specialized workflows for retroactive testing improvements on existing codebases
 │   ├── architectural-pattern.md          # always_on: I/O isolation, testability
 │   ├── rule-priority.md                  # always_on: conflict resolution
 │   └── ...            # 5 more always-on + 15 contextual principles
-├── skills/            # 57 specialized skills — loaded on demand, not always
+├── skills/            # 58 specialized skills — loaded on demand, not always
 │   ├── code-audit/              # reference-loaded from audit workflow
 │   ├── security-audit/          # reference-loaded from security-audit workflow
 │   ├── go-idioms/               # paths: **/*.go — includes references/project-structure.md
@@ -526,7 +527,7 @@ Specialized workflows for retroactive testing improvements on existing codebases
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Include more specialized skills to aid development process (57 skills shipped).
+- [x] Include more specialized skills to aid development process (58 skills shipped).
 - [x] Add development workflows for structured feature delivery (11 workflows shipped).
 - [x] Add language-specific idiom skills (Go, TypeScript, Vue, Flutter, Rust, Python + 18 community language skills).
 - [x] Create a CLI tool for easier installation (`npx awesome-agv`).
