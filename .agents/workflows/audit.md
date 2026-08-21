@@ -79,7 +79,7 @@ Dispatch parallel subagents — one per activated dimension. Each operates indep
 Use `invoke_subagent` to spawn all activated dimension agents in a **single call**.
 
 **Per-dimension fields:**
-- **TypeName:** `self` (**CRITICAL** — named types like `"reviewer"` lack file-reading tools and cannot scan code)
+- **TypeName:** `self` (dimension auditors are ad-hoc specialist roles not covered by a pre-registered type — use `self` per `agent-protocols` §3 fallback rule)
 - **Role:** `Code Auditor — Dimension {KEY}` (e.g., `Code Auditor — Dimension A`)
 - **Workspace:** `inherit`
 - **Prompt:** Build from the system prompt template in `code-audit` skill → `references/audit-dimensions.md`. Fill in: dimension name, scope card, and reconnaissance context from Phase 0.
