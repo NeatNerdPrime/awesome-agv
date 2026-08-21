@@ -358,9 +358,22 @@ MECE task decomposition, file ownership enforcement, DAG-based execution, and sa
 
 ---
 
-## Architecture & Infrastructure Skills (5)
+## Architecture & Infrastructure Skills (6)
 
 Cross-cutting skills loaded via rule references — they apply to all languages and load regardless of file type.
+
+### Structured Spec
+
+**File:** `.agents/skills/structured-spec/SKILL.md`
+
+Machine-parseable specification standard (PRD, SDD, TSD, BDD, ADR, Implementation Plan) with requirement-to-contract-to-test traceability, YAML frontmatter, HTML comment annotations, and multi-agent manifest slicing.
+
+**When to Use:**
+- Writing or reviewing PRDs, SDDs, TSDs, BDD specs, ADRs, or Implementation Plans
+- Enforcing requirement-to-contract-to-test traceability
+- Slicing specifications into work packages for multi-agent dispatch
+
+---
 
 ### Testability Patterns
 
