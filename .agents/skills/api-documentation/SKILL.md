@@ -98,3 +98,4 @@ Document every error code with:
 ## Related
 - API Design Principles @.agents/rules/api-design-principles.md
 - Documentation Principles .agents/rules/documentation-principles.md
+- Structured Spec TSD Profile @.agents/skills/structured-spec/profiles/tsd.md — use when API documentation requires formal requirement traceability (`<!-- contract -->` annotations wrapping OpenAPI blocks)

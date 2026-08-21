@@ -82,6 +82,8 @@ The safety invariant: **one writer per file**. If ownership is valid, merges are
 | **Shared Read** | Read by any sub-task | Immutable during BUILD |
 | **Contracts Layer** | Read by all BUILD agents | Produced by DESIGN, frozen for BUILD |
 
+> When contracts are authored using the `structured-spec` standard, the generated manifest (`specification.md` §7-8) provides machine-parseable work package partitioning by contract ID, contract type, requirement closure, or stack category. See `structured-spec/specification.md` §8 (Multi-Agent Slicing).
+
 If a BUILD agent discovers a contract needs changes → **STOP and escalate** for DESIGN revision. Never silently modify frozen contracts.
 
 ### Integration Sub-Task

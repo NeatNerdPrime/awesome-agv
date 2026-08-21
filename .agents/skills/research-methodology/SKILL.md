@@ -88,7 +88,7 @@ If no search yields results:
 
 ### 5. ADRs
 
-If research reveals choice between 2+ approaches, new dependency, or arch change → create ADR via `adr` skill at `docs/decisions/NNNN-short-title.md`.
+If research reveals choice between 2+ approaches, new dependency, or arch change → create ADR via `adr` skill at `docs/decisions/NNNN-short-title.md`. The `adr` skill template produces structured-spec-compatible ADRs with YAML frontmatter and `<!-- decision -->` annotations.
 
 ## Agent Integration
 

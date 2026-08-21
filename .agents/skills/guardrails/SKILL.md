@@ -24,6 +24,7 @@ Run through this checklist **before writing any code**:
 - [ ] Identified I/O boundaries that need abstraction
 - [ ] Determined test strategy (unit/integration/E2E)
 - [ ] Reviewed `rule-priority.md` for any potential conflicts
+- [ ] Checked for existing structured specs (PRD/SDD/TSD/BDD/Plan) and identified applicable contracts (`CT-*`) and requirements (`REQ-*`)
 
 If any item cannot be checked, **stop and resolve** before proceeding.
 

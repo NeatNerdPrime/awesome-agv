@@ -106,6 +106,7 @@ When invoked as a standalone review (not via `/audit`), saving to `docs/audits/`
 | `[INT]`  | Integration contract | `api-design-principles.md`                         |
 | `[DB]`   | Database design      | `database-design-principles.md`                    |
 | `[CFG]`  | Configuration        | `configuration-management-principles.md`           |
+| `[SPEC]` | Spec compliance      | `structured-spec` profiles                         |
 
 ### 7. Language-Specific Anti-Patterns
 
@@ -133,6 +134,12 @@ Load the anti-pattern checklist for the language(s) under review:
 For full audits, cross-boundary concerns (integration contracts, database schema, configuration hygiene, dependency health, test coverage gaps) are checked via the dedicated MECE dimension scope cards in the `/audit` workflow (Dimension F & G) — defined in `.agents/skills/code-audit/references/audit-dimensions.md`.
 
 When invoking this skill standalone (outside `/audit`), apply the applicable dimensions from that checklist manually and tag findings with `[INT]`, `[DB]`, or `[CFG]` as appropriate.
+
+When structured specs exist in the repository (files with structured-spec YAML frontmatter), verify that:
+- Contracts declared in specs (`CT-*`) are implemented in code
+- Tests declared in specs (`TC-*`) exist and pass
+- No requirement (`REQ-*`) is unimplemented without documented rationale
+Tag findings with `[SPEC]`.
 
 **Zero-Findings Guard:** If this review produces fewer than 3 findings, you MUST produce a "Dimensions Covered" attestation section in the findings document, listing each cross-boundary dimension and the specific files or queries you examined. Only then may you declare a clean result.
 
