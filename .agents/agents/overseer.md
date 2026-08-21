@@ -54,7 +54,7 @@ No code. No tests. No design decisions. No file modifications (except `.agentwor
 
 ## Agent Spawn Protocol
 
-**Use the pre-registered named TypeName** for each agent role. Named types are provisioned by the platform with appropriate tool sets (write tools, subagent tools, etc.).
+**Rule: In Antigravity, spawn subagents using `TypeName="self"`.** This ensures the child inherits all platform tools (subagent dispatching, file writing, terminal execution). Role differentiation and boundaries are enforced via the `Role` field, prompt, and role file.
 
 **The overseer spawns ONLY two agent types:**
 
@@ -66,7 +66,7 @@ No code. No tests. No design decisions. No file modifications (except `.agentwor
 **Conductor spawn template:**
 ```
 invoke_subagent(
-  TypeName: "conductor",
+  TypeName: "self",
   Role:     "Conductor",
   Prompt:   "You are @conductor, the build orchestrator.
 
@@ -187,7 +187,7 @@ The overseer spawns the Red Team Lead, NOT the conductor. This provides **struct
 **Red Team spawn template:**
 ```
 invoke_subagent(
-  TypeName: "red-team-lead",
+  TypeName: "self",
   Role:     "Red Team Lead",
   Prompt:   "You are @red-team-lead, the independent delivery validator.
 

@@ -14,13 +14,13 @@ Your ONLY job: spawn `@conductor`, relay user approvals, spawn `@red-team-lead` 
 
 ---
 
-## §0. Spawn Protocol
+## §0. Spawn Protocol (Universal `TypeName="self"` Pattern)
 
-> **Spawn Rule.** Use the pre-registered named TypeName matching the agent's role (e.g., `TypeName="conductor"`, `TypeName="tech-lead"`, `TypeName="backend-engineer"`). Named types are pre-configured by the platform with appropriate tool sets — builders have write/execution tools, coordinators have write + subagent tools, read-only agents have research tools. Fall back to `TypeName="self"` only for ad-hoc roles or recursive self-decomposition within the same role.
+> **Spawn Rule.** In Antigravity, all subagents across all tiers are spawned using `TypeName="self"`. This ensures the subagent inherits the full toolset (write tools, terminal execution, subagent spawning) needed to perform its work autonomously. Role differentiation and domain boundaries are enforced through the `Role` field, the system prompt, and the agent's role file in `.agents/agents/{role}.md`.
 
 ```
 invoke_subagent(
-  TypeName: "conductor",                         ← Use the pre-registered named type
+  TypeName: "self",                              ← ALWAYS "self" to inherit full toolset
   Role:     "Conductor",                         ← Descriptive role for this instance
   Prompt:   "Read your role file FIRST:          ← Points to role file
              file://{workspace}/.agents/agents/conductor.md
@@ -32,7 +32,7 @@ invoke_subagent(
 > [!IMPORTANT]
 > **Each agent only spawns what its own role file permits.** The overseer spawns ONLY `@conductor` and `@red-team-lead` (see `overseer.md`). The conductor spawns tech-leads, builders, scouts, and reviewers (see `conductor.md`). Tech-leads spawn builders (see `tech-lead.md`). This hierarchy is non-negotiable — agents MUST NOT bypass layers.
 
-Boundaries are enforced by **role files** (`.agents/agents/{role}.md`) AND **platform tool provisioning** (named types receive domain-appropriate tools). Agents read their role file FIRST — it defines what they may and may not do. Coordinators and tech-leads MUST proactively spawn specialized builders for parallel execution within their own layer (see `agent-protocols` §6 Sovereign Subagent Awareness). This applies at ALL hierarchy levels.
+Boundaries and permissions are enforced by **role files** (`.agents/agents/{role}.md`). Agents read their role file FIRST — it defines what they may and may not do. Coordinators and tech-leads MUST proactively spawn specialized builders for parallel execution within their own layer (see `agent-protocols` §6 Sovereign Subagent Awareness). This applies at ALL hierarchy levels.
 
 ---
 
@@ -131,7 +131,7 @@ Before writing ANY code, read these to match established patterns:
 
 **Conductor** — add: `You report to @overseer ({overseer_id}). Do NOT report to user. Do NOT spawn @red-team-lead. Begin Step 1: Elicit.`
 
-**Tech-Lead** — add: Scope card details (name, write scope, shared reads, deps, frozen contracts). `You MUST dispatch domain work to specialized builders (@backend-engineer, @frontend-engineer, @test-automation-engineer) in parallel using their named TypeNames. You write ONLY integration/wiring code (DI, routes, module config). NEVER implement feature business logic yourself — that is the builders' job. Include Convention Reference in every builder dispatch.`
+**Tech-Lead** — add: Scope card details (name, write scope, shared reads, deps, frozen contracts). `You MUST dispatch domain work to specialized builders (@backend-engineer, @frontend-engineer, @test-automation-engineer) in parallel via invoke_subagent using TypeName="self" with distinct Role designations pointing to their role files. You write ONLY integration/wiring code (DI, routes, module config). NEVER implement feature business logic yourself — that is the builders' job. Include Convention Reference in every builder dispatch.`
 
 **Builder** — add: `When complete: run idiom quality checks → build → self-review via code-review skill → write .agentwork/handoff.md → message parent.`
 

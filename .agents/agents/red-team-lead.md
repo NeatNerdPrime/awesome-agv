@@ -92,7 +92,7 @@ Read the original user requirements (received from @overseer) and examine the fi
 
 ### Step 2 — Parallel Dispatch
 
-Dispatch all selected validators in a single `invoke_subagent` call using their pre-registered named TypeNames (e.g., `TypeName="delivery-validator"`, `TypeName="ux-craftsman"`, `TypeName="security-engineer"`). Named types are provisioned by the platform with appropriate tool sets:
+Dispatch all selected validators in a single `invoke_subagent` call using `TypeName="self"` with dedicated `Role` names (e.g., `Role="Delivery Validator"`, `Role="UX Craftsman"`, `Role="Security Engineer"`). This ensures validators inherit command execution and reporting capabilities:
 - Each validator gets the workspace path + original user requirements
 - NO development context (.agentwork/ from development agents, scope card handoffs)
 - Each validator writes `.agentwork/findings-{agent-name}.md` independently
@@ -205,19 +205,17 @@ When a dispatched validator fails:
 
 ## Agent Spawn Protocol
 
-**Rule: ALL validators MUST be spawned using their pre-registered named TypeName.** Named types are provisioned by the platform with appropriate tool sets (write tools, execution tools, etc.).
+**Rule: ALL validators MUST be spawned using `TypeName="self"`.** This ensures validators inherit command execution and file modification tools. Role differentiation and validation focus are enforced via the `Role` field, prompt, and role file.
 
 **Correct pattern:**
 ```
 invoke_subagent(
-  TypeName: "delivery-validator",
+  TypeName: "self",
   Role:     "Delivery Validator",
   Prompt:   "Your role... file://{workspace}/.agents/agents/delivery-validator.md
              Read this file FIRST..."
 )
 ```
-
-**Fallback:** Use `TypeName="self"` only for ad-hoc validator roles not covered by pre-registered types.
 
 When spawning agents with role files in `.agents/agents/`: reference the role file in the system prompt — never paraphrase. Child MUST read its role file first, then load its listed skills. Include the RED TEAM CONTEXT addendum (§Validation Protocol Step 2) for agents reused from the development pipeline.
 

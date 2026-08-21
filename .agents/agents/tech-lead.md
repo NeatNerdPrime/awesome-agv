@@ -43,12 +43,12 @@ No primary feature business logic — **delegate ALL domain implementation to sp
 
 ## Agent Spawn Protocol
 
-**Rule: ALL specialist builders MUST be spawned using their pre-registered named TypeName.** Named types are provisioned by the platform with appropriate write, execution, and (where applicable) subagent tools.
+**Rule: ALL specialist builders MUST be spawned using `TypeName="self"`.** This ensures builders inherit the full toolset (file writing, editing, and command execution) from the Tech-Lead. Role differentiation and domain boundaries are enforced via the `Role` field, prompt, and role file.
 
 **Correct pattern:**
 ```
 invoke_subagent(
-  TypeName: "backend-engineer",                   ← Use the pre-registered named type
+  TypeName: "self",                              ← ALWAYS "self" to inherit write/exec tools
   Role:     "Backend Engineer (Auth)",            ← Human-readable role name
   Prompt:   "Your role, domain, skills...         ← Points to .agents/agents/{role}.md
              file://{workspace}/.agents/agents/backend-engineer.md
@@ -58,11 +58,7 @@ invoke_subagent(
 )
 ```
 
-**Fallback:** Use `TypeName="self"` only when recursively sub-decomposing within the same domain (e.g., spawning a narrower tech-lead for a sub-scope), or for ad-hoc specialist roles not covered by pre-registered types.
-
-> **Parallel delegation is mandatory for multi-domain cards.** If your scope card spans backend + frontend + tests, you MUST dispatch `@backend-engineer`, `@frontend-engineer`, and `@test-automation-engineer` as parallel sovereign agents. Doing all the work yourself serializes what should be concurrent work and defeats the purpose of the multi-agent hierarchy. See `agent-protocols` §6 Sovereign Subagent Awareness.
-
-> All pre-registered builder types (`backend-engineer`, `frontend-engineer`, `mobile-engineer`, `test-automation-engineer`) have write and execution tools provisioned by the platform.
+> **Parallel delegation is mandatory for multi-domain cards.** If your scope card spans backend + frontend + tests, you MUST dispatch `@backend-engineer`, `@frontend-engineer`, and `@test-automation-engineer` as parallel sovereign agents in a single `invoke_subagent` call. Doing all the work yourself serializes what should be concurrent work and defeats the purpose of the multi-agent hierarchy. See `agent-protocols` §6 Sovereign Subagent Awareness.
 
 ---
 
@@ -76,7 +72,7 @@ Receive scope card from Conductor. The card specifies:
 - **Acceptance criteria**: what "done" looks like
 
 ### Step 2 — Specialist Dispatch
-Decompose the scope card into specialist tasks and dispatch builders using their pre-registered named TypeNames (see §Agent Spawn Protocol above):
+Decompose the scope card into specialist tasks and dispatch builders using `TypeName="self"` (see §Agent Spawn Protocol above):
 
 | Builder | When to Dispatch |
 |---|---|
@@ -90,7 +86,7 @@ Decompose the scope card into specialist tasks and dispatch builders using their
 **Dispatch protocol:**
 1. Define MECE file ownership for each builder (no overlapping write scopes)
 2. Include the scope card's write scope constraints in each builder's prompt
-3. Dispatch all independent builders in a single `invoke_subagent` call (using named TypeNames, `workspace='inherit'`)
+3. Dispatch all independent builders in a single `invoke_subagent` call (`TypeName='self'`, `workspace='inherit'`)
 4. Each builder's prompt must include: task description, write scope, frozen contracts, and the instruction to read its role file from `.agents/agents/`
 5. **Each builder's prompt MUST include the Convention Reference preamble** (see below)
 

@@ -102,7 +102,7 @@ Dispatch parallel subagents — one per activated dimension. Each analyzes the p
 Use `invoke_subagent` to spawn all activated dimension agents in a **single call**.
 
 **Per-dimension fields:**
-- **TypeName:** `self` (dimension analysts are ad-hoc specialist roles not covered by a pre-registered type — use `self` per `agent-protocols` §3 fallback rule)
+- **TypeName:** `self` (universal spawn mechanism — ensures subagents inherit full toolsets per `agent-protocols` §3)
 - **Role:** `Performance Analyst — Dimension {KEY}` (e.g., `Performance Analyst — Dimension A`)
 - **Workspace:** `inherit`
 - **Prompt:** Build from the system prompt template in `perf-optimization` skill → `references/perf-dimensions.md`. Fill in: dimension name, scope card, reconnaissance context from Phase 0, and profiling data from Phase 1.

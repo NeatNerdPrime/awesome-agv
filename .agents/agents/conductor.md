@@ -39,18 +39,14 @@ No code. No tests. No design decisions. No file modifications. No direct codebas
 
 ## Agent Spawn Protocol
 
-**Use the pre-registered named TypeName** for each agent role. Named types are provisioned by the platform with appropriate tool sets — builders have write/execution tools, coordinators have write + subagent tools, read-only agents have research tools.
+**Rule: In Antigravity, spawn all subagents using `TypeName="self"`.** This ensures the child inherits all platform tools (subagent dispatching for tech leads, file writing and command execution for builders). Role differentiation and boundaries are enforced via the `Role` field, prompt, and role file.
 
 **Correct pattern:**
 ```
-invoke_subagent → TypeName: "tech-lead", Role: "Tech Lead (Auth)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/tech-lead.md ..."
-invoke_subagent → TypeName: "backend-engineer", Role: "Builder (Payments)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/backend-engineer.md ..."
-invoke_subagent → TypeName: "scout", Role: "Scout (Codebase Analysis)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/scout.md ..."
+invoke_subagent → TypeName: "self", Role: "Tech Lead (Auth)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/tech-lead.md ..."
+invoke_subagent → TypeName: "self", Role: "Builder (Payments)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/backend-engineer.md ..."
+invoke_subagent → TypeName: "self", Role: "Scout (Codebase Analysis)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/scout.md ..."
 ```
-
-**Fallback:** Use `TypeName="self"` only when no pre-registered type exists for the role, or for recursive self-decomposition within the same domain.
-
-**Custom types:** Use `define_subagent` when you need a custom agent type not covered by pre-registered types.
 
 When spawning agents with role files in `.agents/agents/`: reference the role file in the system prompt — never paraphrase. Child MUST read its role file first, then load its listed skills.
 

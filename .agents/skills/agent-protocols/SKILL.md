@@ -16,7 +16,7 @@ Shared behavioral protocols for all agents in the workflow-team pipeline.
 When your scope card is too broad for a single context:
 
 1. Further decompose using `parallel-dispatch` skill (§1 Decomposition, §5 Hierarchical Decomposition)
-2. Spawn sub-agents using pre-registered named TypeNames when available (see §3 Agent Spawn Protocol), or `TypeName="self"` for recursive self-decomposition within the same role
+2. Spawn sub-agents with narrower scope cards using `TypeName="self"` with dedicated `Role` designations (see §3 Agent Spawn Protocol)
 3. Your scope becomes the ceiling — children cannot operate outside it
 4. Track sub-agent progress; merge results when all complete
 5. Write `.agentwork/handoff.md` for your parent coordinator
@@ -36,21 +36,22 @@ Before writing code, restate in your own words:
 
 If any assumption is uncertain, document it in your handoff and proceed with the conservative interpretation.
 
-## 3. Agent Spawn Protocol (Coordinators Only)
+## 3. Agent Spawn Protocol (Universal `TypeName="self"` Pattern)
+
+In the Antigravity subagent platform, `TypeName="self"` is the universal spawn mechanism that ensures subagents inherit their parent's full tool capabilities (file modification, command execution, and subagent dispatch for multi-tier nesting). Discovered named types default to read-only tool sets.
 
 When spawning ANY agent type with a role file in `.agents/agents/`:
 
-1. **Use the pre-registered named TypeName** matching the agent's role file basename (e.g., `TypeName="backend-engineer"` for `.agents/agents/backend-engineer.md`, `TypeName="tech-lead"` for `.agents/agents/tech-lead.md`). Named types are pre-configured by the platform with appropriate tool sets — builders have write/execution tools, coordinators have write + subagent tools, read-only agents have research tools.
-2. **Fall back to `TypeName="self"`** only when no pre-registered type exists for the role, or when recursively sub-decomposing within the same role (e.g., a tech-lead spawning a narrower tech-lead for a sub-scope).
-3. **Use `define_subagent`** when you need a custom agent type not covered by pre-registered types. Specify `enable_write_tools`, `enable_subagent_tools`, and `enable_mcp_tools` flags as needed.
-4. **Reference the role file** in the system prompt — never paraphrase:
+1. **Always use `TypeName="self"`** in `invoke_subagent` calls. This guarantees the subagent inherits write, execution, and subagent tools from the parent.
+2. **Differentiate roles via the `Role` field** (e.g., `Role: "Tech-Lead (Auth API)"`, `Role: "Backend Engineer (Payments)"`, `Role: "Test Automation Engineer"`).
+3. **Reference the role file** in the system prompt — never paraphrase:
    ```
    "Your role, domain, skills, boundaries, and protocols are defined in
     file://{workspace}/.agents/agents/{agent-type}.md.
    Read this file FIRST before beginning any work."
    ```
-5. The child agent MUST read the role file as its first action
-6. Propagate this protocol recursively — if the child is a coordinator, it must follow the same rule when spawning its own children
+4. **The child agent MUST read the role file as its first action.** Boundaries, domain rules, and workflow expectations are strictly defined by the role file.
+5. **Propagate this protocol recursively** — Tech-Leads spawn specialized builders using `TypeName="self"` with builder role files, enabling deep parallel execution.
 
 ## 4. Parallel Dispatch Format
 
