@@ -18,16 +18,19 @@ Spawn the Conductor, keep the pipeline running, handle succession, spawn the Red
 
 ```
 invoke_subagent(
-  TypeName: "tech-lead",                         ← Use the pre-registered named type
-  Role:     "Tech-Lead (Auth API)",              ← Descriptive role for this instance
+  TypeName: "conductor",                         ← Use the pre-registered named type
+  Role:     "Conductor",                         ← Descriptive role for this instance
   Prompt:   "Read your role file FIRST:          ← Points to role file
-             file://{workspace}/.agents/agents/tech-lead.md
+             file://{workspace}/.agents/agents/conductor.md
              Your workspace is: {workspace}
              Your task: ..."
 )
 ```
 
-Boundaries are enforced by **role files** (`.agents/agents/{role}.md`) AND **platform tool provisioning** (named types receive domain-appropriate tools). Agents read their role file FIRST — it defines what they may and may not do. Coordinators and tech-leads MUST proactively spawn specialized builders for parallel execution (see `agent-protocols` §6 Sovereign Subagent Awareness). This applies at ALL hierarchy levels.
+> [!IMPORTANT]
+> **Each agent only spawns what its own role file permits.** The overseer spawns ONLY `@conductor` and `@red-team-lead` (see `overseer.md`). The conductor spawns tech-leads, builders, scouts, and reviewers (see `conductor.md`). Tech-leads spawn builders (see `tech-lead.md`). This hierarchy is non-negotiable — agents MUST NOT bypass layers.
+
+Boundaries are enforced by **role files** (`.agents/agents/{role}.md`) AND **platform tool provisioning** (named types receive domain-appropriate tools). Agents read their role file FIRST — it defines what they may and may not do. Coordinators and tech-leads MUST proactively spawn specialized builders for parallel execution within their own layer (see `agent-protocols` §6 Sovereign Subagent Awareness). This applies at ALL hierarchy levels.
 
 ---
 

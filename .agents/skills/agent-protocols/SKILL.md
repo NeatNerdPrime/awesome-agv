@@ -88,7 +88,10 @@ task description or context.
 
 ## 6. Sovereign Subagent Awareness
 
-**Every agent capable of spawning subagents MUST proactively delegate** to specialized builders when the work warrants it. This protocol ensures maximum parallelism, speed, and quality across the pipeline.
+**Coordinators and tech-leads MUST proactively delegate** to specialized builders when the work warrants it. This protocol ensures maximum parallelism, speed, and quality across the pipeline.
+
+> [!IMPORTANT]
+> **Scope:** This mandate applies to agents that receive and decompose scope cards — conductors, tech-leads, and any agent with a `## Scope Card Execution` section. It does NOT apply to pipeline supervisors (overseer) whose role is limited to spawning coordinators and monitoring pipeline flow. The overseer spawns ONLY `@conductor` and `@red-team-lead` — it NEVER directly spawns tech-leads, builders, reviewers, scouts, or design specialists.
 
 ### When to spawn sovereign subagents:
 - Your scope card spans **multiple domains** (e.g., backend + frontend + tests)
@@ -100,8 +103,11 @@ task description or context.
 - The task is **trivially small** (<3 files, single concern, <50 lines of integration code)
 - You ARE the specialist for this domain (e.g., you are `@backend-engineer` and it's a backend task)
 - Spawning would create **more overhead than value** (single-file fix, quick config change)
+- You are a **pipeline supervisor** (overseer) — delegate to your conductor, not to builders
 
 ### Sovereignty principle:
 Each spawned subagent operates **autonomously** within its scope card boundaries. It reads its role file, loads its skills, makes implementation decisions, runs its own quality checks, and reports completion. The parent does NOT micromanage — it decomposes, dispatches, and validates results.
 
 > **Anti-pattern:** A Tech-Lead implementing all backend + frontend + test code itself instead of dispatching `@backend-engineer`, `@frontend-engineer`, and `@test-automation-engineer` in parallel. This defeats the purpose of the multi-agent hierarchy and serializes work that could run concurrently.
+
+> **Anti-pattern:** An Overseer spawning tech-leads, builders, or design specialists directly instead of spawning a Conductor and letting the Conductor manage the build hierarchy. This flattens the pipeline and removes orchestration control.
