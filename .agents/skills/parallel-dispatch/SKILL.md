@@ -68,7 +68,7 @@ When an agent receives a scope card and the work is still too broad:
   └─ @backend-engineer[auth-integration] ← wires sub-features together
 ```
 
-**Agent Definition Protocol for sub-agents:** When spawning sub-agents that have role files in `.agents/agents/`, reference the role file in their system prompt: `"Your role, domain, skills, boundaries, and protocols are defined in file://{workspace}/.agents/agents/{agent-type}.md. Read this file FIRST."` Never paraphrase the role file from memory.
+**Agent Spawn Protocol for sub-agents:** When spawning sub-agents that have role files in `.agents/agents/`, use the pre-registered named TypeName and reference the role file in their system prompt: `"Your role, domain, skills, boundaries, and protocols are defined in file://{workspace}/.agents/agents/{agent-type}.md. Read this file FIRST."` Never paraphrase the role file from memory.
 
 ## 2. Ownership
 

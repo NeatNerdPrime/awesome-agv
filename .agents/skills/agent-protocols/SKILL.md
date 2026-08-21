@@ -2,9 +2,9 @@
 name: agent-protocols
 description: >-
   Shared protocols for all agents in the multi-agent pipeline: recursive
-  nesting, pre-implementation restatement, parallel dispatch format, and
-  agent definition cascade. Load this skill instead of inlining these
-  protocols in every agent file.
+  nesting, pre-implementation restatement, agent spawn protocol, parallel
+  dispatch format, completion reporting, and sovereign subagent awareness.
+  Load this skill instead of inlining these protocols in every agent file.
 ---
 
 # Agent Protocols
@@ -16,7 +16,7 @@ Shared behavioral protocols for all agents in the workflow-team pipeline.
 When your scope card is too broad for a single context:
 
 1. Further decompose using `parallel-dispatch` skill (§1 Decomposition, §5 Hierarchical Decomposition)
-2. Spawn sub-agents with narrower scope cards using `TypeName="self"` (see `workflow-team.md` §0)
+2. Spawn sub-agents using pre-registered named TypeNames when available (see §3 Agent Spawn Protocol), or `TypeName="self"` for recursive self-decomposition within the same role
 3. Your scope becomes the ceiling — children cannot operate outside it
 4. Track sub-agent progress; merge results when all complete
 5. Write `.agentwork/handoff.md` for your parent coordinator
@@ -36,22 +36,21 @@ Before writing code, restate in your own words:
 
 If any assumption is uncertain, document it in your handoff and proceed with the conservative interpretation.
 
-## 3. Agent Definition Protocol (Coordinators Only)
-
-> **CRITICAL PLATFORM CONSTRAINT.** All named subagent types receive ONLY `schedule` + `send_message` tools. `define_subagent` reports success but defined types FAIL on invocation. **ALL agents MUST be spawned as `TypeName="self"`. NEVER use `define_subagent`.**
+## 3. Agent Spawn Protocol (Coordinators Only)
 
 When spawning ANY agent type with a role file in `.agents/agents/`:
 
-1. **Always use `TypeName="self"`** — named TypeNames produce tool-deprived agents that cannot read files, run commands, or spawn their own subagents
-2. **Never use `define_subagent`** — it always fails with internal tool converter registration errors
-3. **Reference the role file** in the system prompt — never paraphrase:
+1. **Use the pre-registered named TypeName** matching the agent's role file basename (e.g., `TypeName="backend-engineer"` for `.agents/agents/backend-engineer.md`, `TypeName="tech-lead"` for `.agents/agents/tech-lead.md`). Named types are pre-configured by the platform with appropriate tool sets — builders have write/execution tools, coordinators have write + subagent tools, read-only agents have research tools.
+2. **Fall back to `TypeName="self"`** only when no pre-registered type exists for the role, or when recursively sub-decomposing within the same role (e.g., a tech-lead spawning a narrower tech-lead for a sub-scope).
+3. **Use `define_subagent`** when you need a custom agent type not covered by pre-registered types. Specify `enable_write_tools`, `enable_subagent_tools`, and `enable_mcp_tools` flags as needed.
+4. **Reference the role file** in the system prompt — never paraphrase:
    ```
    "Your role, domain, skills, boundaries, and protocols are defined in
     file://{workspace}/.agents/agents/{agent-type}.md.
    Read this file FIRST before beginning any work."
    ```
-4. The child agent MUST read the role file as its first action
-5. Propagate this protocol recursively — if the child is a coordinator, it must follow the same rule when spawning its own children
+5. The child agent MUST read the role file as its first action
+6. Propagate this protocol recursively — if the child is a coordinator, it must follow the same rule when spawning its own children
 
 ## 4. Parallel Dispatch Format
 
@@ -86,3 +85,23 @@ Your parent's conversation ID is the conversation that sent you your initial tas
 This is the conversation you received your first message from.
 **Always reply to THIS conversation ID** — never to any other ID mentioned in your
 task description or context.
+
+## 6. Sovereign Subagent Awareness
+
+**Every agent capable of spawning subagents MUST proactively delegate** to specialized builders when the work warrants it. This protocol ensures maximum parallelism, speed, and quality across the pipeline.
+
+### When to spawn sovereign subagents:
+- Your scope card spans **multiple domains** (e.g., backend + frontend + tests)
+- Your task contains **independently parallelizable** sub-deliverables
+- A sub-task requires **secondary expertise** (e.g., you are a tech-lead but the work is pure frontend — delegate to `@frontend-engineer`)
+- The `parallel-dispatch` skill's nesting triggers fire (>3 files, >2 features, >50% context)
+
+### When NOT to spawn (do the work yourself):
+- The task is **trivially small** (<3 files, single concern, <50 lines of integration code)
+- You ARE the specialist for this domain (e.g., you are `@backend-engineer` and it's a backend task)
+- Spawning would create **more overhead than value** (single-file fix, quick config change)
+
+### Sovereignty principle:
+Each spawned subagent operates **autonomously** within its scope card boundaries. It reads its role file, loads its skills, makes implementation decisions, runs its own quality checks, and reports completion. The parent does NOT micromanage — it decomposes, dispatches, and validates results.
+
+> **Anti-pattern:** A Tech-Lead implementing all backend + frontend + test code itself instead of dispatching `@backend-engineer`, `@frontend-engineer`, and `@test-automation-engineer` in parallel. This defeats the purpose of the multi-agent hierarchy and serializes work that could run concurrently.
