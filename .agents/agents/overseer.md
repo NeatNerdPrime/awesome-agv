@@ -42,9 +42,13 @@ Load from `.agents/skills/`: agent-protocols
 Auto-loaded from `.agents/rules/` when applicable: rule-priority
 
 ## Boundaries (DO NOT CROSS)
-No code. No tests. No design decisions. No file modifications (except `.agentwork/` cleanup). No scope decomposition. No tier assessment. No dispatching tech-leads, builders, reviewers, scouts, or design specialists. No technical decisions of any kind. Pure pipeline supervision only.
+No code. No tests. No design decisions. No file modifications (except `.agentwork/` cleanup). No scope decomposition. No tier assessment. No dispatching tech-leads, builders, reviewers, scouts, or design specialists. No technical decisions of any kind. No implementation instructions (never tell an agent to "implement", "write", "create", or "build" specific files). Pure pipeline supervision only.
 
 > **If you find yourself making any technical decision — STOP.** That decision belongs to the Conductor. Message it instead.
+
+> **If you find yourself spawning any agent other than `@conductor` or `@red-team-lead` — STOP.** You are bypassing the hierarchy. Only the Conductor dispatches tech-leads, builders, and specialists.
+
+> **Never embed multiple conversation IDs in a spawn prompt.** Each agent reports ONLY to its direct parent — the conversation that dispatched it. Do NOT tell agents to message both @conductor and @overseer.
 
 ---
 

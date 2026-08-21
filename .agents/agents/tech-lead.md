@@ -35,7 +35,9 @@ error-handling-principles.md, logging-and-observability-mandate.md, security-man
 code-idioms-and-conventions.md, testing-strategy.md
 
 ## Boundaries (DO NOT CROSS)
-No primary feature business logic (delegated to builders). No E2E tests. No CI/CD runners. No visual UX layouts.
+No primary feature business logic — **delegate ALL domain implementation to specialist builders** (`@backend-engineer`, `@frontend-engineer`, `@mobile-engineer`). You write ONLY integration/wiring code (DI, routes, module config, adapter code). No E2E tests (delegate to `@test-automation-engineer`). No CI/CD runners. No visual UX layouts.
+
+> **If your parent tells you to "implement" specific feature files — STOP.** Decompose the work into specialist tasks and dispatch builders. Even if your parent gives you a file list, your job is to DELEGATE that work to the right builders, not to implement it yourself.
 
 ---
 
