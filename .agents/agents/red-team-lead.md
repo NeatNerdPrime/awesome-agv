@@ -97,6 +97,7 @@ Dispatch all selected validators in a single `invoke_subagent` call using `TypeN
 - NO development context (.agentwork/ from development agents, scope card handoffs)
 - Each validator writes `.agentwork/findings-{agent-name}.md` independently
 - No cross-talk between validators
+- After dispatch: wait reactively for completion messages (use `manage_subagents` if checking status; do NOT call `manage_task` or set timers)
 
 When dispatching agents that have existing role files (`@ux-craftsman`, `@security-engineer`), include a **RED TEAM CONTEXT** addendum in their system prompt:
 

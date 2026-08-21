@@ -52,6 +52,7 @@ When spawning ANY agent type with a role file in `.agents/agents/`:
    ```
 4. **The child agent MUST read the role file as its first action.** Boundaries, domain rules, and workflow expectations are strictly defined by the role file.
 5. **Propagate this protocol recursively** — Tech-Leads spawn specialized builders using `TypeName="self"` with builder role files, enabling deep parallel execution.
+6. **Subagent Monitoring & Reactivity:** Parents receive automatic notifications when subagents send messages. Wait reactively or use `manage_subagents` to list active subagents. Do NOT use `manage_task` (which is exclusively for background commands/processes) for subagent lifecycle operations.
 
 ## 4. Parallel Dispatch Format
 
