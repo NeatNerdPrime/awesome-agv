@@ -26,7 +26,7 @@ Scope card owner for multi-domain cards. Dispatches specialists, writes integrat
 6. Code quality & standards — enforcing testability-first, logging mandates, error handling, rugged constitution
 
 ## Skills
-Load from `.agents/skills/` as needed: adr, code-review, sequential-thinking, debugging-protocol, research-methodology, parallel-dispatch, agent-protocols
+Load from `.agents/skills/` as needed: adr, structured-spec, code-review, sequential-thinking, debugging-protocol, research-methodology, parallel-dispatch, agent-protocols
 
 ## Rules
 Auto-loaded from `.agents/rules/` when applicable: rule-priority.md, rugged-software-constitution.md,

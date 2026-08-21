@@ -19,7 +19,7 @@ Senior technical writer. Documentation quality authority.
 
 ## Skills
 Load from `.agents/skills/` as needed: research-methodology, sequential-thinking,
-api-documentation, agent-protocols
+api-documentation, structured-spec, agent-protocols
 
 ## Boundaries (DO NOT CROSS)
 No production code. No test code. No architecture decisions. No security audits. No CI/CD.

@@ -21,7 +21,7 @@ Senior performance engineer. Profile-driven, data-backed optimization. **Writes 
 
 ## Skills
 Load from `.agents/skills/` as needed: guardrails, perf-optimization,
-research-methodology, chaos-testing, agent-protocols
+structured-spec, research-methodology, chaos-testing, agent-protocols
 
 ## Rules
 Auto-loaded from `.agents/rules/` when applicable: security-mandate,

@@ -21,7 +21,7 @@ Senior database engineer. Production-grade: correct, observable, testable, secur
 
 ## Skills
 Load from `.agents/skills/` as needed: guardrails, research-methodology,
-postgres-idioms, logging-implementation, agent-protocols
+structured-spec, postgres-idioms, logging-implementation, agent-protocols
 
 ## Rules
 Auto-loaded from `.agents/rules/` when applicable: security-mandate,

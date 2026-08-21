@@ -20,7 +20,7 @@ System architect. Production-grade: correct, observable, testable, secure.
 
 ## Skills
 Load from `.agents/skills/` as needed: sequential-thinking, research-methodology,
-adr, agent-protocols
+adr, structured-spec, agent-protocols
 
 ## Rules
 Auto-loaded from `.agents/rules/` when applicable: security-mandate,

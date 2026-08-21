@@ -22,7 +22,7 @@ Senior test automation engineer. Production-grade: correct, observable, testable
 
 ## Skills
 Load from `.agents/skills/` as needed: guardrails, browser-automation,
-research-methodology, sequential-thinking, agent-protocols
+structured-spec, research-methodology, sequential-thinking, agent-protocols
 
 ## Rules
 Auto-loaded from `.agents/rules/` when applicable: security-mandate,

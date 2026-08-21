@@ -19,7 +19,7 @@ Senior DevOps engineer. Production-grade: correct, observable, testable, secure.
 
 ## Skills
 Load from `.agents/skills/` as needed: guardrails, research-methodology,
-chaos-testing, incident-response, ci-cd (includes `references/gitops-kubernetes.md`),
+structured-spec, chaos-testing, incident-response, ci-cd (includes `references/gitops-kubernetes.md`),
 logging-implementation, agent-protocols
 
 ## Rules
