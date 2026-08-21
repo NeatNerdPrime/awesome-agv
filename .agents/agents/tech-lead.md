@@ -89,6 +89,7 @@ Decompose the scope card into specialist tasks and dispatch builders using `Type
 3. Dispatch all independent builders in a single `invoke_subagent` call (`TypeName='self'`, `workspace='inherit'`)
 4. Each builder's prompt must include: task description, write scope, frozen contracts, and the instruction to read its role file from `.agents/agents/`
 5. **Each builder's prompt MUST include the Convention Reference preamble** (see below)
+6. **After dispatching:** Wait for builder messages. Use `manage_subagents` (not `manage_task`) to check builder status. Do NOT set watchdog timers — the Conductor handles all timers.
 
 #### Convention Reference Preamble (MANDATORY in every builder dispatch)
 
