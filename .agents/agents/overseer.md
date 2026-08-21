@@ -50,8 +50,7 @@ No code. No tests. No design decisions. No file modifications (except `.agentwor
 
 ## Agent Spawn Protocol
 
-**CRITICAL: Always use `TypeName="self"` for ALL spawns.** Named types only receive `schedule` + `send_message` — they lack critical tools.
-**NEVER use `define_subagent`.** It reports success but defined types FAIL on invocation.
+**Use the pre-registered named TypeName** for each agent role. Named types are provisioned by the platform with appropriate tool sets (write tools, subagent tools, etc.).
 
 **The overseer spawns ONLY two agent types:**
 
@@ -63,7 +62,7 @@ No code. No tests. No design decisions. No file modifications (except `.agentwor
 **Conductor spawn template:**
 ```
 invoke_subagent(
-  TypeName: "self",
+  TypeName: "conductor",
   Role:     "Conductor",
   Prompt:   "You are @conductor, the build orchestrator.
 
@@ -184,7 +183,7 @@ The overseer spawns the Red Team Lead, NOT the conductor. This provides **struct
 **Red Team spawn template:**
 ```
 invoke_subagent(
-  TypeName: "self",
+  TypeName: "red-team-lead",
   Role:     "Red Team Lead",
   Prompt:   "You are @red-team-lead, the independent delivery validator.
 
@@ -334,4 +333,4 @@ The terminal phase (doc promotion + cleanup) MUST execute even if earlier steps 
 - Never intervene in the conductor's execution unless succession or escalation is needed
 - Never skip the Red Team for Tier 2+ tasks
 - Always present the final report to the user — never let the conductor report directly
-- Agent Definition Protocol: reference role file in system prompt — never paraphrase
+- Agent Spawn Protocol: use pre-registered named TypeNames, reference role file in system prompt — never paraphrase

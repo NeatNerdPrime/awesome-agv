@@ -92,7 +92,7 @@ Read the original user requirements (received from @overseer) and examine the fi
 
 ### Step 2 — Parallel Dispatch
 
-Dispatch all selected validators in a single `invoke_subagent` call. **ALL validators MUST use `TypeName="self"`. NEVER use `define_subagent` or custom TypeNames — they produce tool-deprived agents that cannot read files or run commands** (see §Agent Spawn Protocol below):
+Dispatch all selected validators in a single `invoke_subagent` call using their pre-registered named TypeNames (e.g., `TypeName="delivery-validator"`, `TypeName="ux-craftsman"`, `TypeName="security-engineer"`). Named types are provisioned by the platform with appropriate tool sets:
 - Each validator gets the workspace path + original user requirements
 - NO development context (.agentwork/ from development agents, scope card handoffs)
 - Each validator writes `.agentwork/findings-{agent-name}.md` independently
@@ -205,27 +205,19 @@ When a dispatched validator fails:
 
 ## Agent Spawn Protocol
 
-> **CRITICAL PLATFORM CONSTRAINT.** All named subagent types (`delivery-validator`, `ux-craftsman`, `security-engineer`, etc.) receive ONLY `schedule` + `send_message` tools — they lack `view_file`, `run_command`, and all critical tools. `define_subagent` reports success but defined types FAIL on invocation with tool registration errors. This is a verified platform limitation.
-
-**Rule: ALL validators MUST be spawned as `TypeName="self"`.**
-**Rule: NEVER use `define_subagent`.** It always fails with tool registration errors.
+**Rule: ALL validators MUST be spawned using their pre-registered named TypeName.** Named types are provisioned by the platform with appropriate tool sets (write tools, execution tools, etc.).
 
 **Correct pattern:**
 ```
 invoke_subagent(
-  TypeName: "self",
+  TypeName: "delivery-validator",
   Role:     "Delivery Validator",
   Prompt:   "Your role... file://{workspace}/.agents/agents/delivery-validator.md
              Read this file FIRST..."
 )
 ```
 
-**INCORRECT patterns (WILL FAIL):**
-```
-define_subagent(name="delivery-validator")    ← FAILS (tool registration error)
-invoke_subagent(TypeName="delivery-validator") ← TOOL-DEPRIVED (only schedule + send_message)
-invoke_subagent(TypeName="security-engineer")  ← TOOL-DEPRIVED (only schedule + send_message)
-```
+**Fallback:** Use `TypeName="self"` only for ad-hoc validator roles not covered by pre-registered types.
 
 When spawning agents with role files in `.agents/agents/`: reference the role file in the system prompt — never paraphrase. Child MUST read its role file first, then load its listed skills. Include the RED TEAM CONTEXT addendum (§Validation Protocol Step 2) for agents reused from the development pipeline.
 

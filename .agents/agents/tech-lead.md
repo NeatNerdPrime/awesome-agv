@@ -41,17 +41,12 @@ No primary feature business logic (delegated to builders). No E2E tests. No CI/C
 
 ## Agent Spawn Protocol
 
-> **CRITICAL PLATFORM CONSTRAINT.** All named subagent types (`backend-engineer`, `frontend-engineer`, etc.) receive ONLY `schedule` + `send_message` tools — they lack `view_file`, `run_command`, and all critical tools. `define_subagent` reports success but defined types FAIL on invocation with tool registration errors. This is a verified platform limitation.
-
-**Rule: ALL specialist builders MUST be spawned as `TypeName="self"`.**
-**Rule: NEVER use `define_subagent`.** It always fails with internal tool converter registration errors.
-
-Role differentiation is achieved through the `Role` field and the `Prompt` (which points to the builder's role file).
+**Rule: ALL specialist builders MUST be spawned using their pre-registered named TypeName.** Named types are provisioned by the platform with appropriate write, execution, and (where applicable) subagent tools.
 
 **Correct pattern:**
 ```
 invoke_subagent(
-  TypeName: "self",                              ← ALWAYS "self"
+  TypeName: "backend-engineer",                   ← Use the pre-registered named type
   Role:     "Backend Engineer (Auth)",            ← Human-readable role name
   Prompt:   "Your role, domain, skills...         ← Points to .agents/agents/{role}.md
              file://{workspace}/.agents/agents/backend-engineer.md
@@ -61,14 +56,11 @@ invoke_subagent(
 )
 ```
 
-**INCORRECT patterns (WILL FAIL):**
-```
-define_subagent(name="backend-engineer")           ← FAILS (tool converter registration error)
-invoke_subagent(TypeName="backend-engineer")        ← TOOL-DEPRIVED (only schedule + send_message)
-invoke_subagent(TypeName="frontend-engineer")       ← TOOL-DEPRIVED (only schedule + send_message)
-```
+**Fallback:** Use `TypeName="self"` only when recursively sub-decomposing within the same domain (e.g., spawning a narrower tech-lead for a sub-scope), or for ad-hoc specialist roles not covered by pre-registered types.
 
-> This applies to ALL builders: `@backend-engineer`, `@frontend-engineer`, `@mobile-engineer`, `@test-automation-engineer`. Every single one MUST use `TypeName="self"`.
+> **Parallel delegation is mandatory for multi-domain cards.** If your scope card spans backend + frontend + tests, you MUST dispatch `@backend-engineer`, `@frontend-engineer`, and `@test-automation-engineer` as parallel sovereign agents. Doing all the work yourself serializes what should be concurrent work and defeats the purpose of the multi-agent hierarchy. See `agent-protocols` §6 Sovereign Subagent Awareness.
+
+> All pre-registered builder types (`backend-engineer`, `frontend-engineer`, `mobile-engineer`, `test-automation-engineer`) have write and execution tools provisioned by the platform.
 
 ---
 
@@ -82,7 +74,7 @@ Receive scope card from Conductor. The card specifies:
 - **Acceptance criteria**: what "done" looks like
 
 ### Step 2 — Specialist Dispatch
-Decompose the scope card into specialist tasks and dispatch builders using `TypeName='self'` (see §Agent Spawn Protocol above — NEVER use `define_subagent`):
+Decompose the scope card into specialist tasks and dispatch builders using their pre-registered named TypeNames (see §Agent Spawn Protocol above):
 
 | Builder | When to Dispatch |
 |---|---|
@@ -96,7 +88,7 @@ Decompose the scope card into specialist tasks and dispatch builders using `Type
 **Dispatch protocol:**
 1. Define MECE file ownership for each builder (no overlapping write scopes)
 2. Include the scope card's write scope constraints in each builder's prompt
-3. Dispatch all independent builders in a single `invoke_subagent` call (`TypeName='self'`, `workspace='inherit'`)
+3. Dispatch all independent builders in a single `invoke_subagent` call (using named TypeNames, `workspace='inherit'`)
 4. Each builder's prompt must include: task description, write scope, frozen contracts, and the instruction to read its role file from `.agents/agents/`
 5. **Each builder's prompt MUST include the Convention Reference preamble** (see below)
 

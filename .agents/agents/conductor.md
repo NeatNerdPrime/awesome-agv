@@ -39,23 +39,22 @@ No code. No tests. No design decisions. No file modifications. No direct codebas
 
 ## Agent Spawn Protocol
 
-**CRITICAL: Always use `TypeName="self"` for ALL spawns.** Named types only receive `schedule` + `send_message` — they lack `invoke_subagent`, `view_file`, and all critical tools.
-**NEVER use `define_subagent`.** It reports success but defined types FAIL on invocation with internal tool registration errors. This is a verified platform limitation.
+**Use the pre-registered named TypeName** for each agent role. Named types are provisioned by the platform with appropriate tool sets — builders have write/execution tools, coordinators have write + subagent tools, read-only agents have research tools.
 
 **Correct pattern:**
 ```
-invoke_subagent → TypeName: "self", Role: "Tech Lead (Auth)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/tech-lead.md ..."
-invoke_subagent → TypeName: "self", Role: "Builder (Payments)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/backend-engineer.md ..."
+invoke_subagent → TypeName: "tech-lead", Role: "Tech Lead (Auth)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/tech-lead.md ..."
+invoke_subagent → TypeName: "backend-engineer", Role: "Builder (Payments)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/backend-engineer.md ..."
+invoke_subagent → TypeName: "scout", Role: "Scout (Codebase Analysis)", Prompt: "Read your role file FIRST: file://{workspace}/.agents/agents/scout.md ..."
 ```
 
-**Incorrect patterns (WILL FAIL):**
-```
-define_subagent(name="tech-lead")               ← FAILS (tool converter registration error)
-invoke_subagent → TypeName: "tech-lead"         ← TOOL-DEPRIVED (only schedule + send_message)
-invoke_subagent → TypeName: "backend-engineer"  ← TOOL-DEPRIVED (only schedule + send_message)
-```
+**Fallback:** Use `TypeName="self"` only when no pre-registered type exists for the role, or for recursive self-decomposition within the same domain.
+
+**Custom types:** Use `define_subagent` when you need a custom agent type not covered by pre-registered types.
 
 When spawning agents with role files in `.agents/agents/`: reference the role file in the system prompt — never paraphrase. Child MUST read its role file first, then load its listed skills.
+
+> **Parallel delegation is mandatory.** When scope cards span multiple domains, tech-leads MUST dispatch specialized builders in parallel (see `agent-protocols` §6 Sovereign Subagent Awareness). A tech-lead doing all backend + frontend + test work itself is a protocol violation — it serializes what should be concurrent work.
 
 ### Reply-To Address Rule
 
@@ -435,7 +434,7 @@ The conductor escalates to `@overseer`, NEVER directly to the user.
 - Never spawn @red-team-lead — overseer handles this for information isolation
 - Never proceed without scope approval (relayed through overseer)
 - Always present the scope card plan via overseer before execution begins
-- Agent Definition Protocol: reference role file in system prompt — never paraphrase
+- Agent Spawn Protocol: use pre-registered named TypeNames, reference role file in system prompt — never paraphrase
 
 ---
 

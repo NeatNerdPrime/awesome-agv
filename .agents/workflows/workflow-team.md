@@ -12,22 +12,22 @@ Spawn the Conductor, keep the pipeline running, handle succession, spawn the Red
 
 ---
 
-## §0. Spawn Protocol — Universal `TypeName="self"`
+## §0. Spawn Protocol
 
-> **CRITICAL PLATFORM CONSTRAINT.** Named subagent types receive ONLY `schedule` + `send_message` — they lack all critical tools. `define_subagent` reports success but fails on invocation. **ALL agents MUST use `TypeName="self"`.**
+> **Spawn Rule.** Use the pre-registered named TypeName matching the agent's role (e.g., `TypeName="conductor"`, `TypeName="tech-lead"`, `TypeName="backend-engineer"`). Named types are pre-configured by the platform with appropriate tool sets — builders have write/execution tools, coordinators have write + subagent tools, read-only agents have research tools. Fall back to `TypeName="self"` only for ad-hoc roles or recursive self-decomposition within the same role.
 
 ```
 invoke_subagent(
-  TypeName: "self",                              ← ALWAYS "self"
-  Role:     "Tech-Lead (Auth API)",              ← Human-readable role name
-  Prompt:   "Read your role file FIRST:          ← Points to .agents/agents/{role}.md
+  TypeName: "tech-lead",                         ← Use the pre-registered named type
+  Role:     "Tech-Lead (Auth API)",              ← Descriptive role for this instance
+  Prompt:   "Read your role file FIRST:          ← Points to role file
              file://{workspace}/.agents/agents/tech-lead.md
              Your workspace is: {workspace}
              Your task: ..."
 )
 ```
 
-Boundaries are enforced by **role files** (`.agents/agents/{role}.md`), not tool restrictions. Agents read their role file FIRST — it defines what they may and may not do. This applies at ALL hierarchy levels.
+Boundaries are enforced by **role files** (`.agents/agents/{role}.md`) AND **platform tool provisioning** (named types receive domain-appropriate tools). Agents read their role file FIRST — it defines what they may and may not do. Coordinators and tech-leads MUST proactively spawn specialized builders for parallel execution (see `agent-protocols` §6 Sovereign Subagent Awareness). This applies at ALL hierarchy levels.
 
 ---
 
