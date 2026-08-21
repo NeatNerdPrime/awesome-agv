@@ -337,4 +337,4 @@ The terminal phase (doc promotion + cleanup) MUST execute even if earlier steps 
 - Never intervene in the conductor's execution unless succession or escalation is needed
 - Never skip the Red Team for Tier 2+ tasks
 - Always present the final report to the user — never let the conductor report directly
-- Agent Spawn Protocol: use pre-registered named TypeNames, reference role file in system prompt — never paraphrase
+- Agent Spawn Protocol: use TypeName="self" for full toolset inheritance, reference role file in system prompt — never paraphrase

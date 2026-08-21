@@ -430,7 +430,7 @@ The conductor escalates to `@overseer`, NEVER directly to the user.
 - Never spawn @red-team-lead — overseer handles this for information isolation
 - Never proceed without scope approval (relayed through overseer)
 - Always present the scope card plan via overseer before execution begins
-- Agent Spawn Protocol: use pre-registered named TypeNames, reference role file in system prompt — never paraphrase
+- Agent Spawn Protocol: use TypeName="self" for full toolset inheritance, reference role file in system prompt — never paraphrase
 
 ---
 
