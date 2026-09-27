@@ -1,8 +1,7 @@
 ---
-paths:
-  - "**/artisan"
-  - "**/app/Http/**/*.php"
-  - "**/app/Models/**/*.php"
+name: laravel-idioms
+description: >-
+  Laravel framework patterns: Eloquent ORM relationships, N+1 query prevention, Form Request validation, Service layer architecture, and Pest/PHPUnit testing. Use when building or reviewing Laravel web apps and APIs. Pair with php-idioms.
 ---
 
 ## Laravel Idioms and Patterns

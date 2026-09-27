@@ -1,6 +1,7 @@
 ---
-paths:
-  - "**/*.php"
+name: php-idioms
+description: >-
+  Modern PHP 8.x idioms: strict types, typed properties, enums, readonly classes, match expressions, and PSR standards. Use when writing, refactoring, or reviewing pure PHP code, domain services, or libraries. Pair with laravel-idioms for Laravel applications.
 ---
 
 ## PHP Idioms and Patterns

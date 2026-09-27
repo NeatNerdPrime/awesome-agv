@@ -1,6 +1,7 @@
 ---
-paths:
-  - "**/*.java"
+name: java-idioms
+description: >-
+  Modern Java (17/21+ LTS) idioms: records, sealed classes, pattern matching switch, Optional hygiene, streams, and JUnit 5 testing. Use when writing, refactoring, or reviewing Java core logic, domain models, or libraries. Pair with spring-boot-idioms for Spring services.
 ---
 
 ## Java Idioms and Patterns

@@ -1,6 +1,7 @@
 ---
-paths:
-  - "**/*.cs"
+name: csharp-idioms
+description: >-
+  Modern C# (10+/.NET) coding idioms: nullable reference types, records, pattern matching, async/await with CancellationTokens, LINQ performance, and DI. Use when writing, modifying, or reviewing C# application code or domain models. Pair with dotnet-idioms for framework APIs.
 ---
 
 ## C# Idioms and Patterns

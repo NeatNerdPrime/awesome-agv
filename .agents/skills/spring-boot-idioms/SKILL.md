@@ -1,8 +1,7 @@
 ---
-paths:
-  - "**/Application.java"
-  - "**/application.yml"
-  - "**/application.properties"
+name: spring-boot-idioms
+description: >-
+  Spring Boot 3.x framework patterns: constructor-based DI, Spring Data JPA, REST controllers with RFC 7807 error handling, Actuator observability, and slice testing. Use when building or maintaining Spring Boot microservices. Pair with java-idioms.
 ---
 
 ## Spring Boot Idioms and Patterns

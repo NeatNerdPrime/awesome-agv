@@ -1,8 +1,7 @@
 ---
-paths:
-  - "**/*.csproj"
-  - "**/Program.cs"
-  - "**/appsettings.json"
+name: dotnet-idioms
+description: >-
+  .NET 8+ framework architecture: Minimal APIs, EF Core data access, IOptions configuration, middleware pipelines, and WebApplicationFactory testing. Use when building ASP.NET Core services, Web APIs, or .NET cloud backends. Pair with csharp-idioms.
 ---
 
 ## .NET Idioms and Patterns

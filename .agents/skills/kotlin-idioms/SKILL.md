@@ -1,7 +1,7 @@
 ---
-paths:
-  - "**/*.kt"
-  - "**/*.kts"
+name: kotlin-idioms
+description: >-
+  Kotlin coding idioms: compile-time null safety, data classes, sealed hierarchies, coroutines and Flow concurrency, and Kotest/MockK testing. Use when developing, refactoring, or reviewing Kotlin backend, Android, or multiplatform code.
 ---
 
 ## Kotlin Idioms and Patterns
