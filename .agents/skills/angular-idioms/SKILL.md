@@ -1,13 +1,7 @@
 ---
 name: angular-idioms
-description: Angular components, signals, DI, RxJS, standalone architecture. For TypeScript see typescript-idioms.
-paths:
-  - "**/*.component.ts"
-  - "**/*.service.ts"
-  - "**/*.directive.ts"
-  - "**/*.pipe.ts"
-  - "**/*.guard.ts"
-  - "**/angular.json"
+description: >-
+  Angular (19+) architecture: signals, standalone components, DI, OnPush change detection, and RxJS integration. Use when developing or refactoring Angular web apps. Pair with typescript-idioms.
 ---
 
 ## Angular Idioms and Patterns

@@ -1,8 +1,7 @@
 ---
 name: hono-idioms
-description: Hono HTTP framework patterns — routing, middleware, Zod validation, RPC client. For TypeScript see typescript-idioms.
-paths:
-  - "**/wrangler.toml"
+description: >-
+  Hono lightweight web framework patterns: type-safe route handlers, middleware composition, Zod validation, and RPC clients for Cloudflare Workers, Node, or Bun. Use when building Hono APIs. Pair with typescript-idioms.
 ---
 
 ## Hono Idioms and Patterns

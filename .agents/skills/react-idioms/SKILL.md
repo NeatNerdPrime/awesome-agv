@@ -1,9 +1,7 @@
 ---
 name: react-idioms
-description: React hooks, Suspense, Server Components, React 19 patterns. For TypeScript see typescript-idioms.
-paths:
-  - "**/*.jsx"
-  - "**/*.tsx"
+description: >-
+  React 19+ patterns: custom hooks, Suspense boundaries, state management, component composition, and web performance. Use when developing or refactoring React components and client applications. Pair with typescript-idioms.
 ---
 
 ## React Idioms and Patterns

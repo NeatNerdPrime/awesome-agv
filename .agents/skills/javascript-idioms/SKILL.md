@@ -1,10 +1,7 @@
 ---
 name: javascript-idioms
-description: Plain JavaScript (ES2024+) idioms — ESM, CJS interop, runtime patterns without types. Use ONLY when TypeScript is unavailable; for TS load typescript-idioms.
-paths:
-  - "**/*.js"
-  - "**/*.mjs"
-  - "**/*.cjs"
+description: >-
+  Modern JavaScript (ES2024+) idioms: ESM, CJS interoperability, async/await, and runtime safety in projects without TypeScript. Use only when working in pure JavaScript environments; for TypeScript load typescript-idioms.
 ---
 
 ## JavaScript Idioms and Patterns

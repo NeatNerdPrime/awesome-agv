@@ -1,16 +1,7 @@
 ---
 name: nextjs-idioms
-description: Next.js App Router, RSC, Server Actions, ISR. For React see react-idioms. For TypeScript see typescript-idioms.
-paths:
-  - "**/next.config.*"
-  - "**/app/**/page.tsx"
-  - "**/app/**/layout.tsx"
-  - "**/app/**/route.ts"
-  - "**/app/**/error.tsx"
-  - "**/app/**/loading.tsx"
-  - "**/app/**/not-found.tsx"
-  - "**/app/**/default.tsx"
-  - "**/middleware.ts"
+description: >-
+  Next.js App Router architecture: React Server Components (RSC), Server Actions, nested layouts, route handlers, and streaming. Use when building or refactoring Next.js web applications. Pair with react-idioms and typescript-idioms.
 ---
 
 ## Next.js Idioms and Patterns

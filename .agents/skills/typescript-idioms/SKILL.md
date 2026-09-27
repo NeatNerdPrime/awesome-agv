@@ -1,10 +1,7 @@
 ---
 name: typescript-idioms
-description: TypeScript strict mode, type narrowing, Zod validation, vitest, ESLint flat config.
-paths:
-  - "**/*.ts"
-  - "**/*.tsx"
-  - "**/tsconfig.json"
+description: >-
+  TypeScript strict typing: type narrowing, discriminated unions, Zod runtime validation, generic utility types, and Vitest testing. Use when writing or refactoring TypeScript across frontend, backend, or full-stack projects.
 ---
 
 ## Core Philosophy

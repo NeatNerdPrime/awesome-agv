@@ -1,14 +1,7 @@
 ---
 name: vue-idioms
-description: Vue 3 Composition API, Pinia stores, composables, Vite, Vitest.
-paths:
-  - "**/*.vue"
-  - "**/vite.config.*"
-  - "**/vitest.config.*"
-  - "**/store/**/*.ts"
-  - "**/stores/**/*.ts"
-  - "**/*.store.ts"
-  - "**/pinia*.ts"
+description: >-
+  Vue 3 Composition API patterns: `<script setup>` syntax, reactive state with Pinia stores, reusable composables, and Vitest component testing. Use when developing or refactoring Vue 3 frontend applications.
 ---
 
 ## Vue Idioms and Patterns
