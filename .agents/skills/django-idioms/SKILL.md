@@ -1,11 +1,7 @@
 ---
 name: django-idioms
-description: Django ORM, class-based views, DRF serializers, migrations, pytest-django. For Python see python-idioms.
-paths:
-  - "**/views.py"
-  - "**/models.py"
-  - "**/urls.py"
-  - "**/manage.py"
+description: >-
+  Django and Django REST Framework (DRF) patterns: ORM queries, model managers, class-based views, serializers, migrations, and pytest-django testing. Use when building or maintaining Django backend applications. Pair with python-idioms.
 ---
 
 ## Django Idioms and Patterns

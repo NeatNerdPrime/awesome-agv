@@ -1,7 +1,7 @@
 ---
-paths:
-  - "**/*.rb"
-  - "**/Gemfile"
+name: ruby-idioms
+description: >-
+  Modern Ruby (3.x) idioms: pattern matching, keyword arguments, immutable data structures, error hierarchies, and RSpec testing. Use when writing, modifying, or reviewing Ruby scripts, gems, or business logic. Pair with rails-idioms for Rails applications.
 ---
 
 ## Ruby Idioms and Patterns

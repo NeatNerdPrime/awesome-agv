@@ -1,10 +1,7 @@
 ---
 name: python-idioms
-description: Python type hints, Protocols, Pydantic, async/await, pytest, ruff, mypy strict.
-paths:
-  - "**/*.py"
-  - "**/pyproject.toml"
-  - "**/requirements*.txt"
+description: >-
+  Modern Python (3.11+) idioms: type annotations, typing Protocols, Pydantic models, asyncio, pytest fixtures, and Ruff/Mypy strict compliance. Use when writing, refactoring, or reviewing Python applications, APIs, or scripts.
 ---
 
 ## Python Idioms and Patterns

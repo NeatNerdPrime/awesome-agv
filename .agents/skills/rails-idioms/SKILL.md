@@ -1,8 +1,7 @@
 ---
-paths:
-  - "**/app/**/*.rb"
-  - "**/config/routes.rb"
-  - "**/Gemfile"
+name: rails-idioms
+description: >-
+  Ruby on Rails framework patterns: ActiveRecord scopes, N+1 query prevention, model validations, RESTful routing, and RSpec/Minitest testing. Use when building, maintaining, or auditing Rails web applications and APIs. Pair with ruby-idioms.
 ---
 
 ## Rails Idioms and Patterns

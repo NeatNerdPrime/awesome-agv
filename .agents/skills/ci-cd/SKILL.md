@@ -1,22 +1,7 @@
 ---
 name: ci-cd
 description: >-
-  CI/CD pipeline design: GitHub Actions, GitLab CI, multi-stage Docker builds, image
-  scanning, SBOM attestation (Cosign keyless), and environment promotion. Layered by
-  complexity — Level 0 (all projects), Level 1 (containerized), Level 2 (Kubernetes).
-  GitOps and Kubernetes deployment patterns in references/gitops-kubernetes.md.
-paths:
-  - "**/.github/workflows/*.yml"
-  - "**/.github/workflows/*.yaml"
-  - "**/Dockerfile"
-  - "**/docker-compose*.yml"
-  - "**/docker-compose*.yaml"
-  - "**/.gitlab-ci.yml"
-  - "**/Jenkinsfile"
-  - "**/.circleci/config.yml"
-  - "**/.circleci/config.yaml"
-  - "**/azure-pipelines.yml"
-  - "**/azure-pipelines.yaml"
+  CI/CD pipeline architecture: GitHub Actions, GitLab CI, multi-stage Dockerfiles, vulnerability scanning, SBOM attestation, and deployment promotion. Use when designing, creating, or debugging pipelines, container builds, or release workflows.
 ---
 
 ## CI/CD Principles

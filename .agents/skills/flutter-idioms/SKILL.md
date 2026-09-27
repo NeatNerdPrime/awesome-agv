@@ -1,10 +1,7 @@
 ---
 name: flutter-idioms
-description: Flutter Riverpod 3, freezed, go_router, const widgets, repository pattern.
-paths:
-  - "**/*.dart"
-  - "**/pubspec.yaml"
-  - "**/analysis_options.yaml"
+description: >-
+  Flutter idioms: Riverpod 3 state management, Freezed immutable models, go_router navigation, const widget optimization, and repository patterns. Use when developing, refactoring, or reviewing Flutter mobile applications.
 ---
 
 ## Flutter Idioms and Patterns (Riverpod 3)

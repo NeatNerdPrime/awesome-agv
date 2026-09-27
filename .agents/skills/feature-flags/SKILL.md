@@ -1,14 +1,7 @@
 ---
 name: feature-flags
 description: >-
-  Feature flag implementation: release flags, ops kill switches, experiment flags, and
-  permission gating. PRD-gated — only load when PRD or technical architecture explicitly
-  requires gradual rollout, A/B testing, or kill switches. Includes lifecycle rules
-  (90-day max for release flags), flag evaluation patterns, and CI/CD checklist.
-paths:
-  - "**/feature*flag*"
-  - "**/feature*toggle*"
-  - "**/FeatureFlag*"
+  Feature flag lifecycle patterns: release flags, ops kill switches, experiment toggles, and permission gating. PRD-gated — use only when PRD or architecture explicitly requires gradual rollout, A/B testing, or kill switches.
 ---
 
 ## Feature Flags Principles
