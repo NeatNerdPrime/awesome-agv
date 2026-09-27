@@ -1,8 +1,7 @@
 ---
-paths:
-  - "**/*.ex"
-  - "**/*.exs"
-  - "**/mix.exs"
+name: elixir-idioms
+description: >-
+  Elixir and OTP idioms: pattern matching, `with` pipelines, GenServer and supervision tree architecture, fault-tolerant concurrency, and ExUnit testing. Use when developing, refactoring, or reviewing Elixir and Phoenix applications or OTP systems.
 ---
 
 ## Elixir Idioms and Patterns

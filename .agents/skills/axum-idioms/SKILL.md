@@ -1,8 +1,7 @@
 ---
 name: axum-idioms
-description: Axum HTTP framework patterns — routing, extractors, middleware, state management. For Rust see rust-idioms.
-paths:
-  - "**/Cargo.toml"
+description: >-
+  Axum (0.8+) web framework patterns: type-safe extractors, Tower middleware, route routing, and graceful shutdown. Use when implementing HTTP APIs or web services in Rust. Pair with rust-idioms.
 ---
 
 ## Axum Idioms and Patterns

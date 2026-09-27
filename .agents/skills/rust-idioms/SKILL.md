@@ -1,9 +1,7 @@
 ---
 name: rust-idioms
-description: Rust ownership, tokio, thiserror/anyhow, Clippy pedantic, unsafe, lifetimes.
-paths:
-  - "**/*.rs"
-  - "**/Cargo.toml"
+description: >-
+  Rust idioms: ownership and borrow checker patterns, error handling with thiserror/anyhow, Tokio async concurrency, lifetime management, and Clippy pedantic compliance. Use when writing, optimizing, or reviewing Rust crates.
 ---
 
 ## Rust Idioms and Patterns

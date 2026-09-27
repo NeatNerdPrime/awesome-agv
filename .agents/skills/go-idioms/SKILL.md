@@ -1,9 +1,7 @@
 ---
 name: go-idioms
-description: Go stdlib, error wrapping, interfaces, goroutines, table-driven tests, gofumpt.
-paths:
-  - "**/*.go"
-  - "**/go.mod"
+description: >-
+  Go idioms and patterns: stdlib conventions, explicit error wrapping (%w), small interfaces, goroutines/channels concurrency, table-driven tests, and gofumpt formatting. Use when writing, refactoring, or reviewing Go services and packages.
 ---
 
 ## Go Idioms and Patterns

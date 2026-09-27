@@ -1,9 +1,7 @@
 ---
-paths:
-  - "**/*.cpp"
-  - "**/*.hpp"
-  - "**/*.h"
-  - "**/CMakeLists.txt"
+name: cpp-idioms
+description: >-
+  Modern C++ (17/20/23) idioms: RAII, smart pointers, value semantics, Rule of Zero/Five, concepts, and std::expected error handling. Use when writing, refactoring, or reviewing C++ code, CMake targets, or native modules.
 ---
 
 ## C++ Idioms and Patterns

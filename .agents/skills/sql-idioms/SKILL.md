@@ -1,7 +1,7 @@
 ---
-paths:
-  - "**/*.sql"
-  - "**/migrations/**"
+name: sql-idioms
+description: >-
+  SQL coding standards: CTEs, explicit JOINs, index optimization, query execution plan analysis, transaction locking, and zero-downtime migration patterns. Use when writing complex queries, analyzing performance, or drafting database migrations.
 ---
 
 ## SQL Idioms and Patterns

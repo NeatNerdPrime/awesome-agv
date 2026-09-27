@@ -1,7 +1,7 @@
 ---
-paths:
-  - "**/*.swift"
-  - "**/Package.swift"
+name: swift-idioms
+description: >-
+  Swift idioms and best practices: value types, Optionals hygiene, protocol-oriented design, async/await and Actor concurrency, and XCTest. Use when writing, refactoring, or reviewing Swift iOS, macOS, or server-side code.
 ---
 
 ## Swift Idioms and Patterns
